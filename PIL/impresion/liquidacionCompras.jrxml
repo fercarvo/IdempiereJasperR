@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="liquidacionComprasServihelp" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" whenResourceMissingType="Empty" uuid="a80ed23f-586d-4137-9775-4a3bd6032d6d">
+	<property name="ireport.zoom" value="1.4641000000000008"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="pildes.itsc.ec"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="806"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="182"/>
+	<parameter name="RECORD_ID" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[SELECT
+i.description as invoiceDescription,
+i.dateinvoiced AS fechaEmision,
+bp.name AS razonSocialComprador,
+bp.taxid AS identificacionComprador,
+trim(COALESCE(l.address1,'') ||' '|| COALESCE(l.address2,'')) as direccioncliente,
+COALESCE(bpl.phone,u.phone) as telefonocliente,
+u.name personacontacto,
+p.value codigo,
+coalesce(il.description,c.name,p.description,p.name) as productdescription,
+trunc(il.qtyinvoiced) as cantidad,
+il.priceactual as preciounitario,
+il.linenetamt AS precioTotalSinImpuesto,
+il.taxamt as totalimpuesto,
+/*En liquidacion de compras, hacer JOIN con taxcategory para no sumar la retencion 
+a la base imponible*/
+(	SELECT
+	COALESCE(SUM(it.TaxBaseAmt),0) AS Imponible
+	FROM C_InvoiceTax it
+	JOIN C_Tax t ON t.C_Tax_ID = it.C_Tax_ID and t.LEC_TaxTypeSRI = '2' and t.rate = 0::numeric
+ 	JOIN C_TaxCategory tc on tc.C_TaxCategory_ID = t.C_TaxCategory_ID and tc.IsWithholding = 'N'
+	WHERE it.C_Invoice_ID =i.C_Invoice_ID
+) as subtotalsinimpuesto,
+/*En liquidacion de compras, hacer JOIN con taxcategory para no sumar la retencion 
+a la base imponible*/
+
+CASE WHEN 
+		(SELECT count(*)
+		FROM C_InvoiceTax it WHERE it.C_Invoice_ID =i.C_Invoice_ID AND it.isactive='Y')>0 
+	THEN (SELECT COALESCE(SUM(it.TaxBaseAmt),0) AS Imponible
+		FROM C_InvoiceTax it
+		JOIN C_Tax t ON t.C_Tax_ID = it.C_Tax_ID and t.LEC_TaxTypeSRI = '2' and t.rate > 0::numeric
+		JOIN C_TaxCategory tc on tc.C_TaxCategory_ID = t.C_TaxCategory_ID and tc.IsWithholding = 'N'
+		WHERE it.C_Invoice_ID =i.C_Invoice_ID) 
+	ELSE i.totallines 
+END as subtotalconimpuesto
+
+
+
+/*(	SELECT
+	COALESCE(SUM(it.TaxAmt),0) AS valor
+	FROM C_InvoiceTax it
+ 	JOIN C_Tax t ON t.C_Tax_ID = it.C_Tax_ID and t.LEC_TaxTypeSRI = '2'
+	WHERE it.C_Invoice_ID =i.C_Invoice_ID
+) as iva,*/
+--i.grandtotal,
+--i.totallines,
+--(i.dateacct::timestamp + (tp.netdays ||' days')::interval)::date as fvencimiento,
+/*(	select sum(case when pricelist<>0 then (pricelist-priceentered)*qtyentered else 0 end) 
+ 	from c_invoiceline where c_invoice_id = i.c_invoice_id 
+) as totalDescuento,*/
+--coalesce(l.city||', ','')||''||f_c_fecha_letras(i.dateacct::date) fechaletra
+
+FROM C_Invoice i
+JOIN C_InvoiceLine il ON il.C_Invoice_ID = i.C_Invoice_ID and il.isactive='Y'
+JOIN C_BPartner bp ON bp.C_BPartner_ID = i.C_BPartner_ID
+JOIN C_BPartner_Location bpl ON bpl.C_BPartner_Location_ID = i.C_BPartner_Location_ID and bpl.isactive='Y'
+JOIN C_Location l ON l.C_Location_ID = bpl.C_Location_ID and l.isactive='Y'
+LEFT JOIN m_product p on p.m_product_id=il.m_product_id
+LEFT JOIN c_charge c on c.c_charge_id=il.c_charge_id
+left join ad_user u on  u.ad_user_id=i.ad_user_id
+left join C_PaymentTerm tp on tp.C_PaymentTerm_id=i.C_PaymentTerm_id
+WHERE i.C_Invoice_ID = $P{RECORD_ID} 
+order by il.line]]>
+	</queryString>
+	<field name="invoicedescription" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="invoicedescription"/>
+	</field>
+	<field name="fechaemision" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="fechaemision"/>
+	</field>
+	<field name="razonsocialcomprador" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="razonsocialcomprador"/>
+	</field>
+	<field name="identificacioncomprador" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="identificacioncomprador"/>
+	</field>
+	<field name="direccioncliente" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="direccioncliente"/>
+	</field>
+	<field name="telefonocliente" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="telefonocliente"/>
+	</field>
+	<field name="personacontacto" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="personacontacto"/>
+	</field>
+	<field name="codigo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="codigo"/>
+	</field>
+	<field name="productdescription" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="productdescription"/>
+	</field>
+	<field name="cantidad" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="cantidad"/>
+	</field>
+	<field name="preciounitario" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="preciounitario"/>
+	</field>
+	<field name="preciototalsinimpuesto" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="preciototalsinimpuesto"/>
+	</field>
+	<field name="totalimpuesto" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="totalimpuesto"/>
+	</field>
+	<field name="subtotalsinimpuesto" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="subtotalsinimpuesto"/>
+	</field>
+	<field name="subtotalconimpuesto" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="subtotalconimpuesto"/>
+	</field>
+	<variable name="SubTotal" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{preciototalsinimpuesto}]]></variableExpression>
+	</variable>
+	<variable name="TotalImpuestos" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{totalimpuesto}]]></variableExpression>
+	</variable>
+	<variable name="Base0" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{subtotalsinimpuesto}]]></variableExpression>
+	</variable>
+	<variable name="Base12" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{subtotalconimpuesto}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="213" splitType="Stretch">
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="320" y="143" width="187" height="13" uuid="e897855b-1855-42cd-a64e-a9f15ff5d7df"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="false" isItalic="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fechaemision}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="98" y="130" width="409" height="13" uuid="5b28eb06-059b-4eee-b552-a17c5ba3a119"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="false" isItalic="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{razonsocialcomprador}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="98" y="156" width="408" height="13" uuid="30bc3d8d-a6b3-4ec6-9b33-77b0695e1517"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="false" isItalic="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{direccioncliente}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="98" y="143" width="172" height="13" uuid="9b8106c7-4046-4293-b771-d43d20e576c9"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="false" isItalic="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{identificacioncomprador}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="30" y="130" width="68" height="13" uuid="e5fbcd3b-6202-4161-82da-1220abafa92d"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nombre:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="30" y="143" width="68" height="13" uuid="36affce2-6041-4295-b503-de0be4dbdaf6"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[CI:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="30" y="156" width="68" height="13" uuid="7b8262a4-abdf-4ef7-b3c7-acb9dfcaf7eb"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Dirección:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="270" y="143" width="50" height="13" uuid="0f535ce0-2056-4997-aa98-10fec17846dd"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="30" y="169" width="68" height="13" uuid="edc5291c-c497-4956-8dfa-c631bb797052"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Detalle:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="98" y="169" width="408" height="30" uuid="ae49aa93-1cb2-4076-92e4-4d35940ea334"/>
+				<textElement verticalAlignment="Top">
+					<font fontName="SansSerif" size="10" isBold="false" isItalic="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{invoicedescription}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="28" y="199" width="70" height="13" uuid="411cfc1d-4b2f-4517-8925-89b7315821b0"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CÓDIGO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="98" y="199" width="210" height="13" uuid="733395b1-0d3a-447f-8726-63950ca0b8a5"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[DESCRIPCIÓN]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="308" y="199" width="50" height="13" uuid="62ff0eb9-462a-41b2-8bb1-e59aad6762a7"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cantidad]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="358" y="199" width="60" height="13" uuid="ccea0d01-f2c2-4f62-896a-9dcd23790038"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Precio Unit.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="418" y="199" width="77" height="13" uuid="b3a9b202-2059-4cc0-86bf-8b66ae15d5c6"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Precio Total]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="100" y="0" width="210" height="13" uuid="2fe78c81-e422-4bb7-a381-e2d0b2eed21c"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{productdescription}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="360" y="0" width="60" height="13" uuid="b5e5a107-dd2a-499e-8878-32f2bee2c757"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{preciounitario}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="420" y="0" width="77" height="13" uuid="8a6fe8a3-7258-4ed5-a8a9-61866b9937ae"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{preciototalsinimpuesto}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="30" y="0" width="70" height="13" uuid="7bec4890-4d15-4dc1-9371-0dee9a4c5010"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{codigo}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="###0" isBlankWhenNull="true">
+				<reportElement x="310" y="0" width="50" height="13" uuid="150c82d9-ac94-468d-b926-7d2f74f0802e"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cantidad}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="116">
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="418" y="38" width="77" height="16" uuid="e5d9c80f-ed6d-44b9-b03d-797c4d43cb17"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{subtotalconimpuesto}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement x="418" y="54" width="77" height="16" uuid="5e568ae5-6983-41e0-8c52-d96b9b1e68c3"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TotalImpuestos}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="318" y="38" width="100" height="16" uuid="cdebd9c6-4fd9-45d9-aee3-2313e8fba001"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sub Total 12%]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="318" y="54" width="100" height="16" uuid="82b76059-f272-436f-ba89-a9db03d41156"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total Impuestos]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="318" y="22" width="100" height="16" uuid="3b503d3c-e347-4be8-bc46-c256364a198b"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sub Total 0%]]></text>
+			</staticText>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement x="418" y="22" width="77" height="16" uuid="c7b4b25b-e4ff-44b6-bd72-fdec7a1039c8"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{subtotalsinimpuesto}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="318" y="6" width="100" height="16" uuid="6f183fd7-d0aa-4a89-b7ff-d67971bbc622"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sub Total:]]></text>
+			</staticText>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement x="418" y="6" width="77" height="16" uuid="ea1ab6e5-565d-4451-9e8e-a3142fa96128"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SubTotal}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement x="418" y="70" width="77" height="16" uuid="cd40dda7-4c3c-4768-a4af-55d73505ad09"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SubTotal}.add( $V{TotalImpuestos}  )]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="318" y="70" width="100" height="16" uuid="1e8fdd0f-bbb0-4441-bc4b-a9a9a46893e7"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total:]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

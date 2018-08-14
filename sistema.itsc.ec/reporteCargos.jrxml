@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteCargos" pageWidth="1700" pageHeight="595" orientation="Landscape" columnWidth="1660" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" whenResourceMissingType="Empty" isIgnorePagination="true" uuid="a80ed23f-586d-4137-9775-4a3bd6032d6d">
+	<property name="ireport.zoom" value="1.3636363636363635"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="INDUVIS"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<style name="table" mode="Opaque">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_1" mode="Opaque">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<parameter name="AD_Client_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select 
+org.name org,
+ch.name cargo,
+cs.Description codigosustento,
+wc.Description categoriaretencion,
+ev.value codigo,
+ev.name cuenta,
+(CASE when ch.isactive = 'Y' then 'Activo'
+ELSE 'Inactivo'
+END) as activo
+from c_charge ch
+inner join AD_Org org on org.AD_Org_ID = ch.AD_Org_ID
+left join sri_codigosustento cs on cs.sri_codigosustento_ID=ch.sri_codigosustento_ID
+left join LCO_WithholdingCategory wc on wc.LCO_WithholdingCategory_ID=ch.LCO_WithholdingCategory_ID
+left join C_Charge_Acct cha on cha.C_Charge_ID=ch.C_Charge_ID
+left join C_ValidCombination vc on vc.C_ValidCombination_ID=cha.ch_expense_acct
+left join c_elementvalue ev on ev.c_elementvalue_id=vc.account_id
+where ch.ad_client_id=$P{AD_Client_ID} 
+ORDER BY cargo]]>
+	</queryString>
+	<field name="org" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="org"/>
+	</field>
+	<field name="cargo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="cargo"/>
+	</field>
+	<field name="codigosustento" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="codigosustento"/>
+	</field>
+	<field name="categoriaretencion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="categoriaretencion"/>
+	</field>
+	<field name="codigo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="codigo"/>
+	</field>
+	<field name="cuenta" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="cuenta"/>
+	</field>
+	<field name="activo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="activo"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="20" splitType="Stretch">
+			<staticText>
+				<reportElement x="1242" y="0" width="278" height="20" uuid="a8fffd13-4106-4c2e-ab71-f372810eef83"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[CÓDIGO DE SUSTENTO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="250" y="0" width="250" height="20" uuid="3444348d-9960-475b-90fa-f9a2ca3df02c"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[CARGO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="942" y="0" width="300" height="20" uuid="bd2532ae-1e35-44bb-9ef5-84e3ecfd58fe"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[CATEGORÍA DE RETENCIÓN]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="500" y="0" width="143" height="20" uuid="93c5b7b5-9282-42fa-80a6-311f3336d7ed"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[CÓDIGO CUENTA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="643" y="0" width="299" height="20" uuid="2b5fbf2b-5791-4d39-93a1-13e3f244ef6c"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[CUENTA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="-1" width="250" height="20" uuid="49048b78-aef3-4c91-8e21-37c466ddfe66"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[ORGANIZACION]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1520" y="0" width="140" height="20" uuid="78f783ed-4c10-4ed1-8983-ad4fc2ab12e2"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[ACTIVO / INACTIVO]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement x="1242" y="0" width="278" height="15" uuid="b75cfe83-ed3c-4e8a-a224-cef24207adcf"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{codigosustento}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="250" y="0" width="250" height="15" uuid="222895b0-31ba-48ab-9258-4781c6e3424f"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cargo}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="942" y="0" width="300" height="15" uuid="6d73ba9f-307f-4560-9f64-9d3b0565c03b"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{categoriaretencion}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="500" y="0" width="143" height="15" uuid="4b395b69-6d5e-4d78-a1cf-658fcdc53a7d"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{codigo}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="643" y="0" width="299" height="15" uuid="afad8fa8-bd90-4bd8-af98-71052facbb2f"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cuenta}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="-1" width="250" height="15" uuid="d521305f-c2b7-4bb3-85bd-697b72a5abfb"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{org}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="1520" y="0" width="140" height="15" uuid="22467155-8a96-4d82-87d8-4c6cb0ccf697"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{activo}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

@@ -1,0 +1,446 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="liquidacionComprasServihelp" pageWidth="545" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="545" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" whenResourceMissingType="Error" uuid="a80ed23f-586d-4137-9775-4a3bd6032d6d">
+	<property name="ireport.zoom" value="1.4641000000000008"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="pildes.itsc.ec"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<style name="table">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 2">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 2_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 2_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 2_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 3">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 3_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 3_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 3_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 4">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 4_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 4_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 4_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 5">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 5_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 5_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 5_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<parameter name="RECORD_ID" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[select 
+	taxid, 
+	documentno, 
+	Description,
+	autorizacionreemb, 
+	fechaemisionreemb,
+	(baseimpgravreemb + baseimpexereemb) as subtotalGrava,
+	basenograivareemb as subtotalNoGrava,
+	(montoivaremb + montoiceremb) as totalImpuesto
+from tb_factura_reembolso as rb
+where rb.isactive = 'Y' and rb.c_invoice_id =  $P{RECORD_ID} ]]>
+	</queryString>
+	<field name="taxid" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="taxid"/>
+	</field>
+	<field name="documentno" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="documentno"/>
+	</field>
+	<field name="description" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="description"/>
+	</field>
+	<field name="autorizacionreemb" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="autorizacionreemb"/>
+	</field>
+	<field name="fechaemisionreemb" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="fechaemisionreemb"/>
+	</field>
+	<field name="subtotalgrava" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="subtotalgrava"/>
+	</field>
+	<field name="subtotalnograva" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="subtotalnograva"/>
+	</field>
+	<field name="totalimpuesto" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="totalimpuesto"/>
+	</field>
+	<variable name="SUBTOTAL GRAVA" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{subtotalgrava}]]></variableExpression>
+	</variable>
+	<variable name="IMPUESTOS" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{totalimpuesto}]]></variableExpression>
+	</variable>
+	<variable name="SUBTOTAL NO GRAVA" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{subtotalnograva}]]></variableExpression>
+	</variable>
+	<columnHeader>
+		<band height="25">
+			<staticText>
+				<reportElement x="0" y="0" width="70" height="25" uuid="e1b3a3f0-7b1f-4607-94a3-5ca5a96aecea"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[RUC/CI]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="70" y="0" width="100" height="25" uuid="b70a94a6-2694-4e8d-ac0d-2bde5e5912ec"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nro. Doc.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="450" y="0" width="47" height="25" uuid="761548fd-f71f-43bc-b33d-7b04c539ab38"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Impuestos]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="170" y="0" width="69" height="25" uuid="6df93964-7fc1-4530-a9a4-16e6debc68ae"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Descripcion]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="497" y="0" width="48" height="25" uuid="70787065-1617-48f6-a9fb-4cf567e46514"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="239" y="0" width="56" height="25" uuid="5fd96e6a-7f04-44e3-a47c-3a5904bb9d8c"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Left">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="295" y="0" width="71" height="25" uuid="1fe11203-4f51-4234-bcd8-479d8a6dbbfb"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Left">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Autorización]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="366" y="0" width="42" height="25" uuid="f688bc25-fc1c-4a72-8533-587d2c150f7d"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[SubTotal Grava]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="408" y="0" width="42" height="25" uuid="5691409d-75fa-4a3a-8d50-54f1aa12d634"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[SubTotal No Grava]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="13">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="70" height="13" uuid="d096f45c-27f1-4274-b06a-bb49b86f9691"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{taxid}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="70" y="0" width="100" height="13" uuid="d24dce21-d890-4580-a3b8-c680a36b00c6"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{documentno}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="170" y="0" width="69" height="13" uuid="4671f8a7-a117-48c2-8b6e-e11e105fba10"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{description}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="366" y="0" width="42" height="13" uuid="206d0d0f-772d-4f12-97cf-301330a05f31"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{subtotalgrava}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="450" y="0" width="47" height="13" uuid="26de86cf-29b2-46d3-968c-094731cb24f9"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{totalimpuesto}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="497" y="0" width="48" height="13" uuid="9098015d-c0f8-4065-a594-59e1cabd5dfc"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{subtotalgrava}.add( $F{subtotalnograva} ).add( $F{totalimpuesto} )]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="239" y="0" width="56" height="13" uuid="4fc6b8e5-0b39-49b4-b283-d1c61f3107bf"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement textAlignment="Left">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fechaemisionreemb}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="295" y="0" width="71" height="13" uuid="b83c2528-4b54-42dd-93ed-833ab66777a6"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement textAlignment="Left">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{autorizacionreemb}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="408" y="0" width="42" height="13" uuid="6d13aac3-463e-46fc-8584-9ba6dc63d13f"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{subtotalnograva}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="55">
+			<staticText>
+				<reportElement x="400" y="0" width="97" height="13" uuid="434b0532-1574-44f0-bb64-7879a9e30353"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[SUBTOTAL GRAVA:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="400" y="26" width="97" height="13" uuid="ecb4b7c4-4ae1-4864-a712-cfdaab5647ab"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[IMPUESTOS:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="400" y="39" width="97" height="13" uuid="bc3bd2d8-5983-45a0-9643-76733747c1ec"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TOTAL:]]></text>
+			</staticText>
+			<textField pattern="#,##0.00#">
+				<reportElement x="497" y="0" width="48" height="13" uuid="bb271349-9188-4d5a-992f-d767094ebae0"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement textAlignment="Right">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUBTOTAL GRAVA}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="497" y="26" width="48" height="13" uuid="397fb70b-557d-45af-949f-46bf3481cdf0"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement textAlignment="Right">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{IMPUESTOS}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00#">
+				<reportElement x="497" y="39" width="48" height="13" uuid="ed6d5dde-54cb-44bb-8c04-c7286aab0916"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement textAlignment="Right">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUBTOTAL GRAVA}.add($V{SUBTOTAL NO GRAVA}).add($V{IMPUESTOS})]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="400" y="13" width="97" height="13" uuid="1757908a-889e-4a42-94cc-d4f5ecc14156"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[SUBTOTAL NO GRAVA:]]></text>
+			</staticText>
+			<textField pattern="#,##0.00#">
+				<reportElement x="497" y="13" width="48" height="13" uuid="86d99e9f-ed31-4f6b-b1b1-4d289ce0e81d"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement textAlignment="Right">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUBTOTAL NO GRAVA}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

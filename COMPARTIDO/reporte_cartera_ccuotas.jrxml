@@ -407,7 +407,7 @@ where faltante_pago > 0]]>
 					<textFieldExpression><![CDATA[$V{SaldoVencido}]]></textFieldExpression>
 				</textField>
 				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-					<reportElement x="45" y="0" width="106" height="13" uuid="5b03ccf5-b274-4b70-9eca-8a1325845f93"/>
+					<reportElement x="30" y="0" width="121" height="13" uuid="5b03ccf5-b274-4b70-9eca-8a1325845f93"/>
 					<box leftPadding="2"/>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
 						<font size="8"/>
@@ -427,29 +427,29 @@ where faltante_pago > 0]]>
 	</group>
 	<title>
 		<band height="60" splitType="Stretch">
-			<textField>
-				<reportElement x="274" y="14" width="240" height="12" uuid="75dfeb8c-10a2-4a46-87fe-ab6c7c9473f7"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="230" y="16" width="408" height="12" uuid="75dfeb8c-10a2-4a46-87fe-ab6c7c9473f7"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{org}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="274" y="0" width="240" height="14" uuid="f4582469-735d-416e-9cef-721866c8f59b"/>
+				<reportElement x="230" y="0" width="408" height="14" uuid="f4582469-735d-416e-9cef-721866c8f59b"/>
 				<textElement textAlignment="Center">
 					<font size="10" isBold="true"/>
 				</textElement>
 				<text><![CDATA[REPORTE DE CARTERA POR CUOTAS]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="310" y="29" width="72" height="13" uuid="1b9a146a-aad0-4b58-883b-0585fed0e374"/>
+				<reportElement x="353" y="31" width="72" height="13" uuid="1b9a146a-aad0-4b58-883b-0585fed0e374"/>
 				<textElement>
 					<font size="8" isBold="true"/>
 				</textElement>
 				<text><![CDATA[F. Corte [1]:]]></text>
 			</staticText>
 			<textField pattern="dd/MM/yyyy">
-				<reportElement x="383" y="29" width="85" height="13" uuid="02cf114d-2ac1-4567-898b-a28b920f388f"/>
+				<reportElement x="426" y="31" width="85" height="13" uuid="02cf114d-2ac1-4567-898b-a28b920f388f"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
@@ -504,14 +504,14 @@ where faltante_pago > 0]]>
 				<imageExpression><![CDATA[$F{logo}]]></imageExpression>
 			</image>
 			<staticText>
-				<reportElement x="310" y="42" width="72" height="13" uuid="0a038ec3-3b8f-4fbb-b729-858641d45081"/>
+				<reportElement x="353" y="44" width="72" height="13" uuid="0a038ec3-3b8f-4fbb-b729-858641d45081"/>
 				<textElement>
 					<font size="8" isBold="true"/>
 				</textElement>
 				<text><![CDATA[F. Cálculo [2]:]]></text>
 			</staticText>
 			<textField pattern="dd/MM/yyyy">
-				<reportElement x="383" y="42" width="85" height="13" uuid="1be83247-6553-409b-a93a-326f50e00548"/>
+				<reportElement x="426" y="44" width="85" height="13" uuid="1be83247-6553-409b-a93a-326f50e00548"/>
 				<textElement>
 					<font size="8"/>
 				</textElement>
@@ -535,7 +535,7 @@ where faltante_pago > 0]]>
 				<text><![CDATA[No. Factura]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="45" y="0" width="106" height="23" uuid="24e1dd9e-6d4f-45d6-9a2d-386725272220"/>
+				<reportElement x="30" y="0" width="121" height="23" uuid="24e1dd9e-6d4f-45d6-9a2d-386725272220"/>
 				<box leftPadding="2">
 					<topPen lineWidth="0.5"/>
 					<leftPen lineWidth="0.5"/>

@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reportePagosPichincha" pageWidth="1150" pageHeight="595" orientation="Landscape" columnWidth="1110" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true" uuid="a80ed23f-586d-4137-9775-4a3bd6032d6d">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="net.sf.jasperreports.export.csv.field.delimiter" value=";"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="ITSC"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<parameter name="AD_Org_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="HR_Department_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="C_BankAccount_ID" class="java.lang.Integer"/>
+	<parameter name="fecha_inicio" class="java.util.Date"/>
+	<parameter name="fecha_fin" class="java.util.Date"/>
+	<parameter name="TenderType" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select 
+		'PA'::text as tipo_pago,
+		pb.AccountNo as cuenta_empresa,
+		(ROW_NUMBER() OVER())::text as secuencial,
+		bp.TaxID as beneficiario_codigo, 
+		'USD'::text as moneda, 
+		to_char(p.PayAmt,'FM9999999990V99')::text as valor, 
+		(case when p.TenderType='A' then 'CTA' else 'EFE' end)::text as forma_pago,
+		lpad(coalesce(b.RoutingNo,'0000'),4,'0') as codigo_banco,	
+		case when ba.BankAccountType='S' then 'AHO' when ba.BankAccountType='C' then 'CTE' else '' end tipo_cuenta,
+		ba.AccountNo as cuenta_beneficiario,
+		tit.idats as tipo_doc_beneficiario, 	
+		pb.AccountNo as beneficiario_cedula,
+		bp.name as beneficiario_nombre,
+		SUBSTRING(hpro.name, 1, 39) as procesoNomina, 
+		case when p.TenderType='A' and ba.C_BP_BankAccount_ID is null then bp.TaxID else null end errorid 
+	from c_payment p
+	join C_BankAccount pb on pb.C_BankAccount_ID = p.C_BankAccount_ID and pb.isactive = 'Y'
+	join HR_Process hpro on hpro.HR_Process_id=p.HR_Process_id and hpro.isactive='Y' 
+	join c_bpartner bp on bp.c_bpartner_id=p.c_bpartner_id and bp.isactive='Y' 
+	join LCO_TaxIdType tit on tit.LCO_TaxIdType_id=bp.LCO_TaxIdType_id and tit.isactive='Y' 
+	left join C_BP_BankAccount ba on ba.C_bpartner_ID=p.C_bpartner_ID and ba.isactive='Y' and ba.creditonomina='Y' 
+	left join C_Bank b on b.C_Bank_ID=ba.C_Bank_ID and b.isactive='Y' 
+	where p.isactive='Y' 
+		and p.docstatus='CO' 
+		and p.ad_org_id=  $P{AD_Org_ID} 
+		and p.TenderType not in ('K')
+		and p.C_BankAccount_ID=  $P{C_BankAccount_ID} 
+		and p.TenderType= $P{TenderType} 
+		and coalesce( $P{HR_Department_ID} , -1) in (hpro.HR_Department_ID, -1, 0)
+		and date( p.dateacct) between date( $P{fecha_inicio} ) and date( $P{fecha_fin} )]]>
+	</queryString>
+	<field name="tipo_pago" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="tipo_pago"/>
+	</field>
+	<field name="cuenta_empresa" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="cuenta_empresa"/>
+	</field>
+	<field name="secuencial" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="secuencial"/>
+	</field>
+	<field name="beneficiario_codigo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="beneficiario_codigo"/>
+	</field>
+	<field name="moneda" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="moneda"/>
+	</field>
+	<field name="valor" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="valor"/>
+	</field>
+	<field name="forma_pago" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="forma_pago"/>
+	</field>
+	<field name="codigo_banco" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="codigo_banco"/>
+	</field>
+	<field name="tipo_cuenta" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="tipo_cuenta"/>
+	</field>
+	<field name="cuenta_beneficiario" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="cuenta_beneficiario"/>
+	</field>
+	<field name="tipo_doc_beneficiario" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="tipo_doc_beneficiario"/>
+	</field>
+	<field name="beneficiario_cedula" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="beneficiario_cedula"/>
+	</field>
+	<field name="beneficiario_nombre" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="beneficiario_nombre"/>
+	</field>
+	<field name="procesonomina" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="procesonomina"/>
+	</field>
+	<field name="errorid" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="errorid"/>
+	</field>
+	<pageHeader>
+		<band height="22">
+			<staticText>
+				<reportElement x="0" y="0" width="30" height="22" uuid="45ce8e00-e809-4bd2-a1fd-1c17154c2a2a"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TIPO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="30" y="0" width="113" height="22" uuid="5c6082ce-4256-4b22-9429-25945695adaa"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CUENTA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="143" y="0" width="64" height="22" uuid="08f94def-eff0-4439-80f9-6e3a221457da"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[SECUENCIAL]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="207" y="0" width="64" height="22" uuid="c4d78167-9aec-431a-a883-384a9f72d0f1"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[COD. EMP.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="271" y="0" width="56" height="22" uuid="4dda6c03-c576-49a6-89ef-f89ddeb49aac"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[MONEDA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="327" y="0" width="56" height="22" uuid="c2a0f415-e684-4bbe-97fd-fa8f339bcfc5"/>
+				<box leftPadding="0" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[VALOR]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="383" y="0" width="56" height="22" uuid="d42a0c72-8b5e-4528-bd92-9fa43c1a377b"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[FORMA PAGO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="439" y="0" width="72" height="22" uuid="8409f21a-8115-42a2-a1c1-68e8921aba5d"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CÓDIGO BANCO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="511" y="0" width="62" height="22" uuid="2d75f612-85af-4ba5-89c7-17270472c505"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TIPO CUENTA EMPLEADO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="573" y="0" width="87" height="22" uuid="ec789daf-226a-4a8e-b94b-53eb0153af46"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CUENTA EMPLEADO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="747" y="0" width="168" height="22" uuid="390e5675-1602-4e58-8650-539e51a9a34f"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[BENEFICIARIO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="915" y="0" width="185" height="22" uuid="66544e42-2cc5-49f6-9e0b-a75bb1b2a695"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[REFERENCIA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="660" y="0" width="87" height="22" uuid="f9c779ce-bebe-40ea-bc92-717d40e6067b"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CÉDULA EMPLEADO]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="14" splitType="Stretch">
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="30" height="14" uuid="50fad3ee-fc9c-46c7-860e-c8d14e2a3371"/>
+				<box leftPadding="2" rightPadding="0"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tipo_pago}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="207" y="0" width="64" height="14" uuid="13cb903b-0e79-4902-b4bd-6a8c08ce721e"/>
+				<box leftPadding="2" rightPadding="0"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{beneficiario_codigo}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="271" y="0" width="56" height="14" uuid="47ace6e1-e866-4a5a-9109-51d3450a9d55"/>
+				<box leftPadding="2" rightPadding="0"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{moneda}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="327" y="0" width="56" height="14" uuid="19a9c188-4c02-4c98-a105-8ef6f2ca8e6a"/>
+				<box leftPadding="0" rightPadding="2"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{valor}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="747" y="0" width="168" height="14" uuid="c7f2dfc0-ae51-4692-80de-00e439ac1549"/>
+				<box leftPadding="2" rightPadding="0"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{beneficiario_nombre}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="915" y="0" width="185" height="14" uuid="368661c1-cc9f-4e23-9762-566cb5987845"/>
+				<box leftPadding="2" rightPadding="0"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{procesonomina}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="383" y="0" width="56" height="14" uuid="e2e891da-d72d-43ac-81bb-203799854e68"/>
+				<box leftPadding="2" rightPadding="0"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{forma_pago}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="439" y="0" width="72" height="14" uuid="767a2130-1f82-4854-b4a0-28062d22a29b"/>
+				<box leftPadding="2" rightPadding="0"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{codigo_banco}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="511" y="0" width="62" height="14" uuid="eee3a30a-54df-427c-8eef-22e6290c0de8"/>
+				<box leftPadding="2" rightPadding="0"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tipo_cuenta}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="573" y="0" width="87" height="14" uuid="6abe36d9-4d2c-4583-9d68-077e6b16337d"/>
+				<box leftPadding="2" rightPadding="0"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cuenta_beneficiario}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="143" y="0" width="64" height="14" uuid="9d126e4c-aeaa-4b10-9ed2-1e87e04b32af"/>
+				<box leftPadding="2" rightPadding="0"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{secuencial}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="30" y="0" width="113" height="14" uuid="8687757a-d031-443d-961b-324b43057e20"/>
+				<box leftPadding="2" rightPadding="0"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cuenta_empresa}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="660" y="0" width="87" height="14" uuid="663baaba-8a03-4534-b57f-f1d2df41799e"/>
+				<box leftPadding="2" rightPadding="0"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cuenta_beneficiario}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

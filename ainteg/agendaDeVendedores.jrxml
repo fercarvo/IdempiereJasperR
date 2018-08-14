@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="agendaDeVendedores" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a80ed23f-586d-4137-9775-4a3bd6032d6d">
+	<property name="ireport.zoom" value="1.2396694214876032"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="AINTEG"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<style name="table" mode="Opaque">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_1" mode="Opaque">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<parameter name="AD_Org_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["C:\\Users\\Usuario\\Documents\\JasperResports\\stocks\\"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="fecha_inicio" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="fecha_fin" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="OpportunityAmt" class="java.math.BigDecimal">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SalesRep_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="Probability" class="java.math.BigDecimal"/>
+	<parameter name="fechaesperada" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[WITH referencia AS ( /* Referencias de todo tipo */
+	select distinct lg.name as value, ref_l.value as key, ref.name as tipo 
+	from AD_Reference ref
+	join AD_Ref_List as ref_l on ref_l.AD_Reference_ID = ref.AD_Reference_ID
+	join AD_Ref_List_Trl as lg on ref_l.AD_Ref_List_ID = lg.AD_Ref_List_ID and lg.AD_Language = 'es_EC' 
+), org_img AS ( /* Logo de la organizacion */
+	select org_info.AD_Org_ID, org_img.binarydata
+	from  AD_OrgInfo as org_info
+	join ad_image as org_img on org_img.ad_image_id = org_info.logo_id 
+)
+
+select
+	org_img.binarydata as logo,
+	org.name as org,
+	op.documentno as no_opor,
+	op.foportunidad as f_opor,
+	op.C_BPartner_ID as cliente_id,
+	op.SalesRep_ID as repre_id,
+	repre.Name as representante,
+	cb.Name as cliente,
+	ss.Name as etapa_venta,
+	op.OpportunityAmt as valor,
+	trunc((op.OpportunityAmt*op.Probability/100),2) as valor_ponderado,
+	op.ExpectedCloseDate as f_cierre,
+	op.Comments as comentario,
+	c.Name as campana,
+	ract.value as tipoactiv,
+	ca.StartDate as fechaInicio,
+	ca.Description as descripcion,
+	rnact.value as tipoactivsgte,
+	ca.EndDate as fechasgte
+from c_opportunity op
+join C_BPartner cb on cb.C_BPartner_ID=op.C_BPartner_ID and cb.isactive='Y'
+join C_SalesStage ss on ss.C_SalesStage_ID=op.C_SalesStage_ID and ss.isactive='Y'
+join C_ContactActivity ca on ca.C_Opportunity_ID=op.C_Opportunity_ID and ca.isactive='Y' and ca.IsComplete = 'N'
+
+left join referencia as ract on ract.key = ca.ContactActivityType  and ract.tipo = 'C_ContactActivity Type'
+left join referencia as rnact on rnact.key = ca.next_activity and rnact.tipo = 'C_ContactActivity Type'
+/*
+join AD_Reference ract on ract.name='C_ContactActivity Type' and ract.isactive = 'Y'
+join AD_Ref_List rl on rl.AD_Reference_ID=ract.AD_Reference_ID AND rl.value=ca.ContactActivityType AND rl.isactive = 'Y'
+join AD_Ref_List_Trl trl on trl.AD_Ref_List_ID=rl.AD_Ref_List_ID and trl.AD_Language='es_EC'
+
+join AD_Reference rnact on rnact.name='C_ContactActivity Type' and rnact.isactive = 'Y'
+join AD_Ref_List rla on rla.AD_Reference_ID=rnact.AD_Reference_ID AND rla.value=ca.next_activity AND rla.isactive = 'Y'
+join AD_Ref_List_Trl trla on trla.AD_Ref_List_ID=rla.AD_Ref_List_ID and trla.AD_Language='es_EC'
+*/
+left join C_Campaign c on c.C_Campaign_ID=op.C_Campaign_ID and c.isactive='Y'
+left join AD_User repre on repre.AD_User_ID=op.SalesRep_ID and repre.isactive='Y'
+left join AD_Org org on org.ad_org_id = op.ad_org_id and org.isactive='Y'
+left join org_img on org_img.AD_Org_ID = org.AD_Org_ID
+where op.ad_org_id=$P{AD_Org_ID}
+	and op.isactive = 'Y'
+	and ss.Name != 'Orden'
+	and coalesce(  $P{SalesRep_ID}  , -1) in ( op.salesrep_id , -1 )
+	and date( ca.EndDate ) <= date(  $P{fecha_fin}  )
+	and (case when coalesce($P{OpportunityAmt},0)>0 then op.OpportunityAmt>=$P{OpportunityAmt} else 1=1 end)
+	and (case when coalesce($P{Probability},0)>0 then op.Probability>=$P{Probability} else 1=1 end)
+order by op.SalesRep_ID,ca.EndDate,op.SalesRep_ID,op.documentno]]>
+	</queryString>
+	<field name="logo" class="java.lang.Object">
+		<property name="com.jaspersoft.studio.field.label" value="logo"/>
+	</field>
+	<field name="org" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="org"/>
+	</field>
+	<field name="no_opor" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="no_opor"/>
+	</field>
+	<field name="f_opor" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="f_opor"/>
+	</field>
+	<field name="cliente_id" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="cliente_id"/>
+	</field>
+	<field name="repre_id" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="repre_id"/>
+	</field>
+	<field name="representante" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="representante"/>
+	</field>
+	<field name="cliente" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="cliente"/>
+	</field>
+	<field name="etapa_venta" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="etapa_venta"/>
+	</field>
+	<field name="valor" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="valor"/>
+	</field>
+	<field name="valor_ponderado" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="valor_ponderado"/>
+	</field>
+	<field name="f_cierre" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="f_cierre"/>
+	</field>
+	<field name="comentario" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="comentario"/>
+	</field>
+	<field name="campana" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="campana"/>
+	</field>
+	<field name="tipoactiv" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="tipoactiv"/>
+	</field>
+	<field name="fechainicio" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="fechainicio"/>
+	</field>
+	<field name="descripcion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="descripcion"/>
+	</field>
+	<field name="tipoactivsgte" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="tipoactivsgte"/>
+	</field>
+	<field name="fechasgte" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="fechasgte"/>
+	</field>
+	<group name="vendedor">
+		<groupExpression><![CDATA[$F{repre_id}]]></groupExpression>
+		<groupHeader>
+			<band height="15">
+				<textField>
+					<reportElement x="0" y="0" width="516" height="15" uuid="d2180d54-237e-4092-8b9a-7f4b9f199334"/>
+					<textElement verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{representante}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="oportunidad">
+		<groupExpression><![CDATA[$F{no_opor}]]></groupExpression>
+		<groupHeader>
+			<band/>
+		</groupHeader>
+		<groupFooter>
+			<band height="2">
+				<line>
+					<reportElement x="4" y="0" width="795" height="1" uuid="cb6c19b9-06a6-48b2-ae8c-f0c47b6fd1f0"/>
+				</line>
+			</band>
+		</groupFooter>
+	</group>
+	<title>
+		<band height="75" splitType="Stretch">
+			<staticText>
+				<reportElement x="219" y="1" width="351" height="14" uuid="f4582469-735d-416e-9cef-721866c8f59b"/>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[AGENDA DE VENDEDORES]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="219" y="17" width="349" height="12" uuid="fe18d52e-ced6-4a47-90b3-8cedd9121697"/>
+				<textElement textAlignment="Center">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{org}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="644" y="1" width="126" height="14" uuid="b197ef94-cc70-48eb-b9ae-c12985597b5c"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Página:                           "+$V{PAGE_NUMBER}+"      de "]]></textFieldExpression>
+			</textField>
+			<textField pattern="">
+				<reportElement x="644" y="15" width="158" height="14" uuid="21a0f375-00d9-4022-97d4-54f44a64f876"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Fecha de impresión:   "+new SimpleDateFormat("dd/MMM/yyyy HH:mm").format( new java.util.Date() )]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" evaluationTime="Report">
+				<reportElement x="770" y="1" width="17" height="14" uuid="8ff3ae43-31fd-4810-939a-374255c32537"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="644" y="29" width="158" height="14" uuid="81e34e73-8895-4101-b62c-5a94558c1ece"/>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font size="7" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Reporte:     agendaDeVendedores.jrxml]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="320" y="43" width="74" height="15" uuid="99a00af4-3e05-48a2-846e-bf3da281c9b8"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha Corte:]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="395" y="43" width="87" height="15" uuid="909e3561-b292-4aa8-954b-14aaa3c8f8fd"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{fecha_fin}]]></textFieldExpression>
+			</textField>
+			<image hAlign="Center" vAlign="Middle" isUsingCache="true" onErrorType="Blank">
+				<reportElement x="3" y="0" width="215" height="75" isPrintInFirstWholeBand="true" uuid="30f40e0d-1aee-4e4c-96b6-96a674999e53"/>
+				<imageExpression><![CDATA[$F{logo}]]></imageExpression>
+			</image>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="40" splitType="Stretch">
+			<staticText>
+				<reportElement style="table" x="3" y="20" width="53" height="20" uuid="80ab14c9-afbc-48c5-97a2-8d01ac55bca8"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[No. Oport.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table" x="187" y="20" width="46" height="20" uuid="310cab44-4495-4a44-bbc7-a94d1dfb335a"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Valor]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table" x="56" y="20" width="131" height="20" uuid="d791d0da-75b7-4a6a-ae23-ef34fa7c6115"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cliente]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table" x="233" y="20" width="77" height="20" uuid="da1002c3-2a6d-43de-a9eb-87b6d8c6d4ea"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tipo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table" x="310" y="20" width="60" height="20" uuid="ff467e33-b8b2-4d65-8b9a-8f9f75263caf"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table" x="370" y="20" width="274" height="20" uuid="973d3d88-6d09-4175-b415-a79e5d32b5b1"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Descripción]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table" x="644" y="20" width="76" height="20" uuid="52e35e9a-b054-476d-af09-7729d2f11c84"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Actividad]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table" x="720" y="20" width="82" height="20" uuid="35b5aa24-2315-474b-94fd-3193d072c87d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table" x="233" y="0" width="137" height="20" uuid="82f124e7-8315-4e2f-a626-1e83b2b6542b"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ACTIVIDAD]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table" x="644" y="0" width="158" height="20" uuid="eee8ba18-25e5-407c-8a83-6e87e47f48de"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Siguiente Actividad]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="310" y="0" width="60" height="15" uuid="03b3cd19-0308-4c55-bc1b-f0626dccbefd"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fechainicio}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="644" y="0" width="76" height="15" uuid="49a61ae8-b418-4729-8344-fabc03e91db9"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tipoactivsgte}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="370" y="0" width="261" height="15" uuid="4735a93f-64f1-49da-9a38-cabee8955cda"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descripcion}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="720" y="0" width="82" height="15" uuid="16c0a04c-8aae-4066-872a-5bd4f50c6043"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fechasgte}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="240" y="0" width="70" height="15" uuid="8a811bf5-2c47-4e3e-90d5-b0ac10b84da4"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tipoactiv}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="187" y="0" width="46" height="15" uuid="9f3ff803-ed66-4662-bbaa-1314f30b9229"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{valor}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="12" y="0" width="44" height="15" uuid="475ec7a8-fd49-4d9e-9042-0b6310d20f76"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{no_opor}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="56" y="0" width="132" height="15" uuid="868bdc65-b092-4692-8ef0-e4bebcdf5a46"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cliente}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

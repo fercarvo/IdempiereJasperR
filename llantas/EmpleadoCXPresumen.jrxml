@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="EmpleadoCXP" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a80ed23f-586d-4137-9775-4a3bd6032d6d">
+	<property name="ireport.zoom" value="1.6105100000000045"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="produccion"/>
+	<style name="table" mode="Opaque">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_1" mode="Opaque">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<parameter name="AD_Org_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="C_BPartner_ID" class="java.lang.Integer"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["C:\\Users\\Usuario\\Documents\\JasperResports\\stocks\\"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="fecha_desde" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="fecha_hasta" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mostrar_pendientes" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT m.c_bpartner_id,
+m.HR_Process_ID,
+o.name organizacion,
+(case when char_length(trim(coalesce(BP.lastname1,'') ||' '|| coalesce(BP.lastname2,'') ||' '|| coalesce(BP.firstname1,'') ||' '|| coalesce(BP.firstname2,'')))>0 then trim(coalesce(BP.lastname1,'') ||' '|| coalesce(BP.lastname2,'') ||' '|| coalesce(BP.firstname1,'') ||' '|| coalesce(BP.firstname2,'')) else BP.Name end) empleado,
+pr.name procesonomina,
+m.amount sueldo,
+py.documentno pagono,
+py.payamt montopagado,
+py.c_payment_id,
+py.datetrx as fecha_pago,
+(select coalesce(sum(p.payamt),0) from c_payment p where p.C_bpartner_ID = m.c_bpartner_id and p.HR_Process_id = m.HR_Process_ID and p.isactive = 'Y') pagado,
+(m.amount-(select coalesce(sum(p.payamt),0) from c_payment p where p.C_bpartner_ID = m.c_bpartner_id and p.HR_Process_id = m.HR_Process_ID and p.isactive = 'Y')) saldo
+FROM HR_Movement m
+JOIN HR_Process pr on pr.HR_Process_ID=m.HR_Process_ID AND pr.isactive='Y' AND pr.DocStatus IN ('CO','IP')
+JOIN C_BPartner bp on bp.C_BPartner_ID=m.C_BPartner_ID and bp.isEmployee='Y' and bp.isactive='Y'
+JOIN HR_Concept hc on hc.HR_Concept_ID=m.HR_Concept_ID AND hc.isactive='Y' AND  hc.value in ('T_NetoARecibir','T_NetoARecibirQuincena','C_DecimoTerceroPorPagar','C_PagoAnualDecCuarto','SI_SaldoNetoARecibirDiciembre','T_TotalLiquidacionHaberes')
+INNER JOIN AD_Org o on o.ad_org_id=m.ad_org_id AND o.isactive='Y'
+LEFT JOIN C_Payment py on py.HR_Process_ID=m.HR_Process_ID and py.C_bpartner_ID = m.c_bpartner_id AND py.DocStatus IN ('CO') AND py.isactive='Y'
+WHERE m.amount > 0 and m.ad_org_id=$P{AD_Org_ID}
+and 	(CASE /*Filtro para mostrar solo pagos pendientes*/
+		WHEN $P{mostrar_pendientes}='Y' THEN (m.amount-(select coalesce(sum(p.payamt),0) from c_payment p where p.C_bpartner_ID = m.c_bpartner_id and p.HR_Process_id = m.HR_Process_ID and p.isactive = 'Y'))>0
+		ELSE true
+	END)
+and (case when coalesce($P{C_BPartner_ID},0)>0 then m.c_bpartner_id=$P{C_BPartner_ID} else true end)
+and py.datetrx between $P{fecha_desde} and $P{fecha_hasta}
+order by empleado,m.HR_Process_ID]]>
+	</queryString>
+	<field name="c_bpartner_id" class="java.math.BigDecimal"/>
+	<field name="hr_process_id" class="java.math.BigDecimal"/>
+	<field name="organizacion" class="java.lang.String"/>
+	<field name="empleado" class="java.lang.String"/>
+	<field name="procesonomina" class="java.lang.String"/>
+	<field name="sueldo" class="java.math.BigDecimal"/>
+	<field name="pagono" class="java.lang.String"/>
+	<field name="montopagado" class="java.math.BigDecimal"/>
+	<field name="c_payment_id" class="java.math.BigDecimal"/>
+	<field name="fecha_pago" class="java.sql.Timestamp"/>
+	<field name="pagado" class="java.math.BigDecimal"/>
+	<field name="saldo" class="java.math.BigDecimal"/>
+	<group name="empleado">
+		<groupExpression><![CDATA[$F{c_bpartner_id}]]></groupExpression>
+		<groupHeader>
+			<band height="12">
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement uuid="2a747ff4-77e0-4bdc-8c6b-6480fc1c8e9d" x="0" y="0" width="267" height="11"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{empleado}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="proceso">
+		<groupExpression><![CDATA[$F{hr_process_id}]]></groupExpression>
+		<groupHeader>
+			<band height="11">
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement uuid="705ca6ee-7e83-46cd-a30a-5595a261c849" x="14" y="0" width="178" height="11"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{procesonomina}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement uuid="32a3d2ac-733c-44d2-8a6d-781095048042" mode="Transparent" x="192" y="0" width="75" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
+						<font fontName="SansSerif" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+						<paragraph lineSpacing="Single"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{sueldo}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement uuid="2ea58942-94a4-4bb1-ae00-752bcbfbf646" mode="Transparent" x="425" y="0" width="65" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
+						<font fontName="SansSerif" size="8" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+						<paragraph lineSpacing="Single"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{pagado}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement uuid="2a5eebb9-37a0-4f38-b4d7-dff832cde5ba" x="490" y="0" width="65" height="11"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{saldo}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<title>
+		<band height="77" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="f4582469-735d-416e-9cef-721866c8f59b" x="140" y="2" width="260" height="14"/>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ESTADO DE CUENTA PAGOS EMPLEADO]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="fe18d52e-ced6-4a47-90b3-8cedd9121697" x="140" y="18" width="260" height="14"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{organizacion}]]></textFieldExpression>
+			</textField>
+			<subreport>
+				<reportElement uuid="cca2e509-4a5a-4e22-9742-65aa81a64fff" x="0" y="0" width="100" height="75"/>
+				<subreportParameter name="AD_Org_ID">
+					<subreportParameterExpression><![CDATA[$P{AD_Org_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["/reports/logorg.jasper"]]></subreportExpression>
+			</subreport>
+			<textField isStretchWithOverflow="true" evaluationTime="Report">
+				<reportElement uuid="796aa8aa-0c60-428f-aa26-7909076ec3ba" x="537" y="0" width="17" height="14"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph leftIndent="1"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" "+$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="76ed18eb-0558-42bb-9080-3cef29d84153" x="411" y="0" width="73" height="14"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[Página:        ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a28a41eb-8f93-4c79-822c-d4764a2fbd9a" x="411" y="15" width="73" height="14"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[Fecha de impresión:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="1fd73827-ccae-4a7a-9d8b-811ec741cb37" x="446" y="29" width="108" height="14"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font size="7" isBold="false"/>
+				</textElement>
+				<text><![CDATA[EmpleadoCXP.jrxml]]></text>
+			</staticText>
+			<textField pattern="">
+				<reportElement uuid="e7bfab94-7289-4327-b2a8-3932b6e7f984" x="484" y="15" width="70" height="14"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("dd/MM/yyyy HH:mm").format( new java.util.Date() )]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="27da6c68-2757-4945-81ee-8477f47beac7" x="411" y="29" width="35" height="14"/>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font size="7" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Reporte:                   stock_max_min.jrxml]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement uuid="86fe5498-f0bc-42cb-a37b-b7512ac5f862" x="484" y="0" width="53" height="14"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph rightIndent="1"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}+"  de "]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement uuid="9554741b-de68-425e-a6ee-0781397a2652" x="140" y="43" width="127" height="15"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["DESDE: " + new SimpleDateFormat("dd/MM/yyyy").format( $P{fecha_desde} )]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement uuid="70166225-6016-479f-9dcd-26a245ec5961" x="267" y="43" width="133" height="15"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["HASTA: " + new SimpleDateFormat("dd/MM/yyyy").format( $P{fecha_hasta} )]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="13" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="21e785f7-68e8-4703-b754-7439f4fcf577" style="table" x="425" y="0" width="65" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Pago]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="1dc71d36-61d4-4b38-ab8e-0828514ee99f" style="table" x="490" y="0" width="65" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Saldo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="d5971eea-f56a-4d28-8d6a-88c07d6e1668" style="table" x="14" y="0" width="178" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Proceso Nómina]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="7a8fd07e-62de-4b8a-92b1-84b7a0729b9e" style="table" x="332" y="0" width="93" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Documento]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="5f5cb08f-df5d-4a2b-b83c-6b5d0a735a63" style="table" x="267" y="0" width="65" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a8fffd13-4106-4c2e-ab71-f372810eef83" style="table" x="192" y="0" width="75" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Valor Recibir]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="11" splitType="Stretch">
+			<printWhenExpression><![CDATA[$F{c_payment_id}!=null]]></printWhenExpression>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement uuid="7bd056fe-ad85-4779-b192-ac7d80bf583b" x="332" y="0" width="93" height="11"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{pagono}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement uuid="4afef962-f70a-4412-ac28-79e7adf11e46" x="425" y="0" width="65" height="11"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{montopagado}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement uuid="562c782b-37c3-4f86-baf1-91cf8dc3e6de" x="267" y="0" width="65" height="11"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fecha_pago}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="OportunidadesConInmuebles" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="9d33c009-8a81-48c1-82db-3c821ee7081a">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="AINTEG"/>
+	<parameter name="AD_Org_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="fecha_inicio" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="fecha_fin" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="C_BPartner_ID" class="java.lang.Integer"/>
+	<queryString language="SQL">
+		<![CDATA[WITH org_img AS ( /* Logo de la organizacion */
+	select org_info.AD_Org_ID, org_img.binarydata as logo
+	from  AD_OrgInfo as org_info
+	join ad_image as org_img on org_img.ad_image_id = org_info.logo_id 
+), 
+referencia AS ( /* Referencias de todo tipo */
+	select distinct lg.name as value, ref_l.value as key, ref.name as tipo 
+	from AD_Reference ref
+	join AD_Ref_List as ref_l on ref_l.AD_Reference_ID = ref.AD_Reference_ID
+	join AD_Ref_List_Trl as lg on ref_l.AD_Ref_List_ID = lg.AD_Ref_List_ID and lg.AD_Language = 'es_EC' 
+)
+
+select
+	org_img.logo,
+	org.name as org,
+	op.c_opportunity_id,
+	op.SalesRep_ID as repre_id,
+	repre.Name as representante,	
+	op.documentno as no_opor,
+	op.foportunidad as fecha_opor,
+	cb.Name as cliente,	
+	ss.Name as etapa_venta,
+	op.OpportunityAmt as valor,
+	(op.OpportunityAmt*op.Probability/100) as valor_ponderado,
+	op.ExpectedCloseDate as fecha_cierre,
+	c.Name as campana,
+	op.Comments as comentario,
+	cat_gestion.value as tipo_actividad_gestion,
+	ultima_gestion.observaciones as objecion_gestion,
+	pro.name as nombre_inmueble,
+	coalesce( (
+		select C_BPartner.name 
+		from M_Product_PO
+		inner join C_BPartner on C_BPartner.C_BPartner_ID = M_Product_PO.C_BPartner_ID
+		where M_Product_PO.M_Product_ID = pro.M_Product_ID
+			and coalesce(  $P{C_BPartner_ID} , -1 ) in (C_BPartner.C_BPartner_ID ,  -1)
+		limit 1
+	), '') as propietario
+
+from c_opportunity op
+join C_BPartner cb on cb.C_BPartner_ID=op.C_BPartner_ID and cb.isactive='Y'
+left join C_SalesStage ss on ss.C_SalesStage_ID=op.C_SalesStage_ID and ss.isactive='Y'
+left join C_Campaign c on c.C_Campaign_ID=op.C_Campaign_ID and c.isactive='Y'
+left join AD_User repre on repre.AD_User_ID=op.SalesRep_ID and repre.isactive='Y'
+left join AD_Org org on org.ad_org_id = op.ad_org_id and org.isactive='Y'
+left join org_img on org_img.AD_Org_ID = org.AD_Org_ID
+
+left join ( /*la ultima gestion de la oportunidad, created*/
+	select distinct on (c_opportunity_id) * 
+	from C_ContactActivity cat
+	order by c_opportunity_id, created desc
+) as ultima_gestion on ultima_gestion.c_opportunity_id = op.c_opportunity_id
+left join referencia as cat_gestion on ultima_gestion.ContactActivityType = cat_gestion.key and cat_gestion.tipo = 'C_ContactActivity Type'
+
+inner join tb_productopportunity as pro_op on pro_op.C_Opportunity_ID = op.C_Opportunity_ID and pro_op.isactive = 'Y'
+inner join M_Product as pro on pro.M_Product_ID = pro_op.M_Product_ID
+
+where op.ad_org_id=  $P{AD_Org_ID} 
+	and op.isactive = 'Y'
+	and ss.Name != 'Orden'
+	and date(op.foportunidad ) between date(  $P{fecha_inicio}  ) and date(  $P{fecha_fin}  )
+order by repre_id, no_opor]]>
+	</queryString>
+	<field name="logo" class="java.lang.Object">
+		<property name="com.jaspersoft.studio.field.label" value="logo"/>
+	</field>
+	<field name="org" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="org"/>
+	</field>
+	<field name="c_opportunity_id" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="c_opportunity_id"/>
+	</field>
+	<field name="repre_id" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="repre_id"/>
+	</field>
+	<field name="representante" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="representante"/>
+	</field>
+	<field name="no_opor" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="no_opor"/>
+	</field>
+	<field name="fecha_opor" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="fecha_opor"/>
+	</field>
+	<field name="cliente" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="cliente"/>
+	</field>
+	<field name="etapa_venta" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="etapa_venta"/>
+	</field>
+	<field name="valor" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="valor"/>
+	</field>
+	<field name="valor_ponderado" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="valor_ponderado"/>
+	</field>
+	<field name="fecha_cierre" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="fecha_cierre"/>
+	</field>
+	<field name="campana" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="campana"/>
+	</field>
+	<field name="comentario" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="comentario"/>
+	</field>
+	<field name="tipo_actividad_gestion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="tipo_actividad_gestion"/>
+	</field>
+	<field name="objecion_gestion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="objecion_gestion"/>
+	</field>
+	<field name="nombre_inmueble" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="nombre_inmueble"/>
+	</field>
+	<field name="propietario" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="propietario"/>
+	</field>
+	<title>
+		<band height="74" splitType="Stretch">
+			<staticText>
+				<reportElement x="215" y="1" width="351" height="14" uuid="2bd307f5-b91f-45b1-8486-39129b1ec1e9"/>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[SEGUIMIENTO DE OPORTUNIDADES CON INMUEBLES]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="215" y="17" width="351" height="12" uuid="855856e7-cef4-4eb5-989a-acb272d760b8"/>
+				<textElement textAlignment="Center">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{org}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="640" y="1" width="126" height="14" uuid="1d5e0e82-6408-47d3-9b2f-ebe2d0f3b16a"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Página:                           "+$V{PAGE_NUMBER}+"      de "]]></textFieldExpression>
+			</textField>
+			<textField pattern="">
+				<reportElement x="640" y="15" width="158" height="14" uuid="fa51b6d1-021f-48af-a7d3-1adaac26c778"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Fecha de impresión:   "+new SimpleDateFormat("dd/MMM/yyyy HH:mm").format( new java.util.Date() )]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" evaluationTime="Report">
+				<reportElement x="766" y="1" width="17" height="14" uuid="c30c2271-98bb-4417-a513-c7e4ccc9011d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="235" y="43" width="66" height="15" uuid="3b01306e-c3db-44a3-a421-1eb1d45416c0"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha Inicio: ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="409" y="43" width="74" height="15" uuid="0cd1ae96-524f-4054-b9bf-e77ecc7ba6e7"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha Fin: ]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="301" y="43" width="90" height="15" uuid="df7b50ea-a5a4-4afd-8b72-988a474573f6"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{fecha_fin}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="483" y="43" width="87" height="15" uuid="d0481e57-219d-47ca-a71f-7e4f1dbe6197"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{fecha_fin}]]></textFieldExpression>
+			</textField>
+			<image hAlign="Center" vAlign="Middle" isUsingCache="true" onErrorType="Blank">
+				<reportElement x="1" y="1" width="212" height="73" isPrintInFirstWholeBand="true" uuid="03a7aa49-16fc-49eb-b32b-9369d86ff962"/>
+				<imageExpression><![CDATA[$F{logo}]]></imageExpression>
+			</image>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="20" splitType="Stretch">
+			<staticText>
+				<reportElement x="1" y="0" width="67" height="20" uuid="bd95434b-f091-427e-8186-652a8d769215"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[No. Oport.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="68" y="0" width="50" height="20" uuid="1dfc2cc0-24b8-40d9-84d6-806a30ff02d7"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="118" y="0" width="55" height="20" uuid="6842a887-2abe-43f5-b852-cedd4198c3f9"/>
+				<box topPadding="0" leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Valor]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="173" y="0" width="84" height="20" uuid="5393b8f9-ca67-491a-8ef9-773659ce5031"/>
+				<box topPadding="0" leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Valor Ponderado]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="257" y="0" width="122" height="20" uuid="082e3af3-de54-4d8d-b062-2f631cc0369f"/>
+				<box topPadding="0" leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Actividad Última Gestión]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="379" y="0" width="141" height="20" uuid="e0facc37-2fea-40b1-a1fe-2fab1f21c6e3"/>
+				<box topPadding="0" leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Objeción Gestión]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="520" y="0" width="137" height="20" uuid="5bf5a1ec-e6c2-49fb-b3ed-b1dfe882dce8"/>
+				<box topPadding="0" leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Inmueble]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="657" y="0" width="141" height="20" uuid="1690a753-6acd-4b27-8a12-9582587eee52"/>
+				<box topPadding="0" leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Propietario]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="1" y="0" width="67" height="15" uuid="e4b3f4a3-421c-4567-aedf-451afc646e58"/>
+				<box leftPadding="2"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{no_opor}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="68" y="0" width="50" height="15" uuid="6f0cd821-d02c-4d25-9ba2-c0e02abb0551"/>
+				<box leftPadding="2"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fecha_opor}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="118" y="0" width="55" height="15" uuid="f963fb8d-ab71-4e0c-a496-cfaf87298f01"/>
+				<box leftPadding="0" rightPadding="2"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{valor}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="173" y="0" width="84" height="15" uuid="c998f5e4-af7b-4d9b-80c2-3de8d285ff89"/>
+				<box leftPadding="0" rightPadding="2"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{valor_ponderado}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="257" y="0" width="122" height="15" uuid="0b606e23-65fd-493d-bbb6-03cc35ae3d5a"/>
+				<box leftPadding="2"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tipo_actividad_gestion}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="379" y="0" width="141" height="15" uuid="6fa50f2f-1722-4691-9dd4-2fa892aff1c4"/>
+				<box leftPadding="2"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{objecion_gestion}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="520" y="0" width="137" height="15" uuid="aa3a6902-598a-4b65-b1bd-8fa76f72299d"/>
+				<box leftPadding="2"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nombre_inmueble}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="657" y="0" width="141" height="15" isRemoveLineWhenBlank="true" uuid="8b8c360b-c52b-4716-9c42-76808bcaad7d"/>
+				<box leftPadding="2"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{propietario}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

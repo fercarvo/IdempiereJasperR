@@ -1,0 +1,577 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteCuentaCliente2" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a80ed23f-586d-4137-9775-4a3bd6032d6d">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Llantas"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="fecha_inicio" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="fecha_fin" class="java.util.Date">
+		<defaultValueExpression><![CDATA[new Date()]]></defaultValueExpression>
+	</parameter>
+	<parameter name="fecha_calculo" class="java.util.Date">
+		<defaultValueExpression><![CDATA[new Date()]]></defaultValueExpression>
+	</parameter>
+	<parameter name="C_BPartner_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="AD_Org_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="AD_Client_ID" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[select
+	c.TaxID as taxid,
+	vw_org.name as org,
+	vw_org.logo,
+	c.c_bpartner_id,
+	c.name as nombretercero,
+	i.documentno as numfactura,
+	sales_rep.name as sales_rep,
+	dct.printname as tipo_doc,
+	i.description,
+	i.c_invoice_id as c_invoice_id,
+	i.dateinvoiced as fechaEmision,
+	i.totallines as subtotal,
+	(select coalesce(sum(taxamt),0) from LCO_InvoiceWithholding where C_Invoice_ID=i.C_Invoice_ID and isactive='Y') as retencion,
+	programaPagos.termino_pago,
+	programaPagos.c_invoicepayschedule_id,
+	programaPagos.fvencimiento_pago,
+	(coalesce(i.grandtotal,0)) as total_factura,
+	COALESCE(cobrado.valor , 0) as cobrado_factura,
+	(coalesce(i.grandtotal,0) - COALESCE(cobrado.valor , 0))  as saldo_factura,
+	programaPagos.valor_pago,
+	programaPagos.cum_amt,
+	(CASE
+		when cum_amt - COALESCE(cobrado.valor, 0) <= 0
+			then 0
+		when cum_amt - COALESCE(cobrado.valor, 0) >= COALESCE(programaPagos.valor_pago, 0)
+			then COALESCE(programaPagos.valor_pago, 0)
+		else 
+			cum_amt - COALESCE(cobrado.valor, 0)			
+	END) as faltante_pago,
+	(CASE
+		when programaPagos.fvencimiento_pago >= $P{fecha_calculo}::DATE then 0
+		else abs(  $P{fecha_calculo}::DATE  - programaPagos.fvencimiento_pago)
+	END)::INTEGER as dias_vencidos_pago
+	
+from C_Invoice i
+left join vw_org on vw_org.AD_Org_ID = i.AD_Org_ID
+join C_DocType dct ON dct.C_DocType_ID = i.C_DocTypeTarget_ID and dct.DocBaseType='ARI'
+left join ( /*Se saca todos los pagos que se han hecho a la factura hasta la fecha de fecha_calculo */
+	select 
+		C_Invoice_ID, sum(coalesce(aloc_line.amount, 0) + coalesce(aloc_line.WriteOffAmt, 0)) as valor
+	from C_AllocationLine as aloc_line
+	join C_AllocationHdr as aloc_hdr on  aloc_hdr.C_AllocationHdr_ID = aloc_line.C_AllocationHdr_ID
+		and aloc_hdr.isactive = 'Y'
+		and aloc_hdr.docstatus in ('CO')
+		and aloc_hdr.dateacct::DATE <= $P{fecha_calculo}::DATE
+	where aloc_line.isactive = 'Y'
+	group by 1
+) as cobrado on cobrado.C_Invoice_ID = i.C_Invoice_ID
+left join c_bpartner c on c.c_bpartner_id=i.c_bpartner_id and c.isactive='Y'
+left join AD_User as sales_rep on sales_rep.AD_User_ID = i.SalesRep_ID
+left join ( /*Programas de pagos hasta la fecha de corte*/
+		select 
+			i.C_Invoice_ID,
+			psc.c_invoicepayschedule_id,		
+			(case 
+				when psc.DueDate is not null then psc.DueDate 
+				else (i.dateinvoiced::timestamp + (pt.netdays ||' days')::interval)
+			end)::DATE as fvencimiento_pago,
+			pt.name as termino_pago,
+			COALESCE(psc.DueAmt, i.grandtotal, 0) AS valor_pago,
+			COALESCE(
+				sum(psc.DueAmt) OVER (PARTITION BY i.c_invoice_id ORDER BY psc.DueDate),
+				i.grandtotal, 0
+			)::NUMERIC AS cum_amt
+		from C_Invoice as i
+		left join C_PaymentTerm pt on pt.C_PaymentTerm_ID=i.C_PaymentTerm_ID and pt.isactive='Y'
+		left join C_InvoicePaySchedule as psc on psc.c_invoice_id = i.c_invoice_id and psc.isactive = 'Y'
+	) as programaPagos on programaPagos.C_Invoice_ID = i.C_Invoice_ID
+inner join C_DocType dt on dt.C_DocType_ID=i.C_DocTypeTarget_ID  and dt.isactive='Y'
+where i.issotrx='Y' 
+	and dt.DocBaseType='ARI' and i.docstatus IN ('CO')
+	and i.AD_Client_ID =  $P{AD_Client_ID} 
+	and i.ad_org_id =  $P{AD_Org_ID} 
+	and coalesce(   $P{C_BPartner_ID}    , -1 ) in ( i.C_BPartner_ID , -1 )
+	--and (coalesce(i.grandtotal,0) - COALESCE(cobrado.valor , 0)) > 0 /*Saldo factura > 0*/
+	and i.dateinvoiced::DATE between  $P{fecha_inicio}::DATE and $P{fecha_fin}::DATE 
+order by nombretercero, c_invoice_id, fvencimiento_pago asc]]>
+	</queryString>
+	<field name="taxid" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="taxid"/>
+	</field>
+	<field name="org" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="org"/>
+	</field>
+	<field name="logo" class="java.io.InputStream">
+		<property name="com.jaspersoft.studio.field.label" value="logo"/>
+	</field>
+	<field name="c_bpartner_id" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="c_bpartner_id"/>
+	</field>
+	<field name="nombretercero" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="nombretercero"/>
+	</field>
+	<field name="numfactura" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="numfactura"/>
+	</field>
+	<field name="sales_rep" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="sales_rep"/>
+	</field>
+	<field name="tipo_doc" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="tipo_doc"/>
+	</field>
+	<field name="description" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="description"/>
+	</field>
+	<field name="c_invoice_id" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="c_invoice_id"/>
+	</field>
+	<field name="fechaemision" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="fechaemision"/>
+	</field>
+	<field name="subtotal" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="subtotal"/>
+	</field>
+	<field name="retencion" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="retencion"/>
+	</field>
+	<field name="termino_pago" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="termino_pago"/>
+	</field>
+	<field name="c_invoicepayschedule_id" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="c_invoicepayschedule_id"/>
+	</field>
+	<field name="fvencimiento_pago" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.label" value="fvencimiento_pago"/>
+	</field>
+	<field name="total_factura" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="total_factura"/>
+	</field>
+	<field name="cobrado_factura" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="cobrado_factura"/>
+	</field>
+	<field name="saldo_factura" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="saldo_factura"/>
+	</field>
+	<field name="valor_pago" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="valor_pago"/>
+	</field>
+	<field name="cum_amt" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="cum_amt"/>
+	</field>
+	<field name="faltante_pago" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="faltante_pago"/>
+	</field>
+	<field name="dias_vencidos_pago" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="dias_vencidos_pago"/>
+	</field>
+	<variable name="Cliente_Factura" class="java.math.BigDecimal" resetType="Group" resetGroup="Cliente" incrementType="Group" incrementGroup="Factura" calculation="Sum">
+		<variableExpression><![CDATA[$F{total_factura}]]></variableExpression>
+	</variable>
+	<variable name="Cliente_Retencion" class="java.math.BigDecimal" resetType="Group" resetGroup="Cliente" incrementType="Group" incrementGroup="Factura" calculation="Sum">
+		<variableExpression><![CDATA[$F{retencion}]]></variableExpression>
+	</variable>
+	<variable name="Cliente_Cobrado" class="java.math.BigDecimal" resetType="Group" resetGroup="Cliente" incrementType="Group" incrementGroup="Factura" calculation="Sum">
+		<variableExpression><![CDATA[$F{cobrado_factura}]]></variableExpression>
+	</variable>
+	<variable name="Cliente_SaldoFactura" class="java.math.BigDecimal" resetType="Group" resetGroup="Cliente" incrementType="Group" incrementGroup="Factura" calculation="Sum">
+		<variableExpression><![CDATA[$F{saldo_factura}]]></variableExpression>
+	</variable>
+	<variable name="Total_ValorFactura" class="java.math.BigDecimal" incrementType="Group" incrementGroup="Cliente" calculation="Sum">
+		<variableExpression><![CDATA[$V{Cliente_Factura}]]></variableExpression>
+	</variable>
+	<variable name="Total_ValorRetencion" class="java.math.BigDecimal" incrementType="Group" incrementGroup="Cliente" calculation="Sum">
+		<variableExpression><![CDATA[$V{Cliente_Retencion}]]></variableExpression>
+	</variable>
+	<variable name="Total_ValorCobrado" class="java.math.BigDecimal" incrementType="Group" incrementGroup="Cliente" calculation="Sum">
+		<variableExpression><![CDATA[$V{Cliente_Cobrado}]]></variableExpression>
+	</variable>
+	<variable name="Total_SaldoFactura" class="java.math.BigDecimal" incrementType="Group" incrementGroup="Cliente" calculation="Sum">
+		<variableExpression><![CDATA[$V{Cliente_SaldoFactura}]]></variableExpression>
+	</variable>
+	<group name="Cliente">
+		<groupExpression><![CDATA[$F{c_bpartner_id}]]></groupExpression>
+		<groupHeader>
+			<band height="14">
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="0" y="0" width="308" height="14" uuid="3b2dbaba-4829-4941-9eac-a99ce5e9617f"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{nombretercero}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="14">
+				<staticText>
+					<reportElement x="420" y="0" width="105" height="14" uuid="dac7d759-8aed-4fcc-9509-f7872c82f705"/>
+					<textElement textAlignment="Right">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Total Cliente:]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="525" y="0" width="72" height="14" uuid="ad42ebee-ce2c-4eca-b29c-f9827b036c65"/>
+					<box rightPadding="2"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{Cliente_Factura}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="665" y="0" width="70" height="14" uuid="9695af3a-0454-47ad-a211-945ac8435375"/>
+					<box rightPadding="2"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{Cliente_Cobrado}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="597" y="0" width="68" height="14" uuid="0a4c912a-b775-4ba3-8913-9dd36ff94c5c"/>
+					<box rightPadding="2"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{Cliente_Retencion}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="735" y="0" width="67" height="14" uuid="c09065fc-93bb-420e-9e52-90d67b8a2581"/>
+					<box rightPadding="2"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{Cliente_SaldoFactura}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="Factura">
+		<groupExpression><![CDATA[$F{c_invoice_id}]]></groupExpression>
+		<groupFooter>
+			<band height="14">
+				<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+					<reportElement x="123" y="0" width="55" height="14" uuid="eddb9d4b-fd25-43c7-8e91-7c0029c7d6f0"/>
+					<box leftPadding="2"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{fechaemision}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="7" y="0" width="116" height="14" uuid="c0a8447a-97c1-4c30-8ae6-ae9ec16ca43d"/>
+					<box leftPadding="2"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{numfactura}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="240" y="0" width="285" height="14" uuid="1a9b3cd8-b8d1-46bf-877a-50d9136bb45a"/>
+					<box leftPadding="2"/>
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{description}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="597" y="0" width="68" height="14" uuid="2840c3db-2820-4a7e-aa89-48aec3a710f5"/>
+					<box rightPadding="2"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{retencion}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="665" y="0" width="70" height="14" uuid="cc7cae20-9090-4eee-8e4a-0ad277dd83c6"/>
+					<box rightPadding="2"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cobrado_factura}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="735" y="0" width="67" height="14" uuid="50f4aad4-7f77-4ef2-814c-a88e9e032b58"/>
+					<box rightPadding="2"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{saldo_factura}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="525" y="0" width="72" height="14" uuid="feff8caf-cc8c-40e1-aefa-e4c0922258b5"/>
+					<box rightPadding="2"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{total_factura}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+					<reportElement x="178" y="0" width="62" height="14" uuid="de86d87c-8b22-4cef-b067-21ba8a206545"/>
+					<box leftPadding="2"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{fvencimiento_pago}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<title>
+		<band height="68" splitType="Stretch">
+			<staticText>
+				<reportElement x="273" y="2" width="240" height="14" uuid="f4582469-735d-416e-9cef-721866c8f59b"/>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ESTADO DE CUENTA CLIENTE]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="273" y="20" width="240" height="12" uuid="fe18d52e-ced6-4a47-90b3-8cedd9121697"/>
+				<textElement textAlignment="Center">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{org}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="654" y="1" width="120" height="14" uuid="b197ef94-cc70-48eb-b9ae-c12985597b5c"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Página:                                "+$V{PAGE_NUMBER}+"      de "]]></textFieldExpression>
+			</textField>
+			<textField pattern="">
+				<reportElement x="654" y="16" width="148" height="14" uuid="21a0f375-00d9-4022-97d4-54f44a64f876"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Fecha de impresión: "+new SimpleDateFormat("dd/MM/yyyy HH:mm").format( new java.util.Date() )]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="654" y="30" width="148" height="14" uuid="f4e0b891-ff65-4b06-90f4-6f4d93d41e92"/>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font size="7" isBold="false"/>
+				</textElement>
+				<text><![CDATA[reporte_estado_cuenta_cliente.jrxml]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" evaluationTime="Report">
+				<reportElement x="774" y="1" width="17" height="14" uuid="8ff3ae43-31fd-4810-939a-374255c32537"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="223" y="53" width="60" height="15" uuid="90af028a-90cf-44cb-9380-e904c4c8d9e7"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Desde[2]: ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="456" y="53" width="45" height="15" uuid="1b9a146a-aad0-4b58-883b-0585fed0e374"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Hasta: ]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="284" y="53" width="100" height="15" uuid="7752abbb-6f45-493d-88a1-a94ac0cf03a4"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$P{fecha_inicio}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="501" y="53" width="100" height="15" uuid="02cf114d-2ac1-4567-898b-a28b920f388f"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$P{fecha_fin}]]></textFieldExpression>
+			</textField>
+			<image hAlign="Center" vAlign="Middle" isUsingCache="true" onErrorType="Blank">
+				<reportElement x="2" y="1" width="213" height="59" isPrintInFirstWholeBand="true" uuid="49a0491b-08ac-4643-8103-777b3ccbd71d"/>
+				<imageExpression><![CDATA[$F{logo}]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement x="223" y="38" width="60" height="15" uuid="eacfbb83-327e-4ee4-8497-c3e73622d53a"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Corte[1]: ]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="284" y="38" width="100" height="15" uuid="c92956bb-f06e-4c1a-93d2-5736ed2c446b"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$P{fecha_calculo}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="25" splitType="Stretch">
+			<staticText>
+				<reportElement x="123" y="0" width="55" height="25" uuid="089bcc98-f25c-451c-8244-387bfdb192cd"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha Factura]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="7" y="0" width="116" height="25" uuid="5b61bb17-03ad-48a4-936c-9c71da745e37"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[No. Documento]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="240" y="0" width="285" height="25" uuid="eee6f345-deff-49e4-a36a-af4a17163382"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CONCEPTO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="525" y="0" width="72" height="25" uuid="dbea503b-c08d-4fa6-ba8c-22a2694d0ad0"/>
+				<box rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Valor Factura]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="665" y="0" width="70" height="25" uuid="324bbeee-6088-44bc-998f-eadc569e381d"/>
+				<box rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Valor Cobrado]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="597" y="0" width="68" height="25" uuid="d5a85223-1812-4e49-9d1a-33bcc6e75d71"/>
+				<box rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Valor Retención]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="735" y="0" width="67" height="25" uuid="57a81cb9-1a28-4969-82cf-320b42cd2c80"/>
+				<box rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Saldo Factura]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="178" y="0" width="62" height="25" uuid="89a92b3f-6a7e-4381-9eb3-3b36ae2dc03a"/>
+				<box leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha Vencimiento]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<lastPageFooter>
+		<band height="30">
+			<staticText>
+				<reportElement x="-5" y="0" width="591" height="30" uuid="d46c088f-e88f-4882-970e-84c83ce92ea8"/>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="6" isBold="false"/>
+				</textElement>
+				<text><![CDATA[[1] Fecha usada para el calculo asignaciones y programa de pagos
+[2] Filtra facturas cuya fecha facturación esté entre Desde y Hasta
+NOTA: El reporte no filtra facturas por su saldo, muestra todas.]]></text>
+			</staticText>
+		</band>
+	</lastPageFooter>
+	<summary>
+		<band height="14" splitType="Stretch">
+			<printWhenExpression><![CDATA[$P{C_BPartner_ID}==null]]></printWhenExpression>
+			<staticText>
+				<reportElement x="420" y="0" width="105" height="14" uuid="7eac4b96-6d58-452d-814d-d7260cc3c103"/>
+				<textElement textAlignment="Right">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TOTAL:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="525" y="0" width="72" height="14" uuid="4903dc12-522d-4cd4-8136-2679e8890c9c"/>
+				<box rightPadding="2"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{Total_ValorFactura}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="597" y="0" width="68" height="14" uuid="8c6c0b23-2094-4eaa-9c4d-90f62f4b0317"/>
+				<box rightPadding="2"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{Total_ValorRetencion}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="665" y="0" width="70" height="14" uuid="0b5fff79-8e12-48d2-b5c2-dd9964588fbc"/>
+				<box rightPadding="2"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{Total_ValorCobrado}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="735" y="0" width="67" height="14" uuid="fa150a96-0355-411d-b69a-c3668a11c2f5"/>
+				<box rightPadding="2"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{Total_SaldoFactura}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

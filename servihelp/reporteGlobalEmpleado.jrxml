@@ -1,0 +1,495 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteAtributosEmpleado" language="groovy" pageWidth="1800" pageHeight="842" columnWidth="1760" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a80ed23f-586d-4137-9775-4a3bd6032d6d">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="SERVIHELP"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<parameter name="AD_Org_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mostrar_inactivos" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[WITH referencia AS ( /* Referencias de todo tipo */
+	select distinct lg.name as value, ref_l.value as key, ref.name as tipo 
+	from AD_Reference ref
+	join AD_Ref_List as ref_l on ref_l.AD_Reference_ID = ref.AD_Reference_ID
+	join AD_Ref_List_Trl as lg on ref_l.AD_Ref_List_ID = lg.AD_Ref_List_ID and lg.AD_Language = 'es_EC' 
+)
+
+select
+	o.name org,
+	tipo_id.name as tipo_id,
+	bp.value cedula, 
+	bp.name empleado,
+	bp.C_BPartner_ID,
+	e.StartDate as empleado_nomina_finicio,
+	e.EndDate as empleado_nomina_ffin,
+	(case when exists ( /*Cundo existan nominas sin fechas de fin, son activos*/	
+			select * from HR_Employee 
+			where enddate is null and  C_BPartner_ID = bp.C_BPartner_ID and isactive = 'Y'
+		) then 'Activo'
+		else 'Inactivo'
+	end) as estado_empleado,
+	contrato.value as contrato,
+	atr.HR_Attribute_ID,
+	atr.ValidFrom as atributo_validfrom,
+	atr.ValidTo as atributo_validto,
+	atr.Amount as atributo_monto,
+	d.name as departamento,
+	puesto.name as puesto,
+	banco.name as banco,
+	tipo_cuenta.value as tipo_cuenta,
+	cuenta.AccountNo as numero_cuenta,
+	bp.etnia,
+	bp.hc_tiposangre,
+	estado_civil.value as estado_civil
+from C_BPartner bp 
+ join HR_Employee e on e.C_BPartner_ID=bp.C_BPartner_ID and e.isactive='Y'
+ join HR_Payroll as nomina on nomina.HR_Payroll_ID = e.HR_Payroll_ID 
+	and nomina.mensual = 'Y'
+	and nomina.isactive = 'Y'
+	and nomina.name = 'ADMINISTRACION'
+ join HR_Job as puesto on puesto.HR_Job_ID = e.HR_Job_ID
+ join HR_Attribute atr on atr.C_BPartner_ID = bp.C_BPartner_ID 
+	and atr.isactive = 'Y'
+	and (CASE
+		 when e.EndDate is null then atr.ValidFrom >= date_trunc('month', e.StartDate) /*Nomina sin fecha fin*/
+		 else atr.ValidFrom between date_trunc('month', e.StartDate) and e.EndDate /*Nomina con fecha fin*/
+	END)
+ join HR_Concept con on con.HR_Concept_ID = atr.HR_Concept_ID 
+	and con.isactive='Y' 
+	and (con.value = 'I_SalarioBasicoAsignadoEmpleado' or con.name = 'Salario Basico Asignado Empleado')
+ join LCO_TaxIdType as tipo_id on tipo_id.LCO_TaxIdType_ID = bp.LCO_TaxIdType_ID 
+ join HR_Department d on d.HR_Department_ID=e.HR_Department_ID
+join ad_org o on o.ad_org_id = bp.ad_org_id
+left join C_BP_BankAccount as cuenta on cuenta.C_BPartner_ID = bp.C_BPartner_ID and cuenta.isactive = 'Y'
+left join C_Bank as banco on banco.C_Bank_ID = cuenta.C_Bank_ID
+left join referencia as estado_civil on bp.hc_estadocivil = estado_civil.key and estado_civil.tipo = 'Estado Civil'
+left join referencia as tipo_cuenta on cuenta.BankAccountType = tipo_cuenta.key and tipo_cuenta.tipo = 'C_Bank Account Type'
+left join referencia as contrato on e.tipo_contrato = contrato.key and contrato.tipo = 'Tipo de Contrato' 
+where bp.isactive='Y'
+	and bp.IsEmployee = 'Y'
+	and e.ad_org_id= $P{AD_Org_ID} 
+order by empleado, empleado_nomina_finicio]]>
+	</queryString>
+	<field name="org" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="org"/>
+	</field>
+	<field name="tipo_id" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="tipo_id"/>
+	</field>
+	<field name="cedula" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="cedula"/>
+	</field>
+	<field name="empleado" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="empleado"/>
+	</field>
+	<field name="c_bpartner_id" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="c_bpartner_id"/>
+	</field>
+	<field name="empleado_nomina_finicio" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="empleado_nomina_finicio"/>
+	</field>
+	<field name="empleado_nomina_ffin" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="empleado_nomina_ffin"/>
+	</field>
+	<field name="estado_empleado" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="estado_empleado"/>
+	</field>
+	<field name="contrato" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="contrato"/>
+	</field>
+	<field name="hr_attribute_id" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="hr_attribute_id"/>
+	</field>
+	<field name="atributo_validfrom" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="atributo_validfrom"/>
+	</field>
+	<field name="atributo_validto" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="atributo_validto"/>
+	</field>
+	<field name="atributo_monto" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="atributo_monto"/>
+	</field>
+	<field name="departamento" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="departamento"/>
+	</field>
+	<field name="puesto" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="puesto"/>
+	</field>
+	<field name="banco" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="banco"/>
+	</field>
+	<field name="tipo_cuenta" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="tipo_cuenta"/>
+	</field>
+	<field name="numero_cuenta" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="numero_cuenta"/>
+	</field>
+	<field name="etnia" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="etnia"/>
+	</field>
+	<field name="hc_tiposangre" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="hc_tiposangre"/>
+	</field>
+	<field name="estado_civil" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="estado_civil"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="22" splitType="Stretch">
+			<staticText>
+				<reportElement x="228" y="0" width="292" height="22" uuid="a32372fb-6635-48e7-872c-dda5138d20ff"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[EMPLEADO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1346" y="0" width="63" height="22" uuid="36a63540-1c75-4a88-a13f-7821f88b335d"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[FECHA INGRESO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1534" y="0" width="70" height="22" uuid="c1aa908b-8d49-4198-a343-15225b338e90"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ETNIA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1286" y="0" width="60" height="22" uuid="a8a261fa-f1cd-43d0-91fd-b2e378d15da6"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[SUELDO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="140" y="0" width="88" height="22" uuid="b3501ff9-f94d-47bc-a275-50ffbef8994d"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ID]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="140" height="22" uuid="15aa1ae4-35f0-4d4d-a060-5208438d8747"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TIPO ID]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="520" y="0" width="148" height="22" uuid="26ee8f7e-4d94-442f-97d1-dc6997821e79"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[DEPARTAMENTO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="668" y="0" width="148" height="22" uuid="14d081fb-737d-44d8-9cf0-468b038f983f"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CARGO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="816" y="0" width="108" height="22" uuid="f1542898-3d92-474b-8de5-49870bc9af21"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[BANCO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="924" y="0" width="108" height="22" uuid="6c4e9633-be95-4cf9-ab37-2c5c9ea35692"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TIPO CUENTA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1032" y="0" width="108" height="22" uuid="189331ff-3afd-41a9-ac70-8821d83e6f1a"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[NÚMERO CUENTA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1409" y="0" width="63" height="22" uuid="30368c49-7aa1-4157-9ff5-f05493532f59"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[FECHA SALIDA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1604" y="0" width="72" height="22" uuid="01452922-4c5c-463b-bb4c-80f7c1105675"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TIPO SANGRE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1676" y="0" width="84" height="22" uuid="a570ffa0-320d-4bfd-a74f-d248810e9a47"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ESTADO CIVIL]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1140" y="0" width="146" height="22" uuid="96237762-5ed7-4996-b800-f8a6a4ecc75c"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TIPO CONTRATO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1472" y="0" width="62" height="22" uuid="ef70c0a1-1418-4ff9-bffc-0aa980fb2568"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ESTADO]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<printWhenExpression><![CDATA[($F{empleado_nomina_ffin} == null ) || (  $F{empleado_nomina_ffin} != null && $P{mostrar_inactivos}.equalsIgnoreCase( "Y" ) )]]></printWhenExpression>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="140" y="0" width="88" height="13" uuid="2fc492de-b36b-4eaf-b39f-93bde6fce2c0"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cedula}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="228" y="0" width="292" height="13" uuid="25e57a44-6ae8-4a29-87b0-8b83193e1edd"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{empleado}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="1346" y="0" width="63" height="13" uuid="fb63e1d2-d844-46ed-949d-73d9c01c744c"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{empleado_nomina_finicio}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="1286" y="0" width="60" height="13" uuid="ca6c8f91-25c2-4e28-9beb-c037d23b0e5e"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{atributo_monto}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="140" height="13" uuid="e738925f-93f8-4705-b6af-f7be6e892aeb"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tipo_id}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="520" y="0" width="148" height="13" uuid="156168ba-4343-4bf6-8e6b-d171c28cf930"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{departamento}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="668" y="0" width="148" height="13" uuid="5a60ff0b-a763-4682-b0f9-dee2fc955fcd"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{puesto}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="816" y="0" width="108" height="13" uuid="74df507f-64e5-4171-bab5-fa48f318daed"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{banco}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="924" y="0" width="108" height="13" uuid="9521ec15-ae47-4404-a398-48cb94c70e73"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tipo_cuenta}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="1032" y="0" width="108" height="13" uuid="3cbc7047-4a20-47af-998d-047f0879f144"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{numero_cuenta}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="1409" y="0" width="63" height="13" uuid="2b634758-2795-4764-8d80-5bdcdceef242"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{empleado_nomina_ffin}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="1534" y="0" width="70" height="13" uuid="20af5ede-9b67-4090-b46d-9f2fd0d7c71a"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{etnia}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="1604" y="0" width="72" height="13" uuid="74a6b057-07c7-43d8-8b2e-3513e80302ac"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{hc_tiposangre}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="1676" y="0" width="84" height="13" uuid="ac0aa517-9ed3-4474-92ba-4496f78a900d"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{estado_civil}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="1140" y="0" width="146" height="13" uuid="35394529-9b06-46df-8e25-d82f50753848"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{contrato}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="1472" y="0" width="62" height="13" uuid="bae5c68a-7e98-4c3c-af16-16ba751e950b"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{empleado_nomina_ffin} == null ? "Activo" : "Inactivo"]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+</jasperReport>

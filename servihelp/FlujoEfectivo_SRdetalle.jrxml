@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="FlujoEfectivo" pageWidth="792" pageHeight="595" orientation="Landscape" columnWidth="792" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="ecd80a57-93c3-4e10-979e-5bee365f5e4a">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="SERVIHELP DES"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<style name="Crosstab_CH" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#FFFFFF"/>
+			<topPen lineWidth="0.5" lineColor="#FFFFFF"/>
+			<leftPen lineWidth="0.5" lineColor="#FFFFFF"/>
+			<bottomPen lineWidth="0.5" lineColor="#FFFFFF"/>
+			<rightPen lineWidth="0.5" lineColor="#FFFFFF"/>
+		</box>
+	</style>
+	<style name="Crosstab_CG" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#FFFFFF"/>
+			<topPen lineWidth="0.5" lineColor="#FFFFFF"/>
+			<leftPen lineWidth="0.5" lineColor="#FFFFFF"/>
+			<bottomPen lineWidth="0.5" lineColor="#FFFFFF"/>
+			<rightPen lineWidth="0.5" lineColor="#FFFFFF"/>
+		</box>
+	</style>
+	<style name="Crosstab_CT" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#FFFFFF"/>
+			<topPen lineWidth="0.5" lineColor="#FFFFFF"/>
+			<leftPen lineWidth="0.5" lineColor="#FFFFFF"/>
+			<bottomPen lineWidth="0.5" lineColor="#FFFFFF"/>
+			<rightPen lineWidth="0.5" lineColor="#FFFFFF"/>
+		</box>
+	</style>
+	<style name="Crosstab_CD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#FFFFFF"/>
+			<topPen lineWidth="0.5" lineColor="#FFFFFF"/>
+			<leftPen lineWidth="0.5" lineColor="#FFFFFF"/>
+			<bottomPen lineWidth="0.5" lineColor="#FFFFFF"/>
+			<rightPen lineWidth="0.5" lineColor="#FFFFFF"/>
+		</box>
+	</style>
+	<parameter name="fecha_desde" class="java.util.Date"/>
+	<parameter name="fecha_hasta" class="java.util.Date"/>
+	<parameter name="C_BankAccount_ID" class="java.lang.Integer"/>
+	<parameter name="AD_Org_ID" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[select * from (select
+	--p.c_bankaccount_id,
+	--ba.AccountNo as cuenta,
+	ba.AccountNo || ' ' || p.description as documentno,
+	to_char(p.DateAcct, 'DD/MM') as fecha,
+	CASE WHEN p.isreceipt = 'Y' 
+		THEN p.PayAmt 
+		ELSE -p.PayAmt
+	END as total
+from c_payment p
+inner join c_bankaccount ba on ba.c_bankaccount_id = p.c_bankaccount_id and ba.isactive = 'Y'
+where p.docstatus='CO' --and p.isreconciled='N'
+and  coalesce($P{C_BankAccount_ID}, -1) in (p.C_BankAccount_ID, -1) 
+and p.ad_org_id =   $P{AD_Org_ID} 
+and ba.BankAccountType in ('S', 'C')
+and p.docstatus='CO' --and p.isreconciled='N'
+and date(p.DateAcct) between  date(  $P{fecha_desde}  ) and date( $P{fecha_hasta} )
+
+union all
+
+select distinct /*c_bankaccount_id*/documentno, fecha, total from (select
+	--p.c_bankaccount_id,
+	--ba.AccountNo as cuenta,
+	ba.AccountNo || ' ' || p.description as documentno,
+	0::numeric as total
+from c_payment p
+inner join c_bankaccount ba on ba.c_bankaccount_id = p.c_bankaccount_id and ba.isactive = 'Y'
+where p.docstatus='CO' --and p.isreconciled='N'
+and p.ad_org_id =   $P{AD_Org_ID}
+and  coalesce($P{C_BankAccount_ID}, -1) in (p.C_BankAccount_ID, -1) 
+and ba.BankAccountType in ('S', 'C')
+and p.docstatus='CO' --and p.isreconciled='N'
+and date(p.DateAcct) between  date( $P{fecha_desde} ) and date( $P{fecha_hasta}  )
+) foo cross join (
+SELECT to_char(entry_date, 'DD/MM') as fecha  
+FROM generate_series( date( $P{fecha_desde}  ), date( $P{fecha_hasta}  ), 
+					 interval '1 day')entry_date ) bar
+) report order by 1, 2]]>
+	</queryString>
+	<field name="documentno" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="documentno"/>
+	</field>
+	<field name="fecha" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="fecha"/>
+	</field>
+	<field name="total" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="total"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<summary>
+		<band height="44">
+			<crosstab>
+				<reportElement x="0" y="0" width="792" height="34" uuid="3907906d-69b5-4119-9250-45abad08b25f">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+					<property name="com.jaspersoft.studio.crosstab.style.header" value="Crosstab_CH"/>
+					<property name="com.jaspersoft.studio.crosstab.style.group" value="Crosstab_CG"/>
+					<property name="com.jaspersoft.studio.crosstab.style.total" value="Crosstab_CT"/>
+					<property name="com.jaspersoft.studio.crosstab.style.detail" value="Crosstab_CD"/>
+				</reportElement>
+				<rowGroup name="documentno" width="140" totalPosition="End">
+					<bucket class="java.lang.String">
+						<bucketExpression><![CDATA[$F{documentno}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents mode="Opaque" style="Crosstab_CH">
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement x="0" y="0" width="140" height="10" uuid="68d80408-ab60-4aec-b735-ca4e31880f73"/>
+								<textElement>
+									<font size="6" isBold="false"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$V{documentno}]]></textFieldExpression>
+							</textField>
+						</cellContents>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents mode="Opaque" style="Crosstab_CT"/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="fecha" height="20" totalPosition="End">
+					<bucket class="java.lang.String">
+						<bucketExpression><![CDATA[$F{fecha}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents mode="Opaque" style="Crosstab_CH">
+							<textField>
+								<reportElement x="0" y="0" width="30" height="20" uuid="27ae1680-4a1a-4b34-be5f-ce8b676fe37a"/>
+								<textElement textAlignment="Right">
+									<font size="8" isBold="true"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$V{fecha}]]></textFieldExpression>
+							</textField>
+						</cellContents>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents mode="Opaque" style="Crosstab_CT"/>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="total_MEASURE" class="java.math.BigDecimal" calculation="Sum">
+					<measureExpression><![CDATA[$F{total}]]></measureExpression>
+				</measure>
+				<crosstabCell width="30" height="10">
+					<cellContents mode="Opaque" style="Crosstab_CD">
+						<textField isStretchWithOverflow="true" pattern="#,##0.00#" isBlankWhenNull="true">
+							<reportElement x="0" y="0" width="30" height="10" uuid="86d9e73e-3814-45c4-a4ea-6e27d7c6622d"/>
+							<textElement textAlignment="Right">
+								<font size="6"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$V{total_MEASURE}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="5" height="10" columnTotalGroup="fecha">
+					<cellContents mode="Opaque" style="Crosstab_CT"/>
+				</crosstabCell>
+				<crosstabCell width="30" height="5" rowTotalGroup="documentno">
+					<cellContents mode="Opaque" style="Crosstab_CT"/>
+				</crosstabCell>
+				<crosstabCell width="5" height="5" rowTotalGroup="documentno" columnTotalGroup="fecha">
+					<cellContents mode="Opaque" style="Crosstab_CT"/>
+				</crosstabCell>
+			</crosstab>
+		</band>
+	</summary>
+</jasperReport>

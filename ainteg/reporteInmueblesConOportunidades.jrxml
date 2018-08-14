@@ -1,0 +1,546 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteInmuebles" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a80ed23f-586d-4137-9775-4a3bd6032d6d">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="AINTEG"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<parameter name="AD_Org_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="tipo_negociacion" class="java.lang.String"/>
+	<parameter name="M_Product_Category_ID" class="java.lang.Integer"/>
+	<parameter name="tb_grupo_producto_ID" class="java.lang.Integer"/>
+	<parameter name="C_BPartner_ID" class="java.lang.Integer">
+		<parameterDescription><![CDATA[Propietario del inmueble]]></parameterDescription>
+	</parameter>
+	<queryString>
+		<![CDATA[WITH org_img AS (
+	select 
+		org_info.AD_Org_ID,
+		org_img.binarydata as logo
+	from  AD_OrgInfo as org_info
+	join ad_image as org_img on org_img.ad_image_id = org_info.logo_id
+)
+
+SELECT
+	org_img.logo as logo,
+	org.name as organizacion,
+	pc.name categoria,
+	gp.name grupoproducto,
+	p.m_product_id,
+	p.name as nombre_producto,
+	coalesce(ac.description,ac.name) agentecaptador,
+	p.financiamiento,
+	pp.PriceStd precio,
+	trim(l.Address1 || ' ' || coalesce(l.Address2, '')) as localizacion,
+	zona.name as zona,
+	pro_part.name as propietario,
+	
+	op.SalesRep_ID as repre_id,
+	repre.Name as representante,	
+	op.documentno as no_opor,
+	op.foportunidad as fecha_opor,
+	cb.Name as cliente,	
+	ss.Name as etapa_venta,
+	op.OpportunityAmt as valor,
+	(op.OpportunityAmt*op.Probability/100) as valor_ponderado,
+	op.ExpectedCloseDate as fecha_cierre,
+	c.Name as campana,
+	op.Comments as comentario,
+	gestion.Description as gestion_descripcion,
+	gestion.observaciones as gestion_objecion,
+	gestion.startDate as gestion_fecha_start
+FROM m_product p
+join ad_org org on org.ad_org_id = p.ad_org_id
+left join org_img on org_img.AD_Org_ID = org.AD_Org_ID
+JOIN M_Product_Category pc on pc.M_Product_Category_ID=p.M_Product_Category_ID
+join tb_grupo_producto gp on gp.tb_grupo_producto_id=p.tb_grupo_producto_id
+left join ad_user ac on ac.ad_user_id=p.SalesRep_ID
+left join M_ProductPrice pp on pp.m_product_id=p.m_product_id
+left join C_Location as l on l.C_Location_ID = p.C_Location_ID
+left join C_SalesRegion as zona on zona.C_SalesRegion_ID = p.C_SalesRegion_ID
+left join M_Product_PO as propietario on propietario.m_product_id = p.m_product_id
+left join C_BPartner as pro_part on pro_part.C_BPartner_ID = propietario.C_BPartner_ID
+
+left join tb_productopportunity as pro_op on pro_op.m_product_id = p.m_product_id
+left join c_opportunity op on op.c_opportunity_id = pro_op.c_opportunity_id
+left join C_BPartner cb on cb.C_BPartner_ID=op.C_BPartner_ID and cb.isactive='Y'
+left join C_SalesStage ss on ss.C_SalesStage_ID=op.C_SalesStage_ID and ss.isactive='Y'
+left join C_Campaign c on c.C_Campaign_ID=op.C_Campaign_ID and c.isactive='Y'
+left join AD_User repre on repre.AD_User_ID=op.SalesRep_ID and repre.isactive='Y'
+left join ( /*De cada oportunidad se extrae la ultima gestion*/
+	select distinct on (C_Opportunity_ID)  * 
+	from C_ContactActivity
+	where C_ContactActivity.isactive = 'Y'
+	order by C_Opportunity_ID, created desc
+) as gestion on gestion.C_Opportunity_ID = op.C_Opportunity_ID
+
+WHERE p.ad_org_id= $P{AD_Org_ID}  and p.isactive='Y'
+	and p.tipo_negociacion= $P{tipo_negociacion} 
+	and coalesce(  $P{M_Product_Category_ID}  , -1) in ( p.M_Product_Category_ID , -1)
+	and coalesce(  $P{tb_grupo_producto_ID}  , -1) in ( p.tb_grupo_producto_ID , -1)
+	and coalesce(   $P{C_BPartner_ID}   , -1) in ( propietario.C_BPartner_ID , -1) /*Filtro del propietario*/
+order by categoria, grupoproducto, nombre_producto, fecha_opor]]>
+	</queryString>
+	<field name="logo" class="java.lang.Object">
+		<property name="com.jaspersoft.studio.field.label" value="logo"/>
+	</field>
+	<field name="organizacion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="organizacion"/>
+	</field>
+	<field name="categoria" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="categoria"/>
+	</field>
+	<field name="grupoproducto" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="grupoproducto"/>
+	</field>
+	<field name="m_product_id" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="m_product_id"/>
+	</field>
+	<field name="nombre_producto" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="nombre_producto"/>
+	</field>
+	<field name="agentecaptador" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="agentecaptador"/>
+	</field>
+	<field name="financiamiento" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="financiamiento"/>
+	</field>
+	<field name="precio" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="precio"/>
+	</field>
+	<field name="localizacion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="localizacion"/>
+	</field>
+	<field name="zona" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="zona"/>
+	</field>
+	<field name="propietario" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="propietario"/>
+	</field>
+	<field name="repre_id" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="repre_id"/>
+	</field>
+	<field name="representante" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="representante"/>
+	</field>
+	<field name="no_opor" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="no_opor"/>
+	</field>
+	<field name="fecha_opor" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="fecha_opor"/>
+	</field>
+	<field name="cliente" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="cliente"/>
+	</field>
+	<field name="etapa_venta" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="etapa_venta"/>
+	</field>
+	<field name="valor" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="valor"/>
+	</field>
+	<field name="valor_ponderado" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="valor_ponderado"/>
+	</field>
+	<field name="fecha_cierre" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="fecha_cierre"/>
+	</field>
+	<field name="campana" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="campana"/>
+	</field>
+	<field name="comentario" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="comentario"/>
+	</field>
+	<field name="gestion_descripcion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="gestion_descripcion"/>
+	</field>
+	<field name="gestion_objecion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="gestion_objecion"/>
+	</field>
+	<field name="gestion_fecha_start" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="gestion_fecha_start"/>
+	</field>
+	<group name="Categoria" footerPosition="CollateAtBottom">
+		<groupExpression><![CDATA[$F{categoria}]]></groupExpression>
+		<groupHeader>
+			<band height="15">
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="1" y="0" width="319" height="15" uuid="5bc6850b-232c-4067-8845-24f17c2fc709"/>
+					<box leftPadding="2" rightPadding="2"/>
+					<textElement verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{categoria}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="Tipo">
+		<groupExpression><![CDATA[$F{grupoproducto}]]></groupExpression>
+		<groupHeader>
+			<band height="15">
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="10" y="0" width="310" height="15" uuid="b21562f8-5fe3-43bf-a74f-cd9e36406fb4"/>
+					<box leftPadding="2" rightPadding="2"/>
+					<textElement verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{grupoproducto}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="Inmueble">
+		<groupExpression><![CDATA[$F{m_product_id}]]></groupExpression>
+		<groupHeader>
+			<band height="13">
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="30" y="0" width="110" height="13" uuid="cb3ee536-6c51-4e4c-9387-e73ab5e03916"/>
+					<box leftPadding="2" rightPadding="2"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{zona}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="140" y="0" width="204" height="13" uuid="28d91675-998b-4d1b-999e-5f8b45573c67"/>
+					<box leftPadding="2" rightPadding="2"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{nombre_producto}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="344" y="0" width="70" height="13" uuid="b9a60dd2-66a6-45df-bce9-aba3c7f16f40"/>
+					<box leftPadding="2" rightPadding="2"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{agentecaptador}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="414" y="0" width="128" height="13" uuid="0ab9a2c0-d9fa-4e34-b396-1a57213844a7"/>
+					<box leftPadding="2" rightPadding="2"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{financiamiento}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="542" y="0" width="66" height="13" uuid="fdc181ff-2a01-4948-acdd-668cd4f06921"/>
+					<box leftPadding="2" rightPadding="2"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{precio}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="608" y="0" width="172" height="13" uuid="29bfdb38-c3b8-468c-a6b0-d9d40b7b56f4"/>
+					<box leftPadding="2" rightPadding="2"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{propietario}]]></textFieldExpression>
+				</textField>
+			</band>
+			<band height="13">
+				<printWhenExpression><![CDATA[$F{no_opor} != null]]></printWhenExpression>
+				<staticText>
+					<reportElement x="40" y="0" width="70" height="13" uuid="d70681ff-767d-4f03-b092-483dd8b1dce0"/>
+					<box leftPadding="2">
+						<pen lineWidth="0.0"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="8" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Fecha Op.]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="110" y="0" width="74" height="13" uuid="abdcea97-eafb-494e-9c18-cd2f9142935f"/>
+					<box leftPadding="2">
+						<pen lineWidth="0.0"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="8" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Cliente Op.]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="184" y="0" width="83" height="13" uuid="b0553aef-3b2c-498b-80b6-ceefac658443"/>
+					<box leftPadding="2">
+						<pen lineWidth="0.0"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="8" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Etapa Venta]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="267" y="0" width="127" height="13" uuid="8fb9be43-67e6-47eb-a5c3-e7c658a36603"/>
+					<box leftPadding="2">
+						<pen lineWidth="0.0"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="8" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Comentario]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="394" y="0" width="217" height="13" uuid="ab7bd70c-f142-41a1-90ed-cdb166a49df9"/>
+					<box leftPadding="2">
+						<pen lineWidth="0.0"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="8" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Última Gestión]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="670" y="0" width="110" height="13" uuid="d77f683f-8502-4467-98fb-d104d36c47c7"/>
+					<box leftPadding="2">
+						<pen lineWidth="0.0"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="8" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Objeción]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="611" y="0" width="59" height="13" uuid="2143fec0-d43d-4258-b430-9852d658ff8a"/>
+					<box leftPadding="2">
+						<pen lineWidth="0.0"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="8" isBold="false"/>
+					</textElement>
+					<text><![CDATA[Fecha Gest.]]></text>
+				</staticText>
+			</band>
+		</groupHeader>
+	</group>
+	<title>
+		<band height="60" splitType="Stretch">
+			<staticText>
+				<reportElement x="659" y="0" width="73" height="14" uuid="64b2eea1-0b89-4f31-8732-9f50919f8d25"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[Fecha de impresión:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="659" y="14" width="143" height="14" uuid="ba7be6b9-72a7-478e-a48a-61ecde0a657b"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font size="7" isBold="false"/>
+				</textElement>
+				<text><![CDATA[reporteInmueblesConOportunidades.jrxml]]></text>
+			</staticText>
+			<textField pattern="">
+				<reportElement x="732" y="0" width="70" height="14" uuid="f8c5173b-b89f-4651-95d0-07ea17af088e"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("dd/MM/yyyy HH:mm").format( new java.util.Date() )]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="170" y="2" width="424" height="14" uuid="a9bd85ca-3aad-4309-ba14-454a3a803c1f"/>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[REPORTE DE INMUEBLES CON OPORTUNIDADES]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="170" y="18" width="422" height="14" uuid="4bf8fd9b-d3a7-4fee-878a-216085c3a80c"/>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{organizacion}]]></textFieldExpression>
+			</textField>
+			<image hAlign="Center" vAlign="Middle" isUsingCache="true" onErrorType="Blank">
+				<reportElement x="1" y="2" width="169" height="58" isPrintInFirstWholeBand="true" uuid="4a3036e1-6ee8-40ff-b89e-6b29f4077656"/>
+				<imageExpression><![CDATA[$F{logo}]]></imageExpression>
+			</image>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="23">
+			<staticText>
+				<reportElement x="140" y="0" width="204" height="23" uuid="8891ae5e-1248-42cf-8cb9-cab2c9046968"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[INMUEBLE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="344" y="0" width="70" height="23" uuid="392a5243-7478-4a12-a4ec-122bda4626db"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[AGENTE CAPTADOR]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="542" y="0" width="66" height="23" uuid="7d9af000-e819-47c5-a1de-90f85f4b31e5"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[PRECIO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="414" y="0" width="128" height="23" uuid="8eef8ecc-89e4-4009-95a1-7ce0f864a88a"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[FINANCIAMIENTO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="30" y="0" width="110" height="23" uuid="5e2c9205-f2be-4992-8c24-c0a3d331d970"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ZONA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="608" y="0" width="172" height="23" uuid="4803b1ad-35d4-4811-82ef-77e8b1447b74"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[PROPIETARIO]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<printWhenExpression><![CDATA[$F{no_opor} != null]]></printWhenExpression>
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="40" y="0" width="70" height="13" uuid="a01faf49-8269-41c1-9381-4468753e5087"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fecha_opor}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="110" y="0" width="74" height="13" uuid="8682c7d2-5891-4834-b52b-325cf2df1a75"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cliente}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="184" y="0" width="83" height="13" uuid="da0779ab-71ae-411d-8028-68bb39917a86"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{etapa_venta}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="267" y="0" width="127" height="13" uuid="3339ce32-b5d4-464d-9e7c-b0a8ad8ba8cb"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{comentario}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="394" y="0" width="217" height="13" uuid="5618a88c-acff-457c-a14f-6ef8b8fa3002"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{gestion_descripcion}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="670" y="0" width="110" height="13" uuid="d9668e67-042f-44cf-b6a1-f8fd08557c51"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{gestion_objecion}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="611" y="0" width="59" height="13" uuid="d00ff6c7-9db7-4c7f-973a-bc7d8f6f023c"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{gestion_fecha_start}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

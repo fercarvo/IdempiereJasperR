@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="notaEntregaPie" pageWidth="250" pageHeight="752" columnWidth="250" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="963a3072-aa34-4fec-8358-f7976982ffe1">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="table">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 2">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 2_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 2_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 2_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 3">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 3_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 3_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 3_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 4">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 4_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 4_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 4_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 5">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 5_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 5_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 5_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<parameter name="M_InOut_ID" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[SELECT io.m_inout_id,
+ COALESCE(p.value, '0') AS codigoPrincipal,
+ 0::text AS codigoAuxiliar,
+ olt.name AS descripcion,
+ trunc(iol.QtyEntered) AS cantidad,
+ olt.PriceEntered AS precioUnitario,
+ 0::numeric AS descuento,
+ round(iol.QtyEntered*olt.PriceEntered,2) AS precioTotalSinImpuesto,
+ COALESCE(t.LEC_TaxTypeSRI, '0') AS codigo,
+  CASE
+     WHEN t.LEC_TaxTypeSRI = '2' THEN
+       CASE
+         WHEN t.rate = 0::numeric THEN '0'
+         WHEN t.rate > 0::numeric THEN '2'
+         ELSE '6'
+       END
+     WHEN t.LEC_TaxTypeSRI = '3' THEN
+       '0000'
+     ELSE '0'
+   END AS codigoPorcentaje,
+  t.rate AS tarifa,
+  round(iol.QtyEntered*olt.PriceEntered,2) AS baseImponible,
+  round(round(iol.QtyEntered*olt.PriceEntered,2) * t.rate / 100, 4) AS valor,
+  --olt.description AS descripcion1,
+  t.name AS razon,
+  --COALESCE(olt.productdescription,olt.name) as productdescription,
+  COALESCE(olt.productdescription,olt.name) as comercialname,
+  olt.c_uom_name presentacion,
+  case when ls.islot='Y' then l.name else ai.serno end serlote,
+  iol.m_attributesetinstance_id,
+  l.name lote,
+  ai.GuaranteeDate as garantia,
+  l.datefrom elaboracion,
+  l.dateto vencimiento,
+  olt.group2 marca,
+  olt.group1 procedencia,
+  olt.m_product_id,
+  p.registrosanitario,
+  olt.uomsymbol,
+  coalesce(p.description,p.name,c.name) namecomercial,
+COALESCE(ol.description,iol.description,c.name,p.description,p.name) as productdescription
+FROM M_InOut io
+join m_inoutline iol on iol.m_inout_id=io.m_inout_id and iol.isactive='Y'
+JOIN c_order_linetax_vt olt on olt.c_orderline_id=iol.c_orderline_id and olt.IsDescription = 'N' and olt.ad_language='es_EC'
+JOIN c_orderline ol on ol.c_orderline_id=olt.c_orderline_id
+ JOIN C_Tax t ON t.C_Tax_ID = olt.C_Tax_ID
+ LEFT JOIN M_Product p ON p.M_Product_ID = olt.M_Product_ID
+ LEFT JOIN c_charge c ON olt.c_order_c_charge_id = c.c_charge_id
+ left join m_attributesetinstance ai on ai.m_attributesetinstance_id=(case when coalesce(iol.m_attributesetinstance_id)>0 then iol.m_attributesetinstance_id else ol.m_attributesetinstance_id end)
+ left join M_AttributeSet ls on ls.M_AttributeSet_id=ai.M_AttributeSet_id
+ LEFT JOIN M_Lot l on l.m_lot_id=ai.m_lot_id
+WHERE io.m_inout_id=$P{M_InOut_ID} and io.isactive='Y'
+and io.issotrx='Y'
+ORDER BY olt.line]]>
+	</queryString>
+	<field name="m_inout_id" class="java.math.BigDecimal"/>
+	<field name="codigoprincipal" class="java.lang.String"/>
+	<field name="codigoauxiliar" class="java.lang.String"/>
+	<field name="descripcion" class="java.lang.String"/>
+	<field name="cantidad" class="java.math.BigDecimal"/>
+	<field name="preciounitario" class="java.math.BigDecimal"/>
+	<field name="descuento" class="java.math.BigDecimal"/>
+	<field name="preciototalsinimpuesto" class="java.math.BigDecimal"/>
+	<field name="codigo" class="java.lang.String"/>
+	<field name="codigoporcentaje" class="java.lang.String"/>
+	<field name="tarifa" class="java.math.BigDecimal"/>
+	<field name="baseimponible" class="java.math.BigDecimal"/>
+	<field name="valor" class="java.math.BigDecimal"/>
+	<field name="razon" class="java.lang.String"/>
+	<field name="comercialname" class="java.lang.String"/>
+	<field name="presentacion" class="java.lang.String"/>
+	<field name="serlote" class="java.lang.String"/>
+	<field name="m_attributesetinstance_id" class="java.math.BigDecimal"/>
+	<field name="lote" class="java.lang.String"/>
+	<field name="garantia" class="java.sql.Timestamp"/>
+	<field name="elaboracion" class="java.sql.Timestamp"/>
+	<field name="vencimiento" class="java.sql.Timestamp"/>
+	<field name="marca" class="java.lang.String"/>
+	<field name="procedencia" class="java.lang.String"/>
+	<field name="m_product_id" class="java.math.BigDecimal"/>
+	<field name="registrosanitario" class="java.lang.String"/>
+	<field name="uomsymbol" class="java.lang.String"/>
+	<field name="namecomercial" class="java.lang.String"/>
+	<field name="productdescription" class="java.lang.String"/>
+	<variable name="descuento" class="java.math.BigDecimal" resetType="None">
+		<variableExpression><![CDATA[new BigDecimal(0)]]></variableExpression>
+		<initialValueExpression><![CDATA[]]></initialValueExpression>
+	</variable>
+	<variable name="propina" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[new BigDecimal(0)]]></variableExpression>
+	</variable>
+	<variable name="subtotaliva" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{codigo}.equals( "2") && $F{codigoporcentaje}.equals( "2") ? $F{baseimponible} : 0]]></variableExpression>
+	</variable>
+	<variable name="subtotalcero" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{codigo}.equals( "2") && $F{codigoporcentaje}.equals( "0") ? $F{baseimponible} : 0]]></variableExpression>
+	</variable>
+	<variable name="iva" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{codigo}.equals( "2") && $F{codigoporcentaje}.equals( "2") ? $F{valor} : 0]]></variableExpression>
+	</variable>
+	<variable name="total" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{baseimponible}.add( $F{valor} )]]></variableExpression>
+	</variable>
+	<group name="total">
+		<groupExpression><![CDATA[$F{m_inout_id}]]></groupExpression>
+		<groupFooter>
+			<band height="110">
+				<rectangle>
+					<reportElement mode="Transparent" x="0" y="1" width="245" height="104" uuid="b3e0052b-e030-4aec-89cd-b1ec1dcd25ce"/>
+				</rectangle>
+				<staticText>
+					<reportElement style="table" x="0" y="31" width="156" height="15" uuid="a152bc1e-0ff8-44dc-b6fd-1f477be268eb"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<text><![CDATA[DESCUENTO]]></text>
+				</staticText>
+				<staticText>
+					<reportElement style="table" x="0" y="16" width="156" height="15" uuid="b903ebce-ccad-4e4f-b7af-90f45a9c99fc"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<text><![CDATA[SUBTOTAL 0%]]></text>
+				</staticText>
+				<staticText>
+					<reportElement style="table" x="0" y="91" width="156" height="14" uuid="d75511f7-9fbf-43b5-bd8b-7df4579f71f3"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<text><![CDATA[VALOR TOTAL]]></text>
+				</staticText>
+				<staticText>
+					<reportElement style="table" x="0" y="61" width="156" height="15" uuid="c6cbe6c3-5102-41b7-b59c-c5f48068badf"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<text><![CDATA[ICE]]></text>
+				</staticText>
+				<staticText>
+					<reportElement style="table" x="0" y="46" width="156" height="15" uuid="cb4ac915-a37d-4ac0-9280-b7cde98088b8"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<text><![CDATA[SUBTOTAL]]></text>
+				</staticText>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement style="table" x="156" y="1" width="89" height="15" uuid="b8909d81-105b-468f-b189-3f7518bfaccf"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{subtotaliva}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement style="table" x="156" y="16" width="89" height="15" uuid="a21326c2-0751-42d1-acfe-50c0c1029902"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{subtotalcero}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement style="table" x="156" y="31" width="89" height="15" uuid="3d4f30f7-d5de-48c6-aa56-b522f0c418e1"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{descuento}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement style="table" x="156" y="61" width="89" height="15" uuid="eb9bbe4a-e6c2-45fa-8433-ba0aa79db01c"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{codigo}.equals("3") ? $F{valor} : new BigDecimal(0)]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement style="table" x="156" y="76" width="89" height="15" uuid="222c5680-7b9c-4304-9e49-e286c2b4ca81"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{iva}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement style="table" x="156" y="91" width="89" height="14" uuid="95bb6aff-b1e8-42b1-b184-d265f05da967"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{total}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement style="table" x="156" y="46" width="89" height="15" uuid="455a469c-6461-48bc-aa40-f47db253df52"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{subtotaliva}.add( $V{subtotalcero} )]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement style="table" x="0" y="1" width="156" height="15" uuid="bfe4ea28-7066-4fec-a6d7-4b9172cb6a61"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA["SUBTOTAL "+$F{tarifa}+" %"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement style="table" x="0" y="76" width="156" height="15" uuid="a949b1dc-1874-4c11-b0c5-f28381c25236"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA["IVA "+$F{tarifa}+" %"]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+</jasperReport>

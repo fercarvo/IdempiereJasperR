@@ -1,0 +1,553 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="pedido" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a80ed23f-586d-4137-9775-4a3bd6032d6d">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="SERVIHELP DES"/>
+	<style name="table">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 2">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 2_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 2_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 2_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 3">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 3_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 3_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 3_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 4">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 4_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 4_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 4_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 5">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 5_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 5_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 5_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<parameter name="RECORD_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select
+o.ad_org_id::integer,
+org.name Organizacion,
+o.DocumentNo,
+o.help referencia,
+o.Description as descripcion,
+o.pedidoxclientes,
+o.datedoc fechapedido,
+o.daterequired fecharequerida,
+o.horapedido horarequerida,
+w.name almacen,
+us.name usuario,
+py.name proyecto,
+a.name centrocosto,
+coalesce(ut.uomsymbol,u.uomsymbol) unidad,
+coalesce(cargo.name, p.name) productoCargo, --Si exsite producto, se lo usa, caso contrario producto
+trunc(ol.Qty) cantidad,
+upper(dt.printname) tipodocumento,
+pc.name categoria,
+ol.posiblesproveedores,
+O. pedidoXClientes AS quienPide,
+o.Help as sitioEntrega,
+o.observaciones
+from M_Requisition o
+join M_RequisitionLine ol on ol.M_Requisition_ID=o.M_Requisition_ID and ol.isactive='Y'
+left join C_Charge cargo on cargo.C_Charge_ID = ol.C_Charge_ID and cargo.isactive='Y'
+left join m_product p on p.m_product_id=ol.m_product_id and p.isactive='Y'
+inner join AD_Org org on org.ad_org_id = o.ad_org_id and org.isactive='Y'
+left join c_uom u on u.c_uom_id=p.c_uom_id and u.isactive='Y'
+left join c_uom_trl ut on ut.c_uom_id=u.c_uom_id and ut.ad_language='es_EC' and ut.isactive='Y'
+left join m_warehouse w on w.m_warehouse_id=o.m_warehouse_id and w.isactive='Y'
+left join ad_user us on us.ad_user_id=o.ad_user_id and us.isactive='Y'
+left join c_project py on py.c_project_id=o.c_project_id and py.isactive='Y'
+left join c_activity a on a.c_activity_id=o.c_activity_id and a.isactive='Y'
+left join C_DocType dt on dt.C_DocType_id=o.C_DocType_id
+left join M_Product_Category pc on pc.M_Product_Category_ID=p.M_Product_Category_ID
+where o.M_Requisition_ID=$P{RECORD_ID} order by ol.line]]>
+	</queryString>
+	<field name="ad_org_id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="ad_org_id"/>
+	</field>
+	<field name="organizacion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="organizacion"/>
+	</field>
+	<field name="documentno" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="documentno"/>
+	</field>
+	<field name="referencia" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="referencia"/>
+	</field>
+	<field name="descripcion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="descripcion"/>
+	</field>
+	<field name="pedidoxclientes" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="pedidoxclientes"/>
+	</field>
+	<field name="fechapedido" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="fechapedido"/>
+	</field>
+	<field name="fecharequerida" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="fecharequerida"/>
+	</field>
+	<field name="horarequerida" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="horarequerida"/>
+	</field>
+	<field name="almacen" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="almacen"/>
+	</field>
+	<field name="usuario" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="usuario"/>
+	</field>
+	<field name="proyecto" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="proyecto"/>
+	</field>
+	<field name="centrocosto" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="centrocosto"/>
+	</field>
+	<field name="unidad" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="unidad"/>
+	</field>
+	<field name="productocargo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="productocargo"/>
+	</field>
+	<field name="cantidad" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="cantidad"/>
+	</field>
+	<field name="tipodocumento" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="tipodocumento"/>
+	</field>
+	<field name="categoria" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="categoria"/>
+	</field>
+	<field name="posiblesproveedores" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="posiblesproveedores"/>
+	</field>
+	<field name="quienpide" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="quienpide"/>
+	</field>
+	<field name="sitioentrega" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="sitioentrega"/>
+	</field>
+	<field name="observaciones" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="observaciones"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="150" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.HorizontalRowLayout"/>
+			<textField>
+				<reportElement x="145" y="2" width="240" height="28" uuid="3c90f8f6-f949-46b9-9f36-921d16e74a82"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tipodocumento}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="145" y="30" width="240" height="13" uuid="13048e77-9c7e-487c-9472-eda8e80dc0d0"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{documentno}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="129" width="70" height="13" uuid="a727163b-6191-435d-acef-69814bcd391d"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[DESCRIPCIÓN:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="484" y="1" width="53" height="14" uuid="097b5659-aebe-4259-b0b5-cc92d6caae04"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph rightIndent="1"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}+"  de "]]></textFieldExpression>
+			</textField>
+			<textField pattern="">
+				<reportElement x="484" y="16" width="70" height="14" uuid="67489465-8a18-48c3-bcb4-815f1660e473"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("dd/MM/yyyy HH:mm").format( new java.util.Date() )]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="446" y="30" width="108" height="14" uuid="b3477b71-6cb6-4cbb-97e1-9f49c8025de4"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font size="7" isBold="false"/>
+				</textElement>
+				<text><![CDATA[pedido.jrxml]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="411" y="1" width="73" height="14" uuid="0f3f0599-41d2-42cf-9e9b-aeafeeee3ff9"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[Página:        ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="411" y="30" width="35" height="14" uuid="3c3c6728-5254-43a4-b6b1-f787c166d50f"/>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font size="7" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Reporte:                   stock_max_min.jrxml]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" evaluationTime="Report">
+				<reportElement x="537" y="1" width="17" height="14" uuid="a9a078bf-8f99-43b1-8310-e4995af0ca13"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph leftIndent="1"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" "+$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="411" y="16" width="73" height="14" uuid="e09e7580-f1d9-4165-9314-5bcf34c4a625"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[Fecha de impresión:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="296" y="75" width="89" height="13" uuid="8268932b-afe5-4adc-9214-510e2e229ce4"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[FECHA PEDIDO:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="385" y="75" width="61" height="13" uuid="6f7b7ad0-e127-4d6b-ae09-9a2d54f46a33"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fechapedido}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="71" y="129" width="484" height="13" uuid="97b8fe8f-7ba9-41e4-b09c-64c089b24cd5"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descripcion}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="89" width="70" height="13" uuid="cba50d28-3565-41e7-8dcc-3914dbdff989"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[REFERENCIA:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="71" y="89" width="225" height="13" uuid="af2f25ea-8d74-4847-894d-17f7e16a3722"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{referencia}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="75" width="70" height="13" uuid="aec3086c-e8fd-45ce-b82f-c75f3934b178"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[PEDIDO PARA:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="71" y="75" width="225" height="13" uuid="294f6785-9e8e-4bd7-a7aa-c087bdaf2d9f"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{pedidoxclientes}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="296" y="89" width="89" height="13" uuid="5d3b70dd-adea-4da2-a623-e7bda58367bf"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[FECHA REQUERIDA:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="385" y="89" width="61" height="13" uuid="bd292116-a5b4-4889-b7e3-e7f66164b5f8"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fecharequerida}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="HH:mm" isBlankWhenNull="true">
+				<reportElement x="446" y="89" width="36" height="13" uuid="b132b815-657b-4b08-9828-2c7d41a64567"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{horarequerida}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="296" y="102" width="89" height="13" uuid="92970d18-7918-447c-abde-c7d18acfb8dc"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ALMACÉN:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="385" y="102" width="169" height="13" uuid="aa9c4414-beb3-46db-a0c8-699dbae37b30"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{almacen}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="102" width="70" height="13" uuid="3b3fce93-92ca-4bdd-90bd-b7253838be69"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[PROYECTO:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="296" y="115" width="89" height="13" uuid="48d78110-38c8-43b7-ac01-24e6a988fc99"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CENTRO DE COSTO:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="385" y="115" width="169" height="13" uuid="055612d5-b32e-4db5-a119-db4c51ff66f7"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{centrocosto}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="71" y="102" width="225" height="13" uuid="2316e45c-63d2-472e-9903-408c49822783"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{proyecto}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="115" width="70" height="13" uuid="7f65c309-ef58-4d52-b707-069e6f54b9b8"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[USUARIO:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="71" y="115" width="225" height="13" uuid="2c5690f4-7a8e-4b14-8589-1847ca62074d"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{usuario}]]></textFieldExpression>
+			</textField>
+			<subreport>
+				<reportElement x="0" y="0" width="100" height="75" uuid="65294811-f0d6-483c-bf50-f89c9e5b60fe"/>
+				<subreportParameter name="AD_Org_ID">
+					<subreportParameterExpression><![CDATA[$F{ad_org_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["/reports/logorg.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="13" splitType="Stretch">
+			<staticText>
+				<reportElement style="table" mode="Transparent" x="501" y="0" width="54" height="13" uuid="130272e8-84cc-45fa-9202-4df4c7a65b2c"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CANT.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table" x="0" y="0" width="145" height="13" uuid="dcba1565-5a7e-4eac-8d83-660162800b27"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<text><![CDATA[POSIBLE PROVEEDOR]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table" x="145" y="0" width="301" height="13" uuid="5dd6cfb8-37dd-458f-ba5b-dbb087450641"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<text><![CDATA[PRODUCTO / CARGO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table" mode="Transparent" x="446" y="0" width="55" height="13" uuid="c5232664-43f7-4594-bd2e-4b20976c472e"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[UNIDAD]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="501" y="0" width="54" height="13" uuid="b57c817f-b5f2-49ad-aae6-076614b74ee5"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cantidad}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="145" height="13" uuid="a4a07b65-c46c-4f6f-acc3-8c90e367cb57"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{posiblesproveedores}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="145" y="0" width="301" height="13" uuid="867be628-2176-4188-bd22-c558f6dc0b7b"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{productocargo}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="446" y="0" width="55" height="13" uuid="b630163a-6765-4c93-8b81-101b738115cd"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{unidad}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="50">
+			<staticText>
+				<reportElement x="0" y="14" width="80" height="13" uuid="1b299ca0-e87e-45df-b7e7-e5931c4dfb95"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[SITIO ENTREGA:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="80" y="14" width="226" height="13" uuid="d941dcca-f5d9-407b-8d34-4a141b87c562"/>
+				<textFieldExpression><![CDATA[$F{sitioentrega}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="27" width="80" height="13" uuid="ca312499-fb88-488e-8b2a-8315d1ab3321"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[OBSERVACIONES]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="80" y="27" width="226" height="13" uuid="c10206c6-5d6f-4f1c-8486-b062594015e3"/>
+				<textFieldExpression><![CDATA[$F{observaciones}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

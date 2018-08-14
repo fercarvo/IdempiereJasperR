@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="liquidacion_viaticos_body" pageWidth="802" pageHeight="555" orientation="Landscape" columnWidth="802" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="a80ed23f-586d-4137-9775-4a3bd6032d6d">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="8"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="SERVIHELP"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="AD_Org_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="C_BankStatement_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SaldoInicial" class="java.math.BigDecimal">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select
+	2 orden,
+	'MOVIMIENTOS DE CAJA' as tipo,
+	coalesce(cc.name, 'Sin Cargo') cargo,
+	p.DateAcct as fecha,
+	ci.Description as descripcion,
+	cdt.name tipoDoc,
+	coalesce(ci.documentno,p.DocumentNo) as numDoc,
+	p.isreceipt,
+	(case when p.isreceipt='Y' then
+		   coalesce(cal.valor, p.PayAmt) else
+		   coalesce(cal.valor, -p.PayAmt)
+	 end) as valor,
+	cbp.name tercero,
+	ca.name actividad,
+	cp.name proyecto
+from C_BankStatement bs
+join C_BankStatementLine bsl on bsl.C_BankStatement_ID=bs.C_BankStatement_ID and bsl.isactive='Y'
+join C_BankAccount ba on ba.C_BankAccount_ID=bs.C_BankAccount_ID and ba.isactive='Y'
+join C_Payment p on p.C_Payment_ID=bsl.C_Payment_ID 
+	and p.isactive='Y' 
+	and p.docstatus='CO'
+	
+left join
+	(Select  al.C_AllocationLine_ID, al.Amount+al.DiscountAmt+al.WriteOffAmt valor, al.C_Payment_ID, al.C_Invoice_ID
+	 from C_AllocationLine al
+	 where al.C_Invoice_ID notnull
+	     and (Select docstatus from c_invoice where c_invoice_id = al.c_invoice_id) = 'CO'
+	     and (Select docstatus from C_AllocationHdr where C_AllocationHdr_ID = al.C_AllocationHdr_ID) = 'CO'
+	 union
+	 Select null, paymentavailable(C_Payment_ID) valor, C_Payment_ID, null
+	 from C_Payment where paymentavailable(C_Payment_ID) !=0
+
+	) cal on cal.C_Payment_ID = p.C_Payment_ID
+left join c_invoice ci on ci.c_invoice_id = cal.c_invoice_id and ci.docstatus = 'CO' and invoiceopen(ci.c_invoice_id,0)=0
+/*left join (Select max(linetotalamt) max, c_invoice_id from c_invoiceline group by 2) max on max.C_invoice_id = ci.c_invoice_id*/
+left join c_invoiceline cil on ci.c_invoice_id = cil.c_invoice_id /*and cil.linetotalamt = max.max*/
+left join C_Charge cc on cc.C_Charge_ID = coalesce(cil.c_charge_id, p.C_Charge_ID)
+left join C_Doctype cdt on cdt.c_doctype_id = coalesce(ci.c_doctypetarget_id, p.c_doctype_id)
+left join AD_Org org on org.ad_org_id=bs.ad_org_id and org.isactive='Y'
+left join C_BPartner cbp on cbp.c_BPartner_id = coalesce(ci.c_BPartner_id, p.c_BPartner_id)
+left join C_Activity ca on ca.C_Activity_ID = coalesce(ci.C_Activity_ID,p.C_Activity_ID)
+left join C_Project cp on cp.C_Project_ID = coalesce(ci.C_Project_ID,p.C_Project_ID)
+where 
+	org.AD_Org_ID= $P{AD_Org_ID} 
+	and bs.C_BankStatement_ID= $P{C_BankStatement_ID} 
+order by p.isreceipt desc,orden, tipo, cargo, fecha, tipoDoc, numDoc]]>
+	</queryString>
+	<field name="orden" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="orden"/>
+	</field>
+	<field name="tipo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="tipo"/>
+	</field>
+	<field name="cargo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="cargo"/>
+	</field>
+	<field name="fecha" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="fecha"/>
+	</field>
+	<field name="descripcion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="descripcion"/>
+	</field>
+	<field name="tipodoc" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="tipodoc"/>
+	</field>
+	<field name="numdoc" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="numdoc"/>
+	</field>
+	<field name="isreceipt" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="isreceipt"/>
+	</field>
+	<field name="valor" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="valor"/>
+	</field>
+	<field name="tercero" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="tercero"/>
+	</field>
+	<field name="actividad" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="actividad"/>
+	</field>
+	<field name="proyecto" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="proyecto"/>
+	</field>
+	<variable name="valor_1" class="java.math.BigDecimal" resetType="Group" resetGroup="cargo" calculation="Sum">
+		<variableExpression><![CDATA[$F{valor}]]></variableExpression>
+	</variable>
+	<variable name="diferencia" class="java.math.BigDecimal" resetType="None">
+		<variableExpression><![CDATA[$P{SaldoInicial}.add( $V{ingresos} ).add( $V{gastos} )]]></variableExpression>
+	</variable>
+	<variable name="valor_3" class="java.math.BigDecimal" resetType="Group" resetGroup="esingreso" calculation="Sum">
+		<variableExpression><![CDATA[$F{valor}]]></variableExpression>
+	</variable>
+	<variable name="ingresos" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{isreceipt}.equalsIgnoreCase("Y")?$F{valor}:new BigDecimal("0.00")]]></variableExpression>
+	</variable>
+	<variable name="gastos" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{isreceipt}.equalsIgnoreCase("N")?$F{valor}:new BigDecimal("0.00")]]></variableExpression>
+	</variable>
+	<group name="esingreso" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{isreceipt}]]></groupExpression>
+		<groupHeader>
+			<band height="41">
+				<staticText>
+					<reportElement x="17" y="23" width="80" height="18" uuid="25e23a69-caba-4d1a-8e29-7bf5689689b5"/>
+					<box leftPadding="1" rightPadding="1">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Fecha]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="422" y="23" width="118" height="18" uuid="b6283eee-3e38-49cf-98cd-b0d53b4eb83e"/>
+					<box leftPadding="1" rightPadding="1">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Descripción]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="721" y="23" width="56" height="18" uuid="34dc038a-4bcf-42a3-aa3c-2775d73c1c3f"/>
+					<box leftPadding="1" rightPadding="1">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Valor]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="630" y="23" width="91" height="18" uuid="a1369360-02ae-458d-8c45-db2c05877ce1"/>
+					<box leftPadding="1" rightPadding="1">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+					</textElement>
+					<text><![CDATA[No. Documento]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="540" y="23" width="90" height="18" uuid="daacc92d-51bb-49bd-9f05-7012c63bcbd3"/>
+					<box leftPadding="1" rightPadding="1">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Tipo Documento]]></text>
+				</staticText>
+				<textField>
+					<reportElement x="0" y="0" width="802" height="23" uuid="18cbfb62-537a-4193-8c1b-04d0e1165b62"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{isreceipt}.equalsIgnoreCase("N")?"GASTOS":"INGRESOS"]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="265" y="23" width="70" height="18" uuid="7523eab1-c6b4-415f-8d38-7a887c7c2a05"/>
+					<box leftPadding="1" rightPadding="1">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+					</textElement>
+					<text><![CDATA[C/Costos]]></text>
+				</staticText>
+				<textField>
+					<reportElement x="97" y="23" width="168" height="18" uuid="844f2e5d-0c27-4acd-bee4-ed5e1b683540"/>
+					<box leftPadding="1" rightPadding="1">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{isreceipt}.equalsIgnoreCase("N")?"Proveedor":"Cliente"]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="335" y="23" width="87" height="18" uuid="b02eabd2-901c-44cd-900b-89421e99b399"/>
+					<box leftPadding="1" rightPadding="1">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{isreceipt}.equalsIgnoreCase("N")?"Gasto":"Ingreso"]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="25">
+				<textField pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="709" y="3" width="69" height="20" uuid="774c9f63-cd9d-421c-9aab-e59bab73c524"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{isreceipt}.equalsIgnoreCase("N")?$V{valor_3}.negate():$V{valor_3}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="509" y="3" width="200" height="20" uuid="c81cb62d-b0bd-43a5-9d92-c8693f3158b2"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{isreceipt}.equalsIgnoreCase("N")?"TOTAL GASTOS:":"TOTAL INGRESOS:"]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="cargo">
+		<groupExpression><![CDATA[$F{cargo}]]></groupExpression>
+		<groupHeader>
+			<band height="13">
+				<printWhenExpression><![CDATA[false]]></printWhenExpression>
+				<textField isStretchWithOverflow="true">
+					<reportElement x="17" y="0" width="461" height="13" uuid="ceccdfc2-8fff-4904-96a0-1e4b8546b14d"/>
+					<textElement verticalAlignment="Middle">
+						<font size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cargo}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="13">
+				<printWhenExpression><![CDATA[false]]></printWhenExpression>
+				<textField>
+					<reportElement x="613" y="0" width="96" height="13" uuid="086868b3-5e3e-4393-a29d-e6e618c436ea"/>
+					<textElement>
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Subtotal:"]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="709" y="0" width="70" height="13" uuid="189cb247-091f-451c-bedb-bc373a2eac50"/>
+					<textElement textAlignment="Right">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{isreceipt}.equalsIgnoreCase("N")?$V{valor_1}.negate():$V{valor_1}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="17" y="0" width="80" height="13" uuid="e2cda416-1414-4fea-af24-5557c658acb3"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fecha}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="422" y="0" width="118" height="13" uuid="513751ce-5c21-4931-9d61-edaff1150544"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descripcion}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="721" y="0" width="56" height="13" uuid="07819ca7-45ce-4bf5-8600-2a020fd2610e"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{isreceipt}.equalsIgnoreCase("N")?$F{valor}.negate():$F{valor}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="630" y="0" width="91" height="13" uuid="c18ca79f-6c9d-4fc8-b9c0-0654c84160d7"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{numdoc}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="540" y="0" width="90" height="13" uuid="3d75d813-fa80-48da-8d54-6268b3f78a25"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tipodoc}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="96" y="0" width="170" height="13" uuid="f64e29d9-3092-4664-8b0c-defb2c2f610d"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tercero}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="265" y="0" width="70" height="13" uuid="2eda347e-e7f3-4d59-96c6-bd37ec9f2425"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{actividad}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="335" y="0" width="87" height="13" uuid="c6258bd5-1a48-4bb5-9ce1-17ded57c2936"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cargo}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="78" splitType="Stretch">
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="709" y="58" width="68" height="20" uuid="1ec7e846-9967-4fec-9833-6a010ed2a8ca"/>
+				<box>
+					<pen lineWidth="0.0"/>
+					<topPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$P{SaldoInicial}.add( $V{ingresos} ).add( $V{gastos} )]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="709" y="38" width="68" height="20" uuid="8c2d8964-8676-46e7-80e8-6d04eea3f192"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$P{SaldoInicial}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="709" y="-2" width="68" height="20" uuid="5abefaab-7dec-4f89-991c-f8671e76c6db"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$V{ingresos}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="709" y="18" width="68" height="20" uuid="6470a123-5922-4ebb-8f6d-9f86075cc216"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$V{gastos}.negate()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="510" y="38" width="199" height="20" uuid="8afef835-fbbf-4d5f-9bb7-c36fd9f4b6e0"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[FONDO ENTREGADO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="510" y="18" width="199" height="20" uuid="8d3d736c-f56f-4b28-81cd-02a81372e78e"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[TOTAL GASTO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="510" y="-2" width="199" height="20" uuid="f18781a8-1a01-4f50-9c75-e916c2f60647"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[TOTAL INGRESO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="510" y="58" width="199" height="20" uuid="117e34b0-20d4-4945-b559-514cc1355634"/>
+				<box>
+					<pen lineWidth="0.0"/>
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[DIFERENCIA]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

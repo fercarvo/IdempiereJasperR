@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteVentasCrosstab" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="2c588179-3a6d-43f9-9426-f7ba94ffad98">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Llantas"/>
+	<style name="Crosstab_CH" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.0" lineColor="#FFFFFF"/>
+			<topPen lineWidth="0.0" lineColor="#FFFFFF"/>
+			<leftPen lineWidth="0.0" lineColor="#FFFFFF"/>
+			<bottomPen lineWidth="0.0" lineColor="#FFFFFF"/>
+			<rightPen lineWidth="0.0" lineColor="#FFFFFF"/>
+		</box>
+	</style>
+	<style name="Crosstab_CG" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.0" lineColor="#FFFFFF"/>
+			<topPen lineWidth="0.0" lineColor="#FFFFFF"/>
+			<leftPen lineWidth="0.0" lineColor="#FFFFFF"/>
+			<bottomPen lineWidth="0.0" lineColor="#FFFFFF"/>
+			<rightPen lineWidth="0.0" lineColor="#FFFFFF"/>
+		</box>
+	</style>
+	<style name="Crosstab_CT" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.0" lineColor="#FFFFFF"/>
+			<topPen lineWidth="0.0" lineColor="#FFFFFF"/>
+			<leftPen lineWidth="0.0" lineColor="#FFFFFF"/>
+			<bottomPen lineWidth="0.0" lineColor="#FFFFFF"/>
+			<rightPen lineWidth="0.0" lineColor="#FFFFFF"/>
+		</box>
+	</style>
+	<style name="Crosstab_CD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.0" lineColor="#FFFFFF"/>
+			<topPen lineWidth="0.0" lineColor="#FFFFFF"/>
+			<leftPen lineWidth="0.0" lineColor="#FFFFFF"/>
+			<bottomPen lineWidth="0.0" lineColor="#FFFFFF"/>
+			<rightPen lineWidth="0.0" lineColor="#FFFFFF"/>
+		</box>
+	</style>
+	<parameter name="fecha_inicio" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="fecha_fin" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="AD_Org_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString language="SQL">
+		<![CDATA[select
+	org.name as org,
+	usr.name as vendedor,
+	dt.name as doctype_name,
+	to_char(i.dateinvoiced, 'yyyy/MM/dd') as dateinvoiced,
+	(CASE
+		WHEN dt.DocBaseType = 'ARC' THEN -i.grandtotal
+		ELSE i.grandtotal
+	END) as grandtotal
+from C_Invoice i
+JOIN C_DocType dt ON (dt.C_DocType_ID = i.C_DocTypeTarget_ID) and dt.DocBaseType in ('ARI', 'ARC')
+join AD_User usr on usr.AD_User_ID=i.SalesRep_ID and usr.isactive='Y'
+inner join AD_Org org on org.ad_org_id = i.ad_org_id and org.isactive='Y'
+where i.issotrx='Y' and i.DocStatus='CO'
+and i.dateinvoiced between date( $P{fecha_inicio} ) and date( $P{fecha_fin} )
+and i.ad_org_id= $P{AD_Org_ID} 
+order by vendedor]]>
+	</queryString>
+	<field name="org" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="org"/>
+	</field>
+	<field name="vendedor" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="vendedor"/>
+	</field>
+	<field name="doctype_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="doctype_name"/>
+	</field>
+	<field name="dateinvoiced" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="dateinvoiced"/>
+	</field>
+	<field name="grandtotal" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="grandtotal"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="75" splitType="Stretch">
+			<textField>
+				<reportElement x="274" y="14" width="240" height="12" uuid="e79e9a4c-51f6-4c1e-bc66-d771b9adf63a"/>
+				<textElement textAlignment="Center">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{org}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="274" y="0" width="240" height="14" uuid="abdb4c69-3973-4425-8db4-330e8540ec94"/>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[REPORTE DE VENTAS POR VENDEDOR]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="283" y="30" width="35" height="13" uuid="3663b4bf-0458-4c67-bb89-6d6b88fd370a"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Desde:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="414" y="30" width="33" height="13" uuid="dbe71650-ed53-47c3-8ccb-533e69ed7fc7"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Hasta:]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="318" y="30" width="78" height="13" uuid="05c0223a-8c71-49ca-809c-85db7118958b"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{fecha_inicio}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="447" y="30" width="67" height="13" uuid="a88acf9f-59f2-4c25-9bcd-b24834135cf7"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{fecha_fin}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="693" y="29" width="108" height="14" uuid="5bf7fe4f-fd6c-4586-b984-d823a6e52a64"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font size="7" isBold="false"/>
+				</textElement>
+				<text><![CDATA[reporteVentasVendedor.jrxml]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="731" y="0" width="53" height="14" uuid="eee5a350-be9c-495d-a4b2-b64ff929622b"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph rightIndent="1"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}+"  de "]]></textFieldExpression>
+			</textField>
+			<textField pattern="">
+				<reportElement x="731" y="15" width="70" height="14" uuid="f5ce6633-d5e4-434a-ae1a-672f906025c4"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("dd/MM/yyyy HH:mm").format( new java.util.Date() )]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="658" y="15" width="73" height="14" uuid="cf166a58-a630-4288-a1d5-574875ecc06e"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[Fecha de impresión:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="658" y="0" width="73" height="14" uuid="5e39d518-de47-496f-8faa-1c5ae0df5988"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[Página:        ]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" evaluationTime="Report">
+				<reportElement x="784" y="0" width="17" height="14" uuid="ad02d516-3337-4632-9c4c-8953783e9bc6"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph leftIndent="1"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" "+$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="658" y="29" width="35" height="14" uuid="60c9c3b2-7527-4ea7-a10a-223f052aafee"/>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font size="7" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Reporte:                   stock_max_min.jrxml]]></text>
+			</staticText>
+			<subreport>
+				<reportElement key="" x="0" y="0" width="100" height="75" isPrintInFirstWholeBand="true" uuid="add33830-59bf-41cc-95ba-0ce6b27e98f0"/>
+				<subreportParameter name="AD_Org_ID">
+					<subreportParameterExpression><![CDATA[$P{AD_Org_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["/reports/logorg.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</title>
+	<summary>
+		<band height="70" splitType="Stretch">
+			<crosstab>
+				<reportElement x="0" y="0" width="800" height="70" uuid="dfde7ce3-9cc7-429f-8140-62585a31ce42">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+					<property name="com.jaspersoft.studio.crosstab.style.header" value="Crosstab_CH"/>
+					<property name="com.jaspersoft.studio.crosstab.style.group" value="Crosstab_CG"/>
+					<property name="com.jaspersoft.studio.crosstab.style.total" value="Crosstab_CT"/>
+					<property name="com.jaspersoft.studio.crosstab.style.detail" value="Crosstab_CD"/>
+				</reportElement>
+				<rowGroup name="dateinvoiced" width="60" totalPosition="End">
+					<bucket class="java.lang.String">
+						<bucketExpression><![CDATA[$F{dateinvoiced}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents mode="Opaque" style="Crosstab_CH">
+							<textField>
+								<reportElement x="0" y="0" width="60" height="10" uuid="547e0d44-dca0-4379-9a8a-0ed0c3d7da8a"/>
+								<textElement>
+									<font size="7" isBold="true"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$V{dateinvoiced}]]></textFieldExpression>
+							</textField>
+						</cellContents>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents mode="Opaque" style="Crosstab_CT">
+							<staticText>
+								<reportElement x="0" y="0" width="60" height="10" uuid="99175615-29f1-4725-8033-fafa26856d6e"/>
+								<textElement>
+									<font size="7" isBold="true"/>
+								</textElement>
+								<text><![CDATA[Total Vendedor]]></text>
+							</staticText>
+						</cellContents>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="vendedor" height="20" totalPosition="End">
+					<bucket class="java.lang.String">
+						<bucketExpression><![CDATA[$F{vendedor}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents mode="Opaque" style="Crosstab_CH">
+							<textField>
+								<reportElement x="0" y="0" width="50" height="20" uuid="d34cb58f-b79e-4be0-a1ba-c2ff7545afbb"/>
+								<textElement textAlignment="Right">
+									<font size="7" isBold="true"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$V{vendedor}]]></textFieldExpression>
+							</textField>
+						</cellContents>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents mode="Opaque" style="Crosstab_CT">
+							<staticText>
+								<reportElement x="0" y="0" width="50" height="20" uuid="ff96599f-58d5-4cba-bbd1-36f5c22c8742"/>
+								<textElement textAlignment="Right">
+									<font size="7" isBold="true"/>
+								</textElement>
+								<text><![CDATA[Total Fecha]]></text>
+							</staticText>
+						</cellContents>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="grandtotal_MEASURE" class="java.math.BigDecimal" calculation="Sum">
+					<measureExpression><![CDATA[$F{grandtotal}]]></measureExpression>
+				</measure>
+				<crosstabCell width="50" height="10">
+					<cellContents mode="Opaque" style="Crosstab_CD">
+						<textField isStretchWithOverflow="true" pattern="#,##0.00#" isBlankWhenNull="true">
+							<reportElement x="0" y="0" width="50" height="10" uuid="4420b513-6d42-4963-96e1-718f17749e07"/>
+							<textElement textAlignment="Right">
+								<font size="7"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$V{grandtotal_MEASURE}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="50" height="10" columnTotalGroup="vendedor">
+					<cellContents mode="Opaque" style="Crosstab_CT">
+						<textField isStretchWithOverflow="true" pattern="#,##0.00#" isBlankWhenNull="true">
+							<reportElement x="0" y="0" width="50" height="10" uuid="42c8234d-a081-47ca-8abc-669551fb614d"/>
+							<textElement textAlignment="Right">
+								<font size="7" isBold="true"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$V{grandtotal_MEASURE}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="50" height="10" rowTotalGroup="dateinvoiced">
+					<cellContents mode="Opaque" style="Crosstab_CT">
+						<textField isStretchWithOverflow="true" pattern="#,##0.00#" isBlankWhenNull="true">
+							<reportElement x="0" y="0" width="50" height="10" uuid="90b44987-a084-4038-a40a-1fa4540e131f"/>
+							<textElement textAlignment="Right">
+								<font size="7" isBold="true"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$V{grandtotal_MEASURE}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="50" height="10" rowTotalGroup="dateinvoiced" columnTotalGroup="vendedor">
+					<cellContents mode="Opaque" style="Crosstab_CT"/>
+				</crosstabCell>
+			</crosstab>
+		</band>
+	</summary>
+</jasperReport>

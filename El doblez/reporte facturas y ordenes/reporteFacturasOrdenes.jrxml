@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteOrdenesTrabajoAuditoria" language="groovy" pageWidth="597" pageHeight="842" columnWidth="557" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a80ed23f-586d-4137-9775-4a3bd6032d6d">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="erp.eldoblez.ec"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="AD_Org_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="C_Activity_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="DateFrom" class="java.util.Date"/>
+	<parameter name="DateTo" class="java.util.Date"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[/*Actualizado 25/06/2018 query de subreporte Facturas, para poner negativo a las NC*/
+select ao.ad_org_id
+, ao.name organizacion
+, upper(a.name) actividad
+from AD_Org ao
+join c_activity a on a.ad_client_id=ao.ad_client_id
+and a.c_activity_id=$P{C_Activity_ID}
+and ao.ad_org_id=$P{AD_Org_ID}]]>
+	</queryString>
+	<field name="ad_org_id" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="ad_org_id"/>
+	</field>
+	<field name="organizacion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="organizacion"/>
+	</field>
+	<field name="actividad" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="actividad"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="75" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement x="152" y="16" width="240" height="13" uuid="ea9e4ea8-70ea-4060-b2b8-9e680a2f3476"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{organizacion}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="152" y="3" width="240" height="13" uuid="7eb7b280-2dde-4c91-b6c1-b8a7dfa6b566"/>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[REPORTE DE FACTURAS Y ORDENES]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="448" y="30" width="108" height="14" uuid="5c50869e-5755-4568-9cee-7f8718008c1c"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font size="7" isBold="false"/>
+				</textElement>
+				<text><![CDATA[reporteFacturasOrdenes.jrxml]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="486" y="1" width="53" height="14" uuid="5576f51a-d595-4ff4-930f-eb519c876af2"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph rightIndent="1"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}+"  de "]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="413" y="1" width="73" height="14" uuid="1239d607-f154-4ce8-9ca6-fdf69a2e5ed6"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[Página:        ]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" evaluationTime="Report">
+				<reportElement x="539" y="1" width="17" height="14" uuid="31f1083c-3bc3-4983-baf0-79a9b9600eef"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph leftIndent="1"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" "+$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="413" y="30" width="35" height="14" uuid="6995b4c1-f477-4f97-8905-c14c365930f8"/>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font size="7" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Reporte:                   stock_max_min.jrxml]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="413" y="16" width="73" height="14" uuid="7dc28da9-ade3-4338-aea1-8f5f9fcbda83"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[Fecha de impresión:]]></text>
+			</staticText>
+			<textField pattern="">
+				<reportElement x="486" y="16" width="70" height="14" uuid="a5787679-edd9-4e19-bac6-ac107611a873"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("dd/MM/yyyy HH:mm").format( new java.util.Date() )]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="249" y="30" width="143" height="14" uuid="36d6bff1-1bca-462b-b47f-194e53502354"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+					<paragraph leftIndent="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{actividad}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="152" y="30" width="97" height="14" uuid="5654ef8e-bc08-4ed1-bae7-1702410931b3"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Local:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="177" y="53" width="35" height="13" uuid="e948f9da-679c-4fc8-8f78-2b4f0f2d6daf"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Desde:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="301" y="53" width="33" height="13" uuid="b4ef9e3a-12fc-4a2d-8649-5cf3851f8e1c"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Hasta:]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="212" y="53" width="78" height="13" uuid="3c9a3f20-16e9-431d-a75f-5ef1ded187bc"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{DateFrom}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="334" y="53" width="78" height="13" uuid="d0ed3eae-e0f1-4565-908f-9988c8778524"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{DateTo}]]></textFieldExpression>
+			</textField>
+			<subreport>
+				<reportElement x="0" y="0" width="100" height="75" uuid="d60d885f-1a46-413e-a488-cfa28ffc379f"/>
+				<subreportParameter name="AD_Org_ID">
+					<subreportParameterExpression><![CDATA[$P{AD_Org_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["/reports/logorg.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</title>
+	<detail>
+		<band height="33" splitType="Stretch">
+			<subreport>
+				<reportElement x="0" y="0" width="557" height="33" uuid="0592d717-1619-4880-849c-a482cde83922"/>
+				<subreportParameter name="AD_Org_ID">
+					<subreportParameterExpression><![CDATA[$P{AD_Org_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="C_Activity_ID">
+					<subreportParameterExpression><![CDATA[$P{C_Activity_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="DateFrom">
+					<subreportParameterExpression><![CDATA[$P{DateFrom}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="DateTo">
+					<subreportParameterExpression><![CDATA[$P{DateTo}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "reporteFacturasOrdenesSubF.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="50" splitType="Stretch">
+			<subreport>
+				<reportElement x="0" y="17" width="557" height="33" uuid="21f82d1e-ce1d-41b3-b8fb-c3c9aa240a9b"/>
+				<subreportParameter name="AD_Org_ID">
+					<subreportParameterExpression><![CDATA[$P{AD_Org_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="C_Activity_ID">
+					<subreportParameterExpression><![CDATA[$P{C_Activity_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="DateFrom">
+					<subreportParameterExpression><![CDATA[$P{DateFrom}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="DateTo">
+					<subreportParameterExpression><![CDATA[$P{DateTo}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "reporteFacturasOrdenesSubO.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+</jasperReport>

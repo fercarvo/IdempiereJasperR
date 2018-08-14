@@ -1,0 +1,476 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ordenVenta" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a80ed23f-586d-4137-9775-4a3bd6032d6d">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="108"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Llantas"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="C_BPartner_ID" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[select 
+	txt.name as tipo_id,
+	cb.taxid,
+	cb.name,
+	txp.name as tipo_contribuyente,
+	cbg.name as grupo_tercero,
+	coalesce( cb.SO_CreditLimit, 0 ) as cupo_credito,
+	regla_p.value as regla_pago,
+	tp.name as termino_pago,
+	srep.name as sales_rep,
+	cat_t.name as categoria_tercero,
+	coalesce( fac_abiertas.total, 0 ) as fac_abiertas,
+	coalesce( cheques_postf.total, 0 ) as cheques_postf,
+	coalesce( anticipos.valor, 0 ) as anticipos
+from C_BPartner cb
+left join LCO_TaxIdType txt on txt.LCO_TaxIdType_ID = cb.LCO_TaxIdType_ID and txt.isactive = 'Y'
+left join LCO_TaxPayerType txp on txp.LCO_TaxPayerType_ID = cb.LCO_TaxPayerType_ID and txp.isactive = 'Y'
+left join C_BP_Group cbg on cbg.C_BP_Group_ID = cb.C_BP_Group_ID and cbg.isactive = 'Y'
+left join vw_referencia regla_p on regla_p.key = cb.PaymentRule and regla_p.tipo = '_Payment Rule'
+left join C_PaymentTerm tp on tp.C_PaymentTerm_ID = cb.C_PaymentTerm_ID and tp.isactive = 'Y'
+left join AD_User srep on srep.AD_User_ID = cb.SalesRep_ID and cb.isactive = 'Y'
+left join tb_categoria_tercero cat_t on cat_t.tb_categoria_tercero_ID = cb.tb_categoria_tercero_ID and cat_t.isactive = 'Y'
+left join (
+	select sum(invoiceopen(i.C_Invoice_ID, null)) as total, bp.C_BPartner_ID
+	from C_Invoice i
+	join C_BPartner bp on bp.C_BPartner_ID = i.C_BPartner_ID
+	group by 2
+) as fac_abiertas on fac_abiertas.C_BPartner_ID = cb.C_BPartner_ID
+left join (
+	select sum(p.PayAmt) as total, p.C_BPartner_ID  
+	from C_Payment p
+	join C_BPartner bp on bp.C_BPartner_ID = p.C_BPartner_ID
+	where p.isactive = 'Y' and p.esPosfechado = 'Y' and p.TenderType = 'K' and p.docstatus = 'CO' and p.isreceipt='Y'
+	group by 2
+) as cheques_postf on cheques_postf.C_BPartner_ID = cb.C_BPartner_ID
+left join ( /*Anticipos que ha hecho el cliente, no tocar query*/
+	select pay.c_bpartner_id, sum(pay.WriteOffAmt + pay.payamt - cobrado.valor) as valor
+	from C_Payment pay
+	left join (
+		select 
+			C_Payment_ID, sum(coalesce(aloc_line.amount, 0) + coalesce(aloc_line.WriteOffAmt, 0)) as valor
+		from C_AllocationLine as aloc_line
+		join C_AllocationHdr as aloc_hdr on  aloc_hdr.C_AllocationHdr_ID = aloc_line.C_AllocationHdr_ID
+			and aloc_hdr.isactive = 'Y'
+			and aloc_hdr.docstatus in ('CO')
+		where aloc_line.isactive = 'Y'
+		group by 1
+	) as cobrado on cobrado.C_Payment_ID = pay.C_Payment_ID
+	where pay.docstatus = 'CO' 
+		and pay.isreceipt = 'Y' 
+		and pay.isprepayment = 'Y'
+	group by 1		
+) as anticipos on anticipos.C_BPartner_ID = cb.C_BPartner_ID
+where cb.C_BPartner_ID = $P{C_BPartner_ID} ]]>
+	</queryString>
+	<field name="tipo_id" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="tipo_id"/>
+	</field>
+	<field name="taxid" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="taxid"/>
+	</field>
+	<field name="name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="name"/>
+	</field>
+	<field name="tipo_contribuyente" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="tipo_contribuyente"/>
+	</field>
+	<field name="grupo_tercero" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="grupo_tercero"/>
+	</field>
+	<field name="cupo_credito" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="cupo_credito"/>
+	</field>
+	<field name="regla_pago" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="regla_pago"/>
+	</field>
+	<field name="termino_pago" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="termino_pago"/>
+	</field>
+	<field name="sales_rep" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="sales_rep"/>
+	</field>
+	<field name="categoria_tercero" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="categoria_tercero"/>
+	</field>
+	<field name="fac_abiertas" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="fac_abiertas"/>
+	</field>
+	<field name="cheques_postf" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="cheques_postf"/>
+	</field>
+	<field name="anticipos" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="anticipos"/>
+	</field>
+	<title>
+		<band height="192">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="89" y="93" width="201" height="13" uuid="43c89f02-7ca4-4a2e-ae53-86a1f3299889"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font size="7" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tipo_id}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="93" width="89" height="13" uuid="a727163b-6191-435d-acef-69814bcd391d"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tipo ID]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="89" y="119" width="201" height="13" uuid="c6be2e38-216e-4d68-aa40-726b5a6f75e6"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font size="7" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{grupo_tercero}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="360" y="93" width="194" height="13" uuid="8468a472-855a-49f1-8f56-9842944bd55a"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{termino_pago}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="415" y="0" width="140" height="80" uuid="0f3f0599-41d2-42cf-9e9b-aeafeeee3ff9"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Information Socio de Negocio]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="89" y="80" width="201" height="13" uuid="6f7b7ad0-e127-4d6b-ae09-9a2d54f46a33"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font size="7" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{taxid}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="360" y="80" width="194" height="13" uuid="d7d1136f-08ed-4745-8759-623680d3bd96"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{regla_pago}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="80" width="89" height="13" uuid="30f3a4b3-1aa8-45db-9bb2-8ab9177325e8"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[RUC/CI]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="106" width="89" height="13" uuid="f56a5cbd-800f-43bd-8e71-db35a20bfb84"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tipo Contribuyente]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="89" y="106" width="201" height="13" uuid="02e3c9e5-f92e-40a1-9bf5-319748005e6d"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tipo_contribuyente}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="119" width="89" height="13" uuid="031762e2-677d-41e4-be07-67876d6fb17f"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Grupo Tercero]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="290" y="93" width="70" height="13" uuid="7a01b1df-d42b-4e39-9a46-31436b360aa1"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Término Pago:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="290" y="80" width="70" height="13" uuid="97921d01-e4e2-4065-af67-7ab5e32b0f9a"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Regla Pago:]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="0" y="0" width="415" height="80" uuid="21b6f7c6-cefe-4582-bbdc-b35aef54600a"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="15" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="290" y="106" width="70" height="13" uuid="df9c03da-335a-4867-b783-af42d69c67a8"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Rep. Comercial]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="360" y="106" width="194" height="13" uuid="3ad7ed99-0ec2-4358-aa8c-01ba168d3490"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{sales_rep}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="290" y="119" width="80" height="13" uuid="fc1d4a3d-edc8-4734-94ab-0a453ed10039"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Categoria Tercero]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="370" y="119" width="184" height="13" uuid="afafc272-9849-4369-9e48-95103a93b2c0"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{categoria_tercero}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="140" width="89" height="13" uuid="0e84768e-43fa-451c-9d67-8dcc586600d8"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CUPO ASIGNADO:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="153" width="89" height="13" uuid="752d14f2-33b4-4092-95ac-ba1b710feed0"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[FAC. ABIERTAS]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="89" y="140" width="111" height="13" uuid="60bafea3-ac33-4ebc-8188-552bb2aa883b"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cupo_credito}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="89" y="153" width="111" height="13" uuid="7f2561bf-44ce-4371-a8a3-cb6d206c51e7"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fac_abiertas}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="166" width="89" height="13" uuid="4f004396-8178-4e74-96d0-61345125d73d"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ANTICIPOS:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="179" width="112" height="13" uuid="6b85d9b4-3c54-431f-8d02-d4dc081d183d"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CHEQUES POSFECHADOS]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="89" y="166" width="111" height="13" uuid="3aa8b61a-95be-4be0-8e4a-0ca30d76bba2"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{anticipos}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="112" y="179" width="88" height="13" uuid="65146b04-4356-4e3d-9118-9041e8ae6260"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cheques_postf}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="214" y="140" width="76" height="26" uuid="79c7c0ff-d06f-4da3-badb-b3cc35f3a75f"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["CUPO CREDITO DISPONIBLE"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="290" y="140" width="90" height="26" uuid="b19a9aba-de9f-4a15-88b6-9dae4fe583b1"/>
+				<box topPadding="1" leftPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cupo_credito}.add( $F{anticipos} ).subtract( $F{fac_abiertas} ).subtract( $F{cheques_postf} )]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<summary>
+		<band height="50"/>
+	</summary>
+</jasperReport>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="notaEntregaBody" pageWidth="487" pageHeight="802" columnWidth="487" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="22a1fbe9-fa66-4cac-973e-a3fb4021f03e">
+	<property name="ireport.zoom" value="1.652892561983471"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="M_InOut_ID" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[SELECT
+ trunc(iol.QtyEntered) AS cantidad,
+ olt.PriceEntered AS precioUnitario,
+ ol.linenetamt,
+COALESCE(olt.c_bpartner_product_descriptio,iol.description,ol.description,c.name,p.description,p.name) as productdescription
+FROM M_InOut io
+join m_inoutline iol on iol.m_inout_id=io.m_inout_id and iol.isactive='Y'
+left JOIN c_order_linetax_vt olt on olt.c_orderline_id=iol.c_orderline_id and olt.IsDescription = 'N' and olt.ad_language='es_EC'
+left JOIN c_orderline ol on ol.c_orderline_id=olt.c_orderline_id
+ LEFT JOIN M_Product p ON p.M_Product_ID = iol.M_Product_ID
+ LEFT JOIN c_charge c ON iol.c_charge_id = c.c_charge_id
+WHERE io.m_inout_id=$P{M_InOut_ID} and io.isactive='Y'
+ORDER BY olt.line]]>
+	</queryString>
+	<field name="cantidad" class="java.math.BigDecimal"/>
+	<field name="preciounitario" class="java.math.BigDecimal"/>
+	<field name="linenetamt" class="java.math.BigDecimal"/>
+	<field name="productdescription" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="15">
+			<rectangle>
+				<reportElement stretchType="RelativeToBandHeight" mode="Transparent" x="0" y="0" width="485" height="15" isPrintWhenDetailOverflows="true" uuid="f690e1bf-e954-498b-a198-507644a32c9a"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="0" y="0" width="46" height="15" uuid="66de6189-c6cc-41ac-bb70-1235c65e42ed"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cantidad]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="46" y="0" width="285" height="15" uuid="231b5b52-27db-450e-a0c5-33ee79ea0dc4"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Descripción]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="331" y="0" width="68" height="15" uuid="2e483f3a-e94d-49d0-a825-efbb3403099e"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Precio Unitario]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="399" y="0" width="86" height="15" uuid="31a3d8f2-ff12-44f5-8950-eb886281cb91"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Precio Total]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="13">
+			<textField isStretchWithOverflow="true" pattern="###0;-###0" isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="46" height="13" isPrintWhenDetailOverflows="true" uuid="d65ef855-7d4b-467a-93f8-dc72eb904921"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cantidad}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="331" y="0" width="68" height="13" isPrintWhenDetailOverflows="true" uuid="48e7aed6-061e-4533-b809-bfd81b0f3bc1"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{preciounitario}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="46" y="0" width="285" height="13" isPrintWhenDetailOverflows="true" uuid="07839300-eb47-46f5-bddf-3ea5aabe6ba3"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{productdescription}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="399" y="0" width="86" height="13" uuid="92506a18-a149-468c-b59d-baef664211cc"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{linenetamt}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="logo" printOrder="Horizontal" pageWidth="400" pageHeight="500" columnWidth="400" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isIgnorePagination="true" uuid="18ce69d5-e394-4f31-adad-90b60595297d">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="SERVIHELP"/>
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<parameter name="AD_Org_ID" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[select binarydata from ad_orginfo o
+join ad_image i on i.ad_image_id=o.logo_id
+where o.ad_org_id=$P{AD_Org_ID}]]>
+	</queryString>
+	<field name="binarydata" class="java.io.InputStream"/>
+	<variable name="logo" class="java.io.InputStream">
+		<variableExpression><![CDATA[$F{binarydata}]]></variableExpression>
+	</variable>
+	<detail>
+		<band height="99">
+			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.spreadsheet.SpreadsheetLayout"/>
+			<image scaleImage="RetainShape" hAlign="Center" vAlign="Middle" isUsingCache="true" onErrorType="Blank">
+				<reportElement positionType="Float" stretchType="RelativeToBandHeight" x="0" y="0" width="400" height="99" uuid="b70101f9-9679-4a00-970c-28840028e92d"/>
+				<imageExpression><![CDATA[$F{binarydata}]]></imageExpression>
+			</image>
+		</band>
+	</detail>
+</jasperReport>

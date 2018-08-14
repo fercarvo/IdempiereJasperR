@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="facturaServihelp" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a80ed23f-586d-4137-9775-4a3bd6032d6d">
+	<property name="ireport.zoom" value="1.9487171000000016"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="144"/>
+	<style name="table">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 2">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 2_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 2_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 2_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 3">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 3_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 3_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 3_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 4">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 4_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 4_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 4_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 5">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 5_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 5_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 5_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<parameter name="RECORD_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+ 	 to_char(i.dateinvoiced,
+	'DD/MM/YYYY'::text) AS fechaEmision,
+	bp.name AS razonSocialComprador,
+	bp.taxid AS identificacionComprador,
+	trim(COALESCE(l.address1,'') ||' '|| COALESCE(l.address2,'')) as direccioncliente,
+	COALESCE(bpl.phone,u.phone) as telefonocliente,
+	u.name personacontacto,
+	p.value codigo,
+	coalesce(il.description,c.name,p.description,p.name) as productdescription,
+	trunc(il.qtyinvoiced) as cantidad,
+	il.priceactual as preciounitario,
+	il.linenetamt AS precioTotalSinImpuesto,
+	(SELECT
+	COALESCE(SUM(it.TaxBaseAmt),0) AS Imponible
+	FROM C_InvoiceTax it
+	JOIN C_Tax t ON t.C_Tax_ID = it.C_Tax_ID and t.LEC_TaxTypeSRI = '2' and t.rate = 0::numeric
+	WHERE it.C_Invoice_ID =i.C_Invoice_ID) as subtotalsinimpuesto,
+	CASE WHEN (SELECT
+	count(*)
+	FROM C_InvoiceTax it WHERE it.C_Invoice_ID =i.C_Invoice_ID AND it.isactive='Y')>0 THEN (SELECT
+	COALESCE(SUM(it.TaxBaseAmt),0) AS Imponible
+
+FROM C_InvoiceTax it
+JOIN C_Tax t ON t.C_Tax_ID = it.C_Tax_ID and t.LEC_TaxTypeSRI = '2' and t.rate > 0::numeric
+WHERE it.C_Invoice_ID =i.C_Invoice_ID) ELSE i.totallines END as subtotalconimpuesto,
+(SELECT
+ COALESCE(SUM(it.TaxAmt),0) AS valor
+FROM C_InvoiceTax it
+ JOIN C_Tax t ON t.C_Tax_ID = it.C_Tax_ID and t.LEC_TaxTypeSRI = '2'
+WHERE it.C_Invoice_ID =i.C_Invoice_ID) as iva,
+i.grandtotal,
+i.totallines,
+(i.dateacct::timestamp + (tp.netdays ||' days')::interval)::date as fvencimiento,
+(select sum(case when pricelist<>0 then (pricelist-priceentered)*qtyentered else 0 end) from c_invoiceline where c_invoice_id = i.c_invoice_id ) totalDescuento,
+	sri_i.documentno as invoice_modificado
+FROM C_Invoice i
+JOIN C_InvoiceLine il ON il.C_Invoice_ID = i.C_Invoice_ID and il.isactive='Y'
+ JOIN C_BPartner bp ON bp.C_BPartner_ID = i.C_BPartner_ID
+ JOIN C_BPartner_Location bpl ON bpl.C_BPartner_Location_ID = i.C_BPartner_Location_ID and bpl.isactive='Y'
+ JOIN C_Location l ON l.C_Location_ID = bpl.C_Location_ID and l.isactive='Y'
+ LEFT JOIN m_product p on p.m_product_id=il.m_product_id
+ LEFT JOIN c_charge c on c.c_charge_id=il.c_charge_id
+left join ad_user u on  u.ad_user_id=i.ad_user_id
+left join C_PaymentTerm tp on tp.C_PaymentTerm_id=i.C_PaymentTerm_id
+left join C_Invoice as sri_i on sri_i.c_invoice_id = i.SRI_RefInvoice_ID
+WHERE i.C_Invoice_ID = $P{RECORD_ID}
+order by il.line]]>
+	</queryString>
+	<field name="fechaemision" class="java.lang.String"/>
+	<field name="razonsocialcomprador" class="java.lang.String"/>
+	<field name="identificacioncomprador" class="java.lang.String"/>
+	<field name="direccioncliente" class="java.lang.String"/>
+	<field name="telefonocliente" class="java.lang.String"/>
+	<field name="personacontacto" class="java.lang.String"/>
+	<field name="codigo" class="java.lang.String"/>
+	<field name="productdescription" class="java.lang.String"/>
+	<field name="cantidad" class="java.math.BigDecimal"/>
+	<field name="preciounitario" class="java.math.BigDecimal"/>
+	<field name="preciototalsinimpuesto" class="java.math.BigDecimal"/>
+	<field name="subtotalsinimpuesto" class="java.math.BigDecimal"/>
+	<field name="subtotalconimpuesto" class="java.math.BigDecimal"/>
+	<field name="iva" class="java.math.BigDecimal"/>
+	<field name="grandtotal" class="java.math.BigDecimal"/>
+	<field name="totallines" class="java.math.BigDecimal"/>
+	<field name="fvencimiento" class="java.sql.Date"/>
+	<field name="totaldescuento" class="java.math.BigDecimal"/>
+	<field name="invoice_modificado" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="165" splitType="Stretch">
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement uuid="21cd8fed-d37e-4643-b10f-6bfd1d36fa36" x="60" y="80" width="184" height="13"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="false" isItalic="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fechaemision}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="37244482-bd2a-458b-9764-8830546a8c93" x="37" y="93" width="297" height="13"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="false" isItalic="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{razonsocialcomprador}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="bce05933-9af0-4fda-9d9d-9d88efa03097" x="37" y="120" width="207" height="13"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="false" isItalic="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{direccioncliente}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="218628a8-8739-4275-aeb7-f8563ab4fe1e" x="260" y="106" width="88" height="13"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="false" isItalic="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{telefonocliente}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="55f105ff-c516-4e00-aa12-f794feebf6b7" x="37" y="106" width="207" height="13"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="false" isItalic="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{identificacioncomprador}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="c4ef28e8-5f3c-4156-b93e-2835043b290e" x="420" y="116" width="127" height="13"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="false" isItalic="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{invoice_modificado}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="0cc02c36-2e72-41d3-9086-145c64aa339a" x="-21" y="0" width="816" height="20"/>
+				<textElement/>
+				<text><![CDATA[01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 49 ]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="2fe78c81-e422-4bb7-a381-e2d0b2eed21c" x="60" y="0" width="298" height="13" isPrintWhenDetailOverflows="true"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{productdescription}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement uuid="b5e5a107-dd2a-499e-8878-32f2bee2c757" x="358" y="0" width="74" height="13"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{preciounitario}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement uuid="8a6fe8a3-7258-4ed5-a8a9-61866b9937ae" x="432" y="0" width="67" height="13"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{preciototalsinimpuesto}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="7bec4890-4d15-4dc1-9371-0dee9a4c5010" x="-10" y="0" width="30" height="13"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cantidad}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="508" splitType="Stretch">
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement uuid="d704bfed-4ddd-44b5-8cfb-313d0f360eff" x="388" y="50" width="111" height="16"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{iva}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement uuid="50371b96-9975-4682-9ef3-7f93c489cd23" x="388" y="23" width="111" height="16"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{totallines}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement uuid="c4b29d70-f65f-4bfe-89cd-a4d88beaec99" x="388" y="66" width="111" height="16"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{grandtotal}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

@@ -1,0 +1,534 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteActivosFijos" pageWidth="1500" pageHeight="595" orientation="Landscape" columnWidth="1460" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" whenResourceMissingType="Key" isIgnorePagination="true" uuid="571bf269-744d-4829-b7fc-844a11f72dcc">
+	<property name="ireport.zoom" value="1.771561000000001"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Llantas"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="541"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="445"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<parameter name="AD_Org_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="A_Asset_Group_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select
+	a.A_Asset_ID,
+	org.name as org,
+	null as proveedor,
+	a.InventoryNo, --documentno
+	coalesce(ag.name, ag.description, ag.help) as grupo,
+	a.name as nombreActivo,
+	(
+		select fact.documentno from A_Asset_Addition acad
+		inner join C_Invoice fact on fact.C_Invoice_ID = acad.C_Invoice_ID
+		where acad.A_Asset_ID = a.A_Asset_ID
+		limit 1
+	) as documentno,
+	a.IsOwned,
+	(	select name from C_BPartner
+		where C_BPartner_ID = a.Lease_BPartner_ID
+	) as propietario,
+	a.IsInPosession,
+	pro.name as producto,
+	(case
+		when a.IsInPosession = 'Y'  then (
+				select name from C_BPartner
+				where a.C_BPartnerSR_ID = C_BPartner.C_BPartner_ID
+		) else (
+				select name from AD_User
+				where a.AD_User_ID = AD_User.AD_User_ID
+		) 
+	end ) as usuario,
+	coalesce(ptn.name, ptn.name2) as custodio,
+	ptn_loc.name as loc_custodio,
+	(CASE 
+		when a.M_Locator_ID is not null then ( select value from M_locator
+			where M_locator.M_locator_ID = a.M_locator_ID
+		) else ( select coalesce(l.Address1, l.Address2) || ' ' || l.City  
+			from C_Location l
+			where a.C_Location_ID = l.C_Location_ID )			
+	END) as localizacion2,
+	
+	a.LocationComment,
+	coalesce(marca.name, marca.description) as marca,
+	a.modelo as modelo,
+	a.SerNo as serie,
+	costos.A_Asset_Cost as costoActivo,
+	costos.A_Accumulated_Depr as depreciacionAcumulada,
+	costos.a_asset_remaining as montoRemanente,
+	costos.DateAcct as ultimadepreciacion,
+	(	select dateacct from A_Depreciation_Exp
+		where a_asset_id = a.A_Asset_ID and processed = 'N' and isactive = 'Y'
+		order by dateacct limit 1
+	) as proxFechaDepreciacion,
+	(	select expense from A_Depreciation_Exp
+		where a_asset_id = a.A_Asset_ID and processed = 'N' and isactive = 'Y'
+		order by dateacct limit 1
+	) as valor_proxFechaDepreciacion,
+	(	select count(*) from A_Depreciation_Exp
+		where a_asset_id = a.A_Asset_ID 
+	 	and processed = 'N' and isactive = 'Y'
+	)as faltantesProcesar
+from A_Asset as a
+inner join ad_org as org on org.ad_org_id = a.ad_org_id
+inner join a_asset_group as ag on ag.a_asset_group_id = a.a_asset_group_id
+inner join M_Product as pro on pro.m_product_id = a.m_product_id
+left join tb_marca as marca on marca.tb_marca_ID = a.tb_marca_ID
+left join A_Depreciation_Workfile as costos on costos.a_asset_id = a.a_asset_id
+left join C_BPartner ptn on ptn.C_BPartner_ID = a.C_BPartner_ID
+left join C_BPartner_Location ptn_loc on ptn_loc.C_BPartner_Location_ID = a.C_BPartner_Location_ID
+where a.isactive = 'Y'
+and a.AD_Org_ID =  $P{AD_Org_ID} 
+and coalesce( $P{A_Asset_Group_ID} , -1) in (ag.A_Asset_Group_ID, -1)
+order by grupo, nombreActivo]]>
+	</queryString>
+	<field name="a_asset_id" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="a_asset_id"/>
+	</field>
+	<field name="org" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="org"/>
+	</field>
+	<field name="proveedor" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="proveedor"/>
+	</field>
+	<field name="inventoryno" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="inventoryno"/>
+	</field>
+	<field name="grupo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="grupo"/>
+	</field>
+	<field name="nombreactivo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="nombreactivo"/>
+	</field>
+	<field name="documentno" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="documentno"/>
+	</field>
+	<field name="isowned" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="isowned"/>
+	</field>
+	<field name="propietario" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="propietario"/>
+	</field>
+	<field name="isinposession" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="isinposession"/>
+	</field>
+	<field name="producto" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="producto"/>
+	</field>
+	<field name="usuario" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="usuario"/>
+	</field>
+	<field name="custodio" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="custodio"/>
+	</field>
+	<field name="loc_custodio" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="loc_custodio"/>
+	</field>
+	<field name="localizacion2" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="localizacion2"/>
+	</field>
+	<field name="locationcomment" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="locationcomment"/>
+	</field>
+	<field name="marca" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="marca"/>
+	</field>
+	<field name="modelo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="modelo"/>
+	</field>
+	<field name="serie" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="serie"/>
+	</field>
+	<field name="costoactivo" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="costoactivo"/>
+	</field>
+	<field name="depreciacionacumulada" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="depreciacionacumulada"/>
+	</field>
+	<field name="montoremanente" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="montoremanente"/>
+	</field>
+	<field name="ultimadepreciacion" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="ultimadepreciacion"/>
+	</field>
+	<field name="proxfechadepreciacion" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="proxfechadepreciacion"/>
+	</field>
+	<field name="valor_proxfechadepreciacion" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="valor_proxfechadepreciacion"/>
+	</field>
+	<field name="faltantesprocesar" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="faltantesprocesar"/>
+	</field>
+	<variable name="SumaCostoActivo" class="java.math.BigDecimal" resetType="Group" resetGroup="GrupoActivo" calculation="Sum">
+		<variableExpression><![CDATA[$F{costoactivo}]]></variableExpression>
+	</variable>
+	<variable name="SumaDepreciacion" class="java.math.BigDecimal" resetType="Group" resetGroup="GrupoActivo" calculation="Sum">
+		<variableExpression><![CDATA[$F{depreciacionacumulada}]]></variableExpression>
+	</variable>
+	<variable name="SumaMontoRemanente" class="java.math.BigDecimal" resetType="Group" resetGroup="GrupoActivo" calculation="Sum">
+		<variableExpression><![CDATA[$F{montoremanente}]]></variableExpression>
+	</variable>
+	<variable name="SumaValorProxDep" class="java.math.BigDecimal" resetType="Group" resetGroup="GrupoActivo" calculation="Sum">
+		<variableExpression><![CDATA[$F{valor_proxfechadepreciacion}]]></variableExpression>
+	</variable>
+	<group name="GrupoActivo">
+		<groupExpression><![CDATA[$F{grupo}]]></groupExpression>
+		<groupHeader>
+			<band height="14">
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="0" width="131" height="14" uuid="85d1bfe1-aa79-42a8-9b92-598ecac51464"/>
+					<textElement>
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{grupo}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="13">
+				<staticText>
+					<reportElement x="967" y="0" width="64" height="13" uuid="37300c1a-4814-410b-932e-2a9492a22bac"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Total:]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement x="1031" y="0" width="64" height="13" uuid="045456a4-81c0-417e-9db4-add771e68efc"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{SumaCostoActivo}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement x="1095" y="0" width="69" height="13" uuid="f65a0a5d-191b-4da1-b3aa-2bc446fecf45"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{SumaDepreciacion}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+					<reportElement x="1164" y="0" width="57" height="13" uuid="2d391147-155b-45c1-8b8e-0a6331de5c06"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{SumaMontoRemanente}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00#" isBlankWhenNull="true">
+					<reportElement x="1279" y="0" width="50" height="13" uuid="0801b077-b31a-4d3e-aa42-3cfb9b0cf40d"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{SumaValorProxDep}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="28" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="131" height="14" isPrintWhenDetailOverflows="true" uuid="95fc593d-1dd6-4873-8f6e-a403530a4d4a"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Reporte Activos Fijos]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="0" y="14" width="131" height="14" uuid="00856ea7-5538-4d22-8e1e-44adcedfd0e0"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{org}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="24" splitType="Stretch">
+			<staticText>
+				<reportElement x="131" y="0" width="152" height="24" uuid="2f9b7f54-7462-460e-ad3d-d40136a80c1d"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Producto]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="839" y="0" width="64" height="24" uuid="bb0b2561-29c3-4a42-960b-09e8ca5c8883"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<text><![CDATA[Marca]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="131" height="24" uuid="769520e7-dd6b-4a32-8578-699a5e0f3f33"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cod. Inventario]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="903" y="0" width="64" height="24" uuid="9cd5de7e-0519-48f9-8583-cf239e32091b"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<text><![CDATA[Modelo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="967" y="0" width="64" height="24" uuid="48eaf621-57c1-4054-9970-52ed3cc4fd44"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<text><![CDATA[Placa / Serie]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1031" y="0" width="64" height="24" uuid="8a05e2a0-10d1-4299-88bd-4f66c2e69e47"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<text><![CDATA[Costo Activo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1095" y="0" width="69" height="24" isPrintWhenDetailOverflows="true" uuid="74e49a2c-062a-4693-af0d-070f6e1458f2"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<text><![CDATA[Depreciación acumulada]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1164" y="0" width="57" height="24" isPrintWhenDetailOverflows="true" uuid="f80b006e-7767-485e-997d-0d08259cfef4"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<text><![CDATA[Monto Remanente]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="283" y="0" width="55" height="24" uuid="d03c9e7f-ec83-4b4a-b25b-31d810bafdeb"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Propiedad]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="338" y="0" width="70" height="24" uuid="f40bf489-9359-4f37-b173-e7313af283a1"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Posesión]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="596" y="0" width="123" height="24" uuid="deafe4d0-e6bc-4e9c-98f6-3292934a9a67"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Ubicación / Dirección]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="719" y="0" width="120" height="24" uuid="43d226e6-0688-4664-98cc-56e0c9dfeb7b"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Referencia Ubicación]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="408" y="0" width="80" height="24" uuid="3738e6e8-17b8-4208-b989-1e342088c4d3"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Custodio]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="488" y="0" width="108" height="24" uuid="0fc868c2-075d-4977-b3fa-7c6827800e3b"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Usuario]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1380" y="0" width="80" height="24" uuid="f6fb1a1c-8170-4e89-baa5-8139e9b6297f"/>
+				<box leftPadding="2"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<text><![CDATA[Documento]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1329" y="0" width="51" height="24" uuid="d01627f1-1efb-4a24-ae81-c07f90390ae1"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<text><![CDATA[Por Depreciar]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1221" y="0" width="58" height="24" isPrintWhenDetailOverflows="true" uuid="c8eee1c6-e796-44f9-9017-ecda5a35ea23"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<text><![CDATA[Próxima Depreciación]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1279" y="0" width="50" height="24" isPrintWhenDetailOverflows="true" uuid="dd95d341-f661-4aee-b267-dd11a59ae9ad"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="6" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<text><![CDATA[Valor Próx. Depreciación]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="18" splitType="Stretch">
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="131" height="13" uuid="2e0d5023-d706-44f6-bc49-acae23495a38"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{inventoryno}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="131" y="0" width="152" height="13" isPrintWhenDetailOverflows="true" uuid="d47f9410-ed49-43ec-811b-852d29f666c4"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nombreactivo}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="839" y="0" width="64" height="13" uuid="4bb3418a-b145-440d-b267-52deddc6075b"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{marca}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="967" y="0" width="64" height="13" uuid="17a0bf85-ed99-450a-a30b-3b8ec1270e69"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{serie}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="1031" y="0" width="64" height="13" uuid="2ef89681-576c-4057-bd18-23b558053263"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{costoactivo}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="1095" y="0" width="69" height="13" uuid="dccc1f62-e169-4a8c-8769-3c4302c49d3b"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{depreciacionacumulada}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="1164" y="0" width="57" height="13" uuid="23570939-3e2c-487a-bb0a-7c47ea9387f5"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{montoremanente}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="903" y="0" width="64" height="13" uuid="95a7669b-79f8-423e-9d75-2a3773716842"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{modelo}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="283" y="0" width="55" height="13" isPrintWhenDetailOverflows="true" uuid="84e69fb4-e5c1-49ee-80a1-2c64f5957a00"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{isowned}.equals( "Y" ) ? "Propio" : "Tercero"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="338" y="0" width="70" height="13" isPrintWhenDetailOverflows="true" uuid="9dc62a27-ebec-48be-a64e-2a715a97a189"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{isinposession}.equals( "Y" ) ? "En Posesión" : "Tercero"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="596" y="0" width="123" height="13" isPrintWhenDetailOverflows="true" uuid="9c5892b9-c8fd-4cf3-b85c-a13586a53e05"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{isinposession}.equals( "Y" ) ? $F{localizacion2}  :  $F{loc_custodio}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="719" y="0" width="120" height="13" isPrintWhenDetailOverflows="true" uuid="61ed82a1-28ce-45e5-8d67-025934c49df2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{locationcomment}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="408" y="0" width="80" height="13" isPrintWhenDetailOverflows="true" uuid="83e64212-490e-43c8-9475-f1d95dae351a"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{custodio}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="488" y="0" width="108" height="13" isPrintWhenDetailOverflows="true" uuid="9f60c950-41b5-452c-a3f5-c8489b25b99d"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{usuario}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="1380" y="0" width="80" height="13" uuid="3524297c-5669-4637-9427-b4cc2685f32d"/>
+				<box leftPadding="2"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{documentno}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="1221" y="0" width="58" height="13" uuid="ebb78207-2988-4b19-9e37-a8fabe84ba99"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{proxfechadepreciacion}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.###" isBlankWhenNull="true">
+				<reportElement x="1329" y="0" width="51" height="13" uuid="da8c63e5-b9a6-4be9-84a6-24947c0b660a"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{faltantesprocesar}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement x="1279" y="0" width="50" height="13" uuid="e2dee149-962c-4a12-be3a-3eb896386fc4"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{valor_proxfechadepreciacion}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

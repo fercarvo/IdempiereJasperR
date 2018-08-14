@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="SRI_Factura100RideDet" pageWidth="555" pageHeight="802" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="22a1fbe9-fa66-4cac-973e-a3fb4021f03e">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="INDUVIS"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="C_Invoice_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[0]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+ 	COALESCE(p.value, '0') AS codigoPrincipal,
+	0::text AS codigoAuxiliar,
+ 	ilt.name AS descripcion,
+	trunc(ilt.qtyinvoiced) AS cantidad,
+ 	/*ilt.priceactual AS precioUnitario, */
+ 	(CASE
+		WHEN il.pricelist > il.priceactual AND il.pricelist <> 0::numeric THEN il.pricelist
+		ELSE il.priceactual
+	END) as precioUnitario,
+ 	(CASE 
+		WHEN il.pricelist > il.priceactual AND il.pricelist <> 0::numeric 
+		THEN round((il.pricelist - il.priceactual)*il.QtyEntered,2)
+    	ELSE 0
+	END) as descuento,
+  	(CASE
+        WHEN il.pricelist > il.priceactual AND il.pricelist <> 0::numeric THEN  round(il.pricelist*il.QtyEntered,2)
+        ELSE il.linenetamt
+    END) as precioTotalSinImpuesto,
+ 	/*ilt.linenetamt AS precioTotalSinImpuesto,*/
+ 	COALESCE(t.LEC_TaxTypeSRI, '0') AS codigo,
+ 	CASE
+     WHEN t.LEC_TaxTypeSRI = '2' THEN
+       CASE
+         WHEN t.rate = 0::numeric THEN '0'
+         WHEN t.rate = 12::numeric THEN '2'
+         ELSE '6'
+       END
+     WHEN t.LEC_TaxTypeSRI = '3' THEN
+       '0000'
+     ELSE '0'
+   END AS codigoPorcentaje
+  , t.rate AS tarifa
+  , ilt.linenetamt AS baseImponible
+  , round(ilt.linenetamt * t.rate / 100, 2) AS valor
+  , ilt.description AS descripcion1
+  , t.name AS razon
+, COALESCE(il.description,ilt.c_bp_product_description,p.description,p.name,c.name) as productdescription
+FROM c_invoice_linetax_vt ilt
+JOIN C_InvoiceLine il ON il.C_InvoiceLine_ID = ilt.C_InvoiceLine_ID
+ JOIN C_Tax t ON t.C_Tax_ID = ilt.C_Tax_ID
+ LEFT JOIN M_Product p ON p.M_Product_ID = ilt.M_Product_ID
+ LEFT JOIN c_charge c ON ilt.c_charge_id = c.c_charge_id
+WHERE ilt.C_Invoice_ID = $P{C_Invoice_ID} and ilt.IsDescription = 'N' and ilt.ad_language='es_EC'
+ORDER BY ilt.line]]>
+	</queryString>
+	<field name="codigoprincipal" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="codigoprincipal"/>
+	</field>
+	<field name="codigoauxiliar" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="codigoauxiliar"/>
+	</field>
+	<field name="descripcion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="descripcion"/>
+	</field>
+	<field name="cantidad" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="cantidad"/>
+	</field>
+	<field name="preciounitario" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="preciounitario"/>
+	</field>
+	<field name="descuento" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="descuento"/>
+	</field>
+	<field name="preciototalsinimpuesto" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="preciototalsinimpuesto"/>
+	</field>
+	<field name="codigo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="codigo"/>
+	</field>
+	<field name="codigoporcentaje" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="codigoporcentaje"/>
+	</field>
+	<field name="tarifa" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="tarifa"/>
+	</field>
+	<field name="baseimponible" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="baseimponible"/>
+	</field>
+	<field name="valor" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="valor"/>
+	</field>
+	<field name="descripcion1" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="descripcion1"/>
+	</field>
+	<field name="razon" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="razon"/>
+	</field>
+	<field name="productdescription" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="productdescription"/>
+	</field>
+	<variable name="suma_descuento" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{descuento}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="13">
+			<staticText>
+				<reportElement x="64" y="0" width="46" height="13" uuid="66de6189-c6cc-41ac-bb70-1235c65e42ed"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cantidad]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="110" y="0" width="292" height="13" uuid="231b5b52-27db-450e-a0c5-33ee79ea0dc4"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Descripción]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="402" y="0" width="68" height="13" uuid="2e483f3a-e94d-49d0-a825-efbb3403099e"/>
+				<box rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Precio Unitario]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="470" y="0" width="80" height="13" uuid="31a3d8f2-ff12-44f5-8950-eb886281cb91"/>
+				<box rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<text><![CDATA[Precio Total]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="64" height="13" uuid="7e2f6279-ac6d-46a6-8f52-2b7f470a55ea"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Código]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="22" splitType="Stretch">
+			<textField isStretchWithOverflow="true" pattern="###0;-###0" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="64" y="0" width="46" height="22" isPrintWhenDetailOverflows="true" uuid="d65ef855-7d4b-467a-93f8-dc72eb904921"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cantidad}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.0000;-#,##0.0000" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="402" y="0" width="68" height="22" isPrintWhenDetailOverflows="true" uuid="48e7aed6-061e-4533-b809-bfd81b0f3bc1"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{preciounitario}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="470" y="0" width="80" height="22" isPrintWhenDetailOverflows="true" uuid="e340f469-031d-4ef8-bb01-db1893a85a56"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{preciototalsinimpuesto}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="64" height="22" isPrintWhenDetailOverflows="true" uuid="b9e89c6d-dfe9-4676-9e3c-804036697c86"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{codigoprincipal}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="110" y="0" width="292" height="22" isPrintWhenDetailOverflows="true" uuid="07839300-eb47-46f5-bddf-3ea5aabe6ba3"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8"/>
+					<paragraph lineSpacing="1_1_2" leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{productdescription}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

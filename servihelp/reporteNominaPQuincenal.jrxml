@@ -1,0 +1,603 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteNominaPQuincenal" pageWidth="842" pageHeight="620" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a80ed23f-586d-4137-9775-4a3bd6032d6d">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="SERVIHELP DES"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<style name="table">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 1_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 2">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 2_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 2_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 2_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 3">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 3_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 3_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 3_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 4">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 4_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 4_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 4_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 5">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 5_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 5_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table 5_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<parameter name="AD_Org_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="HR_Process_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["C:\\Users\\DIANA\\Dropbox\\ITSC\\stocks\\"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select
+row_number() OVER () as no,
+org.name org,
+hpro.name as procesoNomina,
+hpay.name as conceptonomina,
+hd.name as dptonomina,
+cb.taxid as cedula,
+(case when char_length(trim(coalesce(cb.lastname1,'') ||' '|| coalesce(cb.lastname2,'') ||' '|| coalesce(cb.firstname1,'') ||' '|| coalesce(cb.firstname2,'')))>0 then trim(coalesce(cb.lastname1,'') ||' '|| coalesce(cb.lastname2,'') ||' '|| coalesce(cb.firstname1,'') ||' '|| coalesce(cb.firstname2,'')) else cb.Name end) as nombre,
+case bpa.BankAccountType when 'S' then 'CA' when 'C' then 'CC' else 'CH' end cta,
+bpa.AccountNo cuenta,
+case cb.TenderType when 'K' then 'CHEQUE' when 'A' then 'DEPÓSITO DIRECTO' when 'X' then 'EFECTIVO' else '' end formapago,
+b.description banco,
+sum (case hc.value when 'I_SalarioBasicoAsignadoEmpleado' then hm.amount else 0 end) as sueldo,
+sum (case hc.value when 'Q_AnticipoQuincenal' then hm.amount else 0 end) as anticipo,
+sum (case hc.value when 'NE_OtrosEgresos' then hm.amount else 0 end) as descuento_OtrosEgresos,
+sum (case hc.value when 'T_NetoARecibirQuincena' then hm.amount else 0 end) as neto
+from  HR_Movement hm
+left join HR_Process hpro on hpro.HR_Process_id=hm.HR_Process_id and hpro.isactive='Y'
+left join HR_Payroll hpay on hpay.HR_Payroll_id=hpro.HR_Payroll_id and hpay.isactive='Y'
+left join HR_Department hd on hd.HR_Department_id=hm.HR_Department_id and hd.isactive='Y'
+left join C_bpartner cb on cb.C_bpartner_ID=hm.C_bpartner_ID and cb.isactive='Y'
+left join HR_Concept hc on hc.HR_Concept_ID=hm.HR_Concept_ID and hc.isactive='Y'
+left join C_BP_BankAccount bpa on bpa.C_bpartner_ID=cb.C_bpartner_ID and bpa.isactive='Y' and bpa.creditonomina='Y'
+left join C_Bank b on b.C_Bank_ID=bpa.C_Bank_ID
+inner join AD_Org org on org.ad_org_id = hm.ad_org_id and org.isactive='Y'
+where hpro.hr_process_id=$P{HR_Process_ID} and hm.ad_org_id=$P{AD_Org_ID}
+group by 2,3,4,5,6,7,8,9,10,11
+order by dptonomina,nombre]]>
+	</queryString>
+	<field name="no" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="no"/>
+	</field>
+	<field name="org" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="org"/>
+	</field>
+	<field name="procesonomina" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="procesonomina"/>
+	</field>
+	<field name="conceptonomina" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="conceptonomina"/>
+	</field>
+	<field name="dptonomina" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="dptonomina"/>
+	</field>
+	<field name="cedula" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="cedula"/>
+	</field>
+	<field name="nombre" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="nombre"/>
+	</field>
+	<field name="cta" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="cta"/>
+	</field>
+	<field name="cuenta" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="cuenta"/>
+	</field>
+	<field name="formapago" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="formapago"/>
+	</field>
+	<field name="banco" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="banco"/>
+	</field>
+	<field name="sueldo" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="sueldo"/>
+	</field>
+	<field name="anticipo" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="anticipo"/>
+	</field>
+	<field name="descuento_otrosegresos" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="descuento_otrosegresos"/>
+	</field>
+	<field name="neto" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="neto"/>
+	</field>
+	<variable name="No" class="java.lang.Integer" incrementType="Column" calculation="Count">
+		<variableExpression><![CDATA[1]]></variableExpression>
+		<initialValueExpression><![CDATA[1]]></initialValueExpression>
+	</variable>
+	<variable name="sueldo_1" class="java.math.BigDecimal" resetType="Group" resetGroup="dpto" calculation="Sum">
+		<variableExpression><![CDATA[$F{sueldo}]]></variableExpression>
+	</variable>
+	<variable name="anticipo_1" class="java.math.BigDecimal" resetType="Group" resetGroup="dpto" calculation="Sum">
+		<variableExpression><![CDATA[$F{anticipo}]]></variableExpression>
+	</variable>
+	<variable name="neto_1" class="java.math.BigDecimal" resetType="Group" resetGroup="dpto" calculation="Sum">
+		<variableExpression><![CDATA[$F{neto}]]></variableExpression>
+	</variable>
+	<variable name="sueldo_2" class="java.math.BigDecimal" resetType="Group" resetGroup="total" calculation="Sum">
+		<variableExpression><![CDATA[$F{sueldo}]]></variableExpression>
+	</variable>
+	<variable name="anticipo_2" class="java.math.BigDecimal" resetType="Group" resetGroup="total" calculation="Sum">
+		<variableExpression><![CDATA[$F{anticipo}]]></variableExpression>
+	</variable>
+	<variable name="neto_2" class="java.math.BigDecimal" resetType="Group" resetGroup="total" calculation="Sum">
+		<variableExpression><![CDATA[$F{neto}]]></variableExpression>
+	</variable>
+	<variable name="descuento_1" class="java.math.BigDecimal" resetType="Group" resetGroup="dpto" calculation="Sum">
+		<variableExpression><![CDATA[$F{descuento_otrosegresos}]]></variableExpression>
+	</variable>
+	<variable name="descuento_2" class="java.math.BigDecimal" resetType="Group" resetGroup="total" calculation="Sum">
+		<variableExpression><![CDATA[$F{descuento_otrosegresos}]]></variableExpression>
+	</variable>
+	<group name="total">
+		<groupHeader>
+			<band/>
+		</groupHeader>
+		<groupFooter>
+			<band height="13">
+				<staticText>
+					<reportElement x="168" y="0" width="58" height="13" uuid="cc4cabc3-6dca-4080-88bb-fe281a01b252"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[TOTAL]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="343" y="0" width="45" height="13" uuid="90c23e0c-85f4-4e96-af30-f5847d8878ec"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{sueldo_2}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="388" y="0" width="45" height="13" uuid="bcfffdbe-25bb-4698-a69e-a0aa04b05f98"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{anticipo_2}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="491" y="0" width="45" height="13" uuid="44759278-b160-4f3a-898b-e3a1f0b816c9"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{neto_2}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="433" y="0" width="58" height="13" uuid="95d13f65-edcd-4ad9-a1fa-5f0f1752301d"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{descuento_2}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="dpto">
+		<groupExpression><![CDATA[$F{dptonomina}]]></groupExpression>
+		<groupHeader>
+			<band height="13">
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="5" y="0" width="160" height="13" uuid="d60f01ed-25f2-489f-9782-81e83316b30d"/>
+					<textElement verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{dptonomina}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="13">
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="63" y="0" width="163" height="13" uuid="d563575a-d3db-41e4-9e72-51f006f60ed6"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["TOTAL "+$F{dptonomina}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="343" y="0" width="45" height="13" uuid="68c984bd-d7f9-4979-a37c-93797976237a"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{sueldo_1}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="388" y="0" width="45" height="13" uuid="51142e48-4629-4b97-aa51-165199448197"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{anticipo_1}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="491" y="0" width="45" height="13" uuid="d4ece5cb-786e-4027-b8cb-35c7b437a257"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{neto_1}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="433" y="0" width="58" height="13" uuid="976fa630-87b0-453b-8d94-8f5dbc48b8a6"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{descuento_1}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="75" splitType="Stretch">
+			<staticText>
+				<reportElement x="140" y="2" width="470" height="14" uuid="f4582469-735d-416e-9cef-721866c8f59b"/>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[REPORTE NÓMINA QUINCENAL]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="140" y="16" width="470" height="14" uuid="a0560094-8e10-4aa8-9d62-c609eea8c815"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{org}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="140" y="30" width="470" height="14" uuid="ec23c247-bd45-4cb8-a53e-d05a3ae93db1"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{procesonomina}]]></textFieldExpression>
+			</textField>
+			<subreport>
+				<reportElement x="0" y="0" width="100" height="75" uuid="9485f407-f65c-4fe1-805a-b35df76e48f0"/>
+				<subreportParameter name="AD_Org_ID">
+					<subreportParameterExpression><![CDATA[$P{AD_Org_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["/reports/logorg.jasper"]]></subreportExpression>
+			</subreport>
+			<staticText>
+				<reportElement x="657" y="17" width="73" height="14" uuid="a1986bbe-1df4-4dea-b899-e5eac362ebb9"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[Fecha de impresión:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" evaluationTime="Report">
+				<reportElement x="783" y="2" width="17" height="14" uuid="6d25f4ed-efc4-456d-b7be-339ab112c8c4"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph leftIndent="1"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" "+$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="730" y="2" width="53" height="14" uuid="05e5d6bb-9dec-4f61-b997-0065c3c9457b"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph rightIndent="1"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}+"  de "]]></textFieldExpression>
+			</textField>
+			<textField pattern="">
+				<reportElement x="730" y="17" width="70" height="14" uuid="fd02ba8a-594c-41b7-9de2-e1eb22f8d406"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("dd/MM/yyyy HH:mm").format( new java.util.Date() )]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="657" y="31" width="35" height="14" uuid="fad790b0-8cc7-4950-934b-6b460fa383b3"/>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font size="7" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Reporte:                   stock_max_min.jrxml]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="657" y="2" width="73" height="14" uuid="ee8bf33b-cbbb-481e-b8ee-9b85e9499c26"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[Página:        ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="692" y="31" width="108" height="14" uuid="8354629a-af82-446f-b6b5-751ce50cec9f"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font size="7" isBold="false"/>
+				</textElement>
+				<text><![CDATA[reporteNominaPQuincena.jrxml]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="20" splitType="Stretch">
+			<staticText>
+				<reportElement x="23" y="0" width="244" height="20" uuid="ad360320-6e34-4af0-bcad-b8be627ea1ce"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[NOMBRE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="343" y="0" width="45" height="20" uuid="20588a16-9148-46d4-8538-bf327d09329c"/>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[SUELDO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="267" y="0" width="76" height="20" uuid="9d52748d-aac8-4936-8dc9-1a5f5c32c8c3"/>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[IDENTIFICACIÓN]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="23" height="20" uuid="fc8940e6-1489-46ee-8749-41b2a0d64747"/>
+				<textElement verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[No.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="388" y="0" width="45" height="20" uuid="41a1c462-8ad0-40ab-aadc-8a7598692c93"/>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ANTICIPO QUINCENAL]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="491" y="0" width="45" height="20" uuid="a6a95622-e138-42e4-ba1a-a0bd135861cd"/>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TOTAL A PAGAR]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="683" y="0" width="46" height="20" uuid="a0c2c8bf-f730-4aa1-a400-e7f1f46abd04"/>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CTA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="729" y="0" width="64" height="20" uuid="70a87aef-a186-4120-8a3f-0d4700a74d93"/>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nº CUENTA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="537" y="0" width="78" height="20" uuid="5500f1f6-7dd4-4bc6-b518-892a99ef2427"/>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[FORMA DE PAGO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="615" y="0" width="68" height="20" uuid="2422ef61-4894-49c8-86b2-1ccebc7e54b3"/>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[BCO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="433" y="0" width="58" height="20" uuid="5e677288-81ba-416f-8107-2c58cb45cb1a"/>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[DESCUENTO OTROS E.]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="23" y="0" width="244" height="13" uuid="569af11e-1ade-4528-940f-74d3d5e5d16f"/>
+				<textElement verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nombre}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="343" y="0" width="45" height="13" uuid="7dca4331-b5cb-4b7d-a42f-839aa37bec2d"/>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{sueldo}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="23" height="13" uuid="600fdf8a-ec41-4aac-a157-f0b71327ffe8"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{no}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="388" y="0" width="45" height="13" uuid="926d91c0-bf1f-420b-84f6-f3c9d6b12491"/>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{anticipo}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="491" y="0" width="45" height="13" uuid="2177fd00-4910-4135-ad98-9682c17b1e42"/>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{neto}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="267" y="0" width="76" height="13" uuid="ba2b989e-2ba7-4bbe-910b-06aa1da1ca10"/>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cedula}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="683" y="0" width="46" height="13" uuid="3b3d9e03-af02-4ead-bad7-396070469ec0"/>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cta}.equalsIgnoreCase("CA") ? "Ahorro" : "Corriente"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="729" y="0" width="64" height="13" uuid="6f942540-b801-4f96-a917-f7eb0de8560a"/>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cuenta}]]></textFieldExpression>
+			</textField>
+			<textField pattern="" isBlankWhenNull="true">
+				<reportElement x="537" y="0" width="78" height="13" uuid="540927a0-452a-41c4-96c6-33083829002d"/>
+				<box leftPadding="2"/>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{formapago}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="615" y="0" width="68" height="13" uuid="ae7baa40-a15c-4aec-ac1e-1037fc9d5594"/>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{banco}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="433" y="0" width="58" height="13" uuid="a074cf4f-e169-4ddb-ae64-cc596a3755f5"/>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descuento_otrosegresos}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+</jasperReport>

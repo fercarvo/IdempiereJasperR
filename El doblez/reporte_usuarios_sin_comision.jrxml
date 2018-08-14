@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteVentasVendedor" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a80ed23f-586d-4137-9775-4a3bd6032d6d">
+	<property name="ireport.zoom" value="2.196150000000002"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="29"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="erp.eldoblez.ec"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="fecha_inicio" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="fecha_fin" class="java.util.Date">
+		<defaultValueExpression><![CDATA[new Date()]]></defaultValueExpression>
+	</parameter>
+	<parameter name="AD_Client_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select distinct 		
+	usr.name as usuario, 
+	cb.taxid as ruc,
+	c.name as comision,
+	c.datelastrun,
+	SUM(i.grandtotal) OVER( partition by usr.name, cb.taxid) as suma_facturas
+from C_Invoice i
+inner join AD_User usr on usr.AD_User_ID = i.SalesRep_ID
+inner join C_BPartner cb on cb.C_BPartner_ID = usr.C_BPartner_ID and cb.isactive = 'Y'
+left join C_Commission c on c.C_BPartner_ID = cb.C_BPartner_ID and c.isactive = 'Y'
+where i.DateInvoiced::date between date( $P{fecha_inicio}   ) and date(  $P{fecha_fin}  )
+	and cb.IsSalesRep = 'Y'
+	and i.IsSOTrx = 'Y'
+	and i.isactive = 'Y'
+	and i.AD_Client_ID =  $P{AD_Client_ID}
+order by comision, usuario ]]>
+	</queryString>
+	<field name="usuario" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="usuario"/>
+	</field>
+	<field name="ruc" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="ruc"/>
+	</field>
+	<field name="comision" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="comision"/>
+	</field>
+	<field name="datelastrun" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="datelastrun"/>
+	</field>
+	<field name="suma_facturas" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="suma_facturas"/>
+	</field>
+	<title>
+		<band height="54" splitType="Stretch">
+			<staticText>
+				<reportElement x="80" y="0" width="310" height="14" uuid="f4582469-735d-416e-9cef-721866c8f59b"/>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[REPORTE VENDEDORES SIN COMISIÓN]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="129" y="23" width="35" height="13" uuid="90af028a-90cf-44cb-9380-e904c4c8d9e7"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Desde:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="260" y="23" width="33" height="13" uuid="1b9a146a-aad0-4b58-883b-0585fed0e374"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Hasta:]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="164" y="23" width="78" height="13" uuid="7752abbb-6f45-493d-88a1-a94ac0cf03a4"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{fecha_inicio}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="293" y="23" width="67" height="13" uuid="02cf114d-2ac1-4567-898b-a28b920f388f"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{fecha_fin}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="411" y="15" width="142" height="14" uuid="4e70ca92-84ea-475b-856c-19d140deb66b"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font size="7" isBold="false"/>
+				</textElement>
+				<text><![CDATA[reporte_usuarios_sin_comision.jrxml]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy hh:mm">
+				<reportElement x="484" y="1" width="70" height="14" uuid="08b246bf-27b5-4928-8b50-93be10964593"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="411" y="1" width="73" height="14" uuid="18a532cc-50a7-4b85-a4d6-7121a3bc3b65"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[Fecha de impresión:]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="16" splitType="Stretch">
+			<staticText>
+				<reportElement x="237" y="0" width="139" height="16" uuid="bbc7a60b-46a4-486a-90de-b7c421096d98"/>
+				<box leftPadding="1"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Comision]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="440" y="0" width="62" height="16" uuid="60105a1d-98e2-448e-bbce-086bd3889660"/>
+				<box rightPadding="1"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Suma Facturas]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="376" y="0" width="64" height="16" uuid="711b2a52-c7f9-4bee-b6c8-5fcc43f055f2"/>
+				<box rightPadding="1"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha Última E.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="115" y="0" width="122" height="16" uuid="b0cdc8f5-2836-48cc-b957-23e705c919cb"/>
+				<box leftPadding="1"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[RUC]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="15" y="0" width="100" height="16" uuid="7259610b-70d4-4802-9343-2567cb017d75"/>
+				<box leftPadding="1"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Usuario]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="237" y="0" width="139" height="13" uuid="29dd90e9-129c-4c85-b1e3-f12df5ee66fe"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{comision}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="15" y="0" width="100" height="13" uuid="fd2002a4-076d-48b5-a189-4997473c012c"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{usuario}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00#" isBlankWhenNull="true">
+				<reportElement x="440" y="0" width="62" height="13" uuid="bf95b63d-a620-4ffe-990b-b68ffeac523a"/>
+				<box rightPadding="1"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{suma_facturas}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="376" y="0" width="64" height="13" uuid="6367e2c2-6533-4564-8f63-54287b5d8fbe"/>
+				<box rightPadding="1"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{datelastrun}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="115" y="0" width="122" height="13" uuid="0909967b-106c-4f65-859e-001f0b9f211f"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ruc}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

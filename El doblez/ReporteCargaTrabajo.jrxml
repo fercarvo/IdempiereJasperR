@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ReporteCargaTrabajo" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="76219609-efa2-423d-9bfe-dcb4eca238a3">
+	<property name="ireport.zoom" value="1.771561000000002"/>
+	<property name="ireport.x" value="4"/>
+	<property name="ireport.y" value="0"/>
+	<style name="style1">
+		<box>
+			<topPen lineWidth="0.75"/>
+			<leftPen lineWidth="0.75"/>
+			<bottomPen lineWidth="0.75"/>
+			<rightPen lineWidth="0.75"/>
+		</box>
+		<paragraph leftIndent="2" rightIndent="2"/>
+	</style>
+	<parameter name="AD_Org_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="fecha_desde" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="fecha_hasta" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select
+	reporte2.*,
+	sum(totalordenes) OVER (PARTITION BY local) AS total_local
+from
+(
+select
+	org,
+	local,
+	usr,
+	COUNT(usr) as ordenes,
+	SUM(total) as totalOrdenes,
+	count(CASE WHEN reporte.isfinished = 'N' THEN 1 END) as pendientes,
+	SUM(CASE WHEN reporte.isfinished = 'N' THEN total END) as totalPendientes
+from
+(select
+	org.name as org,
+	coalesce(loc.name, loc.value) as local,
+	u.name as usr,
+	o.c_order_id,
+	o.grandtotal as total,
+	o.isfinished
+from c_order as o
+inner join AD_User as u on u.AD_User_ID = o.salesrep_id and u.isactive = 'Y'
+inner join m_warehouse as loc on loc.m_warehouse_id = o.m_warehouse_id and loc.isactive = 'Y'
+inner join AD_Org as org on org.AD_Org_ID = o.AD_Org_ID
+where
+	o.AD_Org_ID = $P{AD_Org_ID}
+	and date(o.created) between date($P{fecha_desde}) and date($P{fecha_hasta})
+	and o.docstatus in ('CO', 'CL')
+order by local, usr, o.isfinished
+) as reporte
+group by usr, local, org
+order by local, totalOrdenes desc, usr) as reporte2]]>
+	</queryString>
+	<field name="org" class="java.lang.String"/>
+	<field name="local" class="java.lang.String"/>
+	<field name="usr" class="java.lang.String"/>
+	<field name="ordenes" class="java.lang.Long"/>
+	<field name="totalordenes" class="java.math.BigDecimal"/>
+	<field name="pendientes" class="java.lang.Long"/>
+	<field name="totalpendientes" class="java.math.BigDecimal"/>
+	<field name="total_local" class="java.math.BigDecimal"/>
+	<variable name="sum_total_ordenes" class="java.math.BigDecimal" resetType="Group" resetGroup="Local" calculation="Sum">
+		<variableExpression><![CDATA[$F{totalordenes}]]></variableExpression>
+	</variable>
+	<variable name="sum_total" class="java.math.BigDecimal" resetType="Group" resetGroup="Local" calculation="Sum">
+		<variableExpression><![CDATA[$F{ordenes}]]></variableExpression>
+	</variable>
+	<variable name="porcentaje" class="java.math.BigDecimal" resetType="Group" resetGroup="Local" calculation="Sum">
+		<variableExpression><![CDATA[$F{totalordenes}]]></variableExpression>
+	</variable>
+	<group name="Local">
+		<groupExpression><![CDATA[$F{local}]]></groupExpression>
+		<groupHeader>
+			<band height="13">
+				<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+					<reportElement uuid="0cf42c05-fe52-40f9-8df8-274b33cd6ede" x="4" y="0" width="551" height="13"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{local}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="13">
+				<staticText>
+					<reportElement uuid="4bf39c7f-2bfa-455b-ab22-7ce1b40113e9" x="92" y="0" width="77" height="13"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Total: ]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" pattern="#,##0;-#,##0" isBlankWhenNull="false">
+					<reportElement uuid="9a7d58bf-bf95-40a8-bc73-53d07116ef9a" x="169" y="0" width="77" height="13"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{sum_total}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00" isBlankWhenNull="false">
+					<reportElement uuid="2cb22307-b7b0-4910-8e8e-db938ed4164a" x="246" y="0" width="82" height="13"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{sum_total_ordenes}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="75" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="9934e36b-e809-4f63-a570-40b58af2bc62" x="100" y="14" width="280" height="14"/>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{org}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement uuid="ebe5de92-248c-4b08-ac84-b9cd68acacb0" x="100" y="30" width="280" height="13"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Desde: " + new SimpleDateFormat("dd/MM/yyyy").format( $P{fecha_desde} ) + "    Hasta: " + new SimpleDateFormat("dd/MM/yyyy").format(  $P{fecha_hasta} )]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="aa34bde5-c308-4f5b-a5a5-3ae2e8dc4b31" x="398" y="0" width="73" height="14"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Página:        ]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement uuid="20e3263f-e80b-4f0f-8e76-2a390052c189" x="471" y="0" width="53" height="14"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph rightIndent="1"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}+"  de "]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" evaluationTime="Report">
+				<reportElement uuid="0de44b61-8b30-4e9b-b8cc-d162410cb132" x="524" y="0" width="23" height="14"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph leftIndent="1"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" "+$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="05922181-cfc6-4aa6-836b-880ae4981991" x="398" y="15" width="73" height="14"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha de impresión:]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement uuid="97492be1-de21-44d4-ad97-2087159e392e" x="471" y="15" width="76" height="14"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("dd/MM/yyyy HH:mm").format( new java.util.Date() )]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="32bc9599-b536-4727-afe9-9d5b907581fe" x="398" y="29" width="31" height="14"/>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Reporte:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="8b06a94d-cc65-45f4-bcae-6a8a701de2f4" x="100" y="0" width="280" height="14" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Reporte Cargas de Trabajo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="eebf8241-06d9-44bb-875f-a4ea30313bd6" x="429" y="29" width="120" height="14"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[ReporteCargaTrabajo.jrxml]]></text>
+			</staticText>
+			<subreport>
+				<reportElement uuid="4408d775-8a3c-40ef-9bc8-fa7c603aab9b" x="0" y="0" width="100" height="75"/>
+				<subreportParameter name="AD_Org_ID">
+					<subreportParameterExpression><![CDATA[$P{AD_Org_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["/reports/logorg.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="13" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="840ac946-e9b1-4733-9e68-24e159ba7aad" style="style1" x="169" y="0" width="77" height="13"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Ordenes]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="649204c6-eea1-470c-8006-5408bcd20884" style="style1" x="471" y="0" width="83" height="13"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<text><![CDATA[Total Pendientes]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="266f7ada-5b39-4dc4-be3d-23e0213adbe3" style="style1" x="398" y="0" width="73" height="13"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Pendientes]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="022f23c4-4d95-49b8-90f0-5bfa6c295f02" style="style1" x="246" y="0" width="82" height="13"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total Ordenes]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="56c0c620-c05f-4335-ab5d-cc1cc300165a" style="style1" x="10" y="0" width="159" height="13"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Responsable]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="e84517e5-3756-4853-ade0-2387b623ee13" style="style1" x="328" y="0" width="70" height="13"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[% Participación]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="13">
+			<textField isStretchWithOverflow="true" pattern="###0" isBlankWhenNull="false">
+				<reportElement uuid="e71260a8-6112-4687-b703-c79c2a517cf0" x="169" y="0" width="77" height="13"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ordenes}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00" isBlankWhenNull="false">
+				<reportElement uuid="490832c8-ebe6-4eca-9405-1d379209d070" x="246" y="0" width="82" height="13"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{totalordenes}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="###0" isBlankWhenNull="false">
+				<reportElement uuid="31210836-16f8-41b5-8676-c5ac5ba62c1a" x="398" y="0" width="73" height="13"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{pendientes}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00" isBlankWhenNull="false">
+				<reportElement uuid="5d5bfde1-8bb4-4ff5-9d34-edd5d5b87138" x="474" y="0" width="80" height="13"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{totalpendientes} == null ? 0 : $F{totalpendientes}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement uuid="7f491391-6da9-438d-af4a-9b66c9c978d7" x="10" y="0" width="159" height="13"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{usr}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.0 %" isBlankWhenNull="false">
+				<reportElement uuid="35e26ac8-a572-48a8-b864-dfd4a3d926ad" x="328" y="0" width="70" height="13"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{totalordenes}.divide( $F{total_local}, 4, java.math.RoundingMode.HALF_UP )]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

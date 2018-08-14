@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteInmuebles" language="groovy" pageWidth="1500" pageHeight="595" orientation="Landscape" columnWidth="1460" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true" uuid="a80ed23f-586d-4137-9775-4a3bd6032d6d">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="AINTEG"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<style name="table" mode="Opaque">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_1" mode="Opaque">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<parameter name="AD_Org_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="tipo_negociacion" class="java.lang.String"/>
+	<parameter name="M_Product_Category_ID" class="java.lang.Integer"/>
+	<parameter name="tb_grupo_producto_ID" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[SELECT
+	pc.name categoria,
+	gp.name grupoproducto,
+	p.name nombre,
+	coalesce(ac.description,ac.name) agentecaptador,
+	p.financiamiento,
+	pp.PriceStd precio,
+	p.Description,
+	trim(l.Address1 || ' ' || coalesce(l.Address2, '')) as localizacion,
+	zona.name as zona,
+	(	select coalesce(rel.Description, rel.name) 
+		from AD_Reference re
+		join AD_Ref_List rel on rel.AD_Reference_ID = re.AD_Reference_ID and rel.isactive = 'Y'
+		where re.name = 'Comercial Status'
+			and rel.value = p.ComercialStatus
+			limit 1
+	) as estado_comercial,
+	(	select coalesce(rel.Description, rel.name)
+		from AD_Reference re
+		join AD_Ref_List rel on rel.AD_Reference_ID = re.AD_Reference_ID and rel.isactive = 'Y'
+		where re.name = 'Construcction Status'
+			and rel.value = p.ComercialStatus
+			limit 1
+	) as estado_construccion,
+	pro_part.name as propietario
+FROM m_product p
+JOIN M_Product_Category pc on pc.M_Product_Category_ID=p.M_Product_Category_ID
+join tb_grupo_producto gp on gp.tb_grupo_producto_id=p.tb_grupo_producto_id
+left join ad_user ac on ac.ad_user_id=p.SalesRep_ID
+left join M_ProductPrice pp on pp.m_product_id=p.m_product_id
+left join C_Location as l on l.C_Location_ID = p.C_Location_ID
+left join C_SalesRegion as zona on zona.C_SalesRegion_ID = p.C_SalesRegion_ID
+left join M_Product_PO as propietario on propietario.m_product_id = p.m_product_id
+left join C_BPartner as pro_part on pro_part.C_BPartner_ID = propietario.C_BPartner_ID
+WHERE p.ad_org_id=$P{AD_Org_ID} and p.isactive='Y'
+and p.tipo_negociacion=$P{tipo_negociacion}
+and (case when coalesce($P{tb_grupo_producto_ID},0)>0 then p.tb_grupo_producto_ID=$P{tb_grupo_producto_ID} else 1=1 end)
+and (case when coalesce($P{M_Product_Category_ID},0)>0 then p.M_Product_Category_ID=$P{M_Product_Category_ID} else 1=1 end)
+order by categoria,grupoproducto,nombre]]>
+	</queryString>
+	<field name="categoria" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="categoria"/>
+	</field>
+	<field name="grupoproducto" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="grupoproducto"/>
+	</field>
+	<field name="nombre" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="nombre"/>
+	</field>
+	<field name="agentecaptador" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="agentecaptador"/>
+	</field>
+	<field name="financiamiento" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="financiamiento"/>
+	</field>
+	<field name="precio" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="precio"/>
+	</field>
+	<field name="description" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="description"/>
+	</field>
+	<field name="localizacion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="localizacion"/>
+	</field>
+	<field name="zona" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="zona"/>
+	</field>
+	<field name="estado_comercial" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="estado_comercial"/>
+	</field>
+	<field name="estado_construccion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="estado_construccion"/>
+	</field>
+	<field name="propietario" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="propietario"/>
+	</field>
+	<title>
+		<band height="23" splitType="Stretch">
+			<staticText>
+				<reportElement x="259" y="0" width="200" height="23" uuid="8891ae5e-1248-42cf-8cb9-cab2c9046968"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[INMUEBLE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="459" y="0" width="136" height="23" uuid="392a5243-7478-4a12-a4ec-122bda4626db"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[AGENTE CAPTADOR]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="132" height="23" uuid="38891e33-bb63-4f00-a086-a2a2d7261960"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CATEGORÍA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="132" y="0" width="127" height="23" uuid="7dd61f78-f4b4-4465-99db-93e08078bd7c"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TIPO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="795" y="0" width="65" height="23" uuid="7d9af000-e819-47c5-a1de-90f85f4b31e5"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[PRECIO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="595" y="0" width="200" height="23" uuid="8eef8ecc-89e4-4009-95a1-7ce0f864a88a"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[FINANCIAMIENTO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="860" y="0" width="100" height="23" uuid="4aa253f3-e265-458e-a1ae-452115b812fe"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[DESCRIPCIÓN]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="960" y="0" width="100" height="23" uuid="f4683d38-3271-4c2d-b6d4-8f769d6bdc96"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[DIRECCIÓN]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1060" y="0" width="100" height="23" uuid="5e2c9205-f2be-4992-8c24-c0a3d331d970"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ZONA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1160" y="0" width="100" height="23" uuid="b3843069-810f-4030-aee1-d3e617bd9dca"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ESTADO COMERCIAL]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1260" y="0" width="100" height="23" uuid="1d2412c6-fd7b-4bbe-ac94-33284e11ffdb"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ESTADO CONSTRUCCIÓN]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1360" y="0" width="100" height="23" uuid="4803b1ad-35d4-4811-82ef-77e8b1447b74"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[PROPIETARIO]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="259" y="0" width="200" height="13" uuid="28d91675-998b-4d1b-999e-5f8b45573c67"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nombre}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="459" y="0" width="136" height="13" uuid="b9a60dd2-66a6-45df-bce9-aba3c7f16f40"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{agentecaptador}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="132" height="13" uuid="5bc6850b-232c-4067-8845-24f17c2fc709"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{categoria}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="132" y="0" width="127" height="13" uuid="b21562f8-5fe3-43bf-a74f-cd9e36406fb4"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{grupoproducto}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="795" y="0" width="65" height="13" uuid="fdc181ff-2a01-4948-acdd-668cd4f06921"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{precio}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="595" y="0" width="200" height="13" uuid="0ab9a2c0-d9fa-4e34-b396-1a57213844a7"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{financiamiento}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="860" y="0" width="100" height="13" uuid="987f1e7c-7af4-43d2-9887-003de9193f00"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{description}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="960" y="0" width="100" height="13" uuid="c3713a56-464c-4757-8129-923d05e64532"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{localizacion}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="1060" y="0" width="100" height="13" uuid="cb3ee536-6c51-4e4c-9387-e73ab5e03916"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{zona}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="1160" y="0" width="100" height="13" uuid="8cd344b2-db6e-4d27-8815-67563de3adc6"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{estado_comercial}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="1260" y="0" width="100" height="13" uuid="9e50688e-0a47-4a60-accc-1cd0b28005b3"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{estado_construccion}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="1360" y="0" width="100" height="13" uuid="29bfdb38-c3b8-468c-a6b0-d9d40b7b56f4"/>
+				<box leftPadding="2" rightPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{propietario}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

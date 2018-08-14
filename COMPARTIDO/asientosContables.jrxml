@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="asientosContables" pageWidth="1100" pageHeight="595" orientation="Landscape" columnWidth="1060" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true" uuid="897f7ed6-c7f2-48c5-bd18-76cf39bf6255">
+	<property name="ireport.zoom" value="1.7715610000000017"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="ESPANOLA"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="fecha_desde" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="fecha_hasta" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="AD_Org_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="C_Activity_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="accounttype_R" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="accounttype_E" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[/*
+ * Actualizado 06/07/2018 todos los ambientes
+ * Ademas se creo en la tabla C_Avtivity el campo C_Activity_parent_ID
+ */
+select
+	org.name as org_name,
+	coalesce(elva.value || ' - ' , '')  || elva.name as cuenta,
+	(CASE
+		when fa.c_activity_id is null then 'Sin CC'
+		else a.name
+	END) as centroCosto,
+	(CASE
+		WHEN elva.accountsign = 'D' and fa.amtacctdr > 0 THEN fa.amtacctdr --debido, debe
+		WHEN elva.accountsign = 'D' and fa.amtacctcr > 0 THEN fa.amtacctcr*-1 --debito haber
+		WHEN elva.accountsign = 'C' and fa.amtacctdr > 0 THEN fa.amtacctdr*-1 --credito, debe
+		WHEN elva.accountsign = 'C' and fa.amtacctcr > 0 THEN fa.amtacctcr --credito, haber
+		ELSE fa.amtacctdr + fa.amtacctcr
+	END) AS valor
+	--fa.amtacctdr as debe,
+	--fa.amtacctcr as haber
+from fact_acct as fa
+inner join c_elementvalue as elva on elva.c_elementvalue_id = fa.account_id
+inner join c_element as el on el.c_element_id = elva.c_element_id
+inner join ad_org as org on org.ad_org_id = fa.ad_org_id
+left join c_activity as a on a.c_activity_id = fa.c_activity_id
+where fa.ad_org_id =$P{AD_Org_ID}
+and fa.dateacct between date($P{fecha_desde}) and date($P{fecha_hasta})
+/*and elva.accounttype in ('R', 'E')*/
+and
+	((case when $P{accounttype_R}='Y' then elva.accounttype='R' else false end) or
+	(case when $P{accounttype_E}='Y' then elva.accounttype='E' else false end) )
+
+and (case when coalesce($P{C_Activity_ID},0)>0 then
+(case when (select issummary
+		from C_Activity
+		where C_Activity_ID=$P{C_Activity_ID})='N'
+	then fa.C_Activity_ID=$P{C_Activity_ID}
+	else fa.C_Activity_ID IN (SELECT C_Activity_ID
+						from C_Activity
+						where C_Activity_parent_ID=$P{C_Activity_ID} or C_Activity_ID=$P{C_Activity_ID}) end) else true end)
+and fa.isactive = 'Y'
+order by org.name, cuenta, centroCosto]]>
+	</queryString>
+	<field name="org_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="org_name"/>
+	</field>
+	<field name="cuenta" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="cuenta"/>
+	</field>
+	<field name="centrocosto" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="centrocosto"/>
+	</field>
+	<field name="valor" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="valor"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="49" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="188" height="21" uuid="4255dd54-3df6-4172-a7f6-7854515bb086"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Análisis Contable Por Centro de Costo]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="0" y="32" width="188" height="11" uuid="b7f980fa-48ae-4538-8ed1-f0dd3b1d1212"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Desde: " + new SimpleDateFormat("dd/MMM/yyyy", new Locale("es")).format($P{fecha_desde}) + "  Hasta: " + new SimpleDateFormat("dd/MMM/yyyy", new Locale("es")).format($P{fecha_hasta})]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="0" y="21" width="188" height="11" uuid="ddac1451-55c5-494f-b671-10107dd05cee"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{org_name}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<summary>
+		<band height="50">
+			<crosstab>
+				<reportElement x="0" y="0" width="1060" height="50" uuid="185cd4a6-5f64-4b88-929d-5dcfbe428871"/>
+				<rowGroup name="cuenta" width="188">
+					<bucket class="java.lang.String">
+						<bucketExpression><![CDATA[$F{cuenta}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents backcolor="#FFFFFF" mode="Opaque">
+							<textField isStretchWithOverflow="true">
+								<reportElement x="0" y="0" width="188" height="11" uuid="e084df71-8402-4863-a0d2-c86613812ba9"/>
+								<textElement textAlignment="Left">
+									<font size="8"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$V{cuenta}]]></textFieldExpression>
+							</textField>
+						</cellContents>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="centrocosto" height="13" totalPosition="End">
+					<bucket class="java.lang.String">
+						<bucketExpression><![CDATA[$F{centrocosto}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents backcolor="#FFFFFF" mode="Opaque">
+							<textField isStretchWithOverflow="true">
+								<reportElement x="0" y="0" width="50" height="13" uuid="49579f75-a2e8-461e-9cb1-3c14866eabc9"/>
+								<textElement textAlignment="Right">
+									<font size="8" isBold="true"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$V{centrocosto}]]></textFieldExpression>
+							</textField>
+						</cellContents>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents backcolor="#FFFFFF" mode="Opaque">
+							<staticText>
+								<reportElement x="0" y="0" width="50" height="13" uuid="cfcb1da8-656d-4fa4-9406-654d1d2545dc"/>
+								<textElement textAlignment="Right" verticalAlignment="Middle">
+									<font size="8" isBold="true"/>
+								</textElement>
+								<text><![CDATA[Total centrocosto]]></text>
+							</staticText>
+						</cellContents>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="valorMeasure" class="java.math.BigDecimal" calculation="Sum">
+					<measureExpression><![CDATA[$F{valor}]]></measureExpression>
+				</measure>
+				<crosstabCell width="50" height="11">
+					<cellContents>
+						<textField pattern="#,##0.00;-#,##0.00">
+							<reportElement x="0" y="0" width="50" height="11" uuid="0415db28-c412-4c64-b1ef-b98176143153"/>
+							<textElement textAlignment="Right">
+								<font size="8"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$V{valorMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell height="25" rowTotalGroup="cuenta">
+					<cellContents backcolor="#BFE1FF" mode="Opaque">
+						<textField>
+							<reportElement style="Crosstab Data Text" x="0" y="0" width="50" height="25" uuid="3d5998cd-d1f6-4cf5-be27-8f98ef58b532"/>
+							<textFieldExpression><![CDATA[$V{valorMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="50" height="11" columnTotalGroup="centrocosto">
+					<cellContents backcolor="#FFFFFF" mode="Opaque">
+						<textField pattern="#,##0.00;-#,##0.00">
+							<reportElement x="0" y="0" width="50" height="11" uuid="431acc45-f356-4d3d-bcbc-df4cb4950f0a"/>
+							<textElement textAlignment="Right">
+								<font size="8" isBold="true"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$V{valorMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell rowTotalGroup="cuenta" columnTotalGroup="centrocosto">
+					<cellContents backcolor="#BFE1FF" mode="Opaque">
+						<textField>
+							<reportElement style="Crosstab Data Text" x="0" y="0" width="50" height="25" uuid="afcda65d-bb6d-4e45-af33-968676867fc0"/>
+							<textFieldExpression><![CDATA[$V{valorMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+			</crosstab>
+		</band>
+	</summary>
+</jasperReport>

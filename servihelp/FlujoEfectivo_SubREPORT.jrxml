@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="FlujoEfectivo" pageWidth="792" pageHeight="595" orientation="Landscape" columnWidth="792" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="ecd80a57-93c3-4e10-979e-5bee365f5e4a">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="SERVIHELP DES"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<style name="Crosstab_CH" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.0" lineColor="#000000"/>
+			<topPen lineWidth="0.0" lineColor="#000000"/>
+			<leftPen lineWidth="0.0" lineColor="#000000"/>
+			<bottomPen lineWidth="0.0" lineColor="#000000"/>
+			<rightPen lineWidth="0.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Crosstab_CG" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.0" lineColor="#000000"/>
+			<topPen lineWidth="0.0" lineColor="#000000"/>
+			<leftPen lineWidth="0.0" lineColor="#000000"/>
+			<bottomPen lineWidth="0.0" lineColor="#000000"/>
+			<rightPen lineWidth="0.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Crosstab_CT" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.0" lineColor="#000000"/>
+			<topPen lineWidth="0.0" lineColor="#000000"/>
+			<leftPen lineWidth="0.0" lineColor="#000000"/>
+			<bottomPen lineWidth="0.0" lineColor="#000000"/>
+			<rightPen lineWidth="0.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Crosstab_CD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.0" lineColor="#000000"/>
+			<topPen lineWidth="0.0" lineColor="#000000"/>
+			<leftPen lineWidth="0.0" lineColor="#000000"/>
+			<bottomPen lineWidth="0.0" lineColor="#000000"/>
+			<rightPen lineWidth="0.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<parameter name="fecha_desde" class="java.util.Date"/>
+	<parameter name="fecha_hasta" class="java.util.Date"/>
+	<parameter name="C_BankAccount_ID" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[WITH reporte AS ((
+	select '0 Saldo'::text as fecha, 'Total'::text as tipo, 0::numeric valor
+) union (
+
+--Query para hacer un formato en crosstab
+select fecha, tipo, valor from (select * from (
+	select 'Total'::text as tipo union
+	select 'Egreso'::text as tipo union
+	select 'Ingreso'::text as tipo ) tipos cross join (
+SELECT to_char(entry_date, 'DD/MM') as fecha, 0::numeric as valor 
+FROM generate_series( date( $P{fecha_desde} ), date(  $P{fecha_hasta}  ), 
+					 interval '1 day')entry_date ) fechas ) reorganizando
+	
+)union (	
+	
+--La suma del egreso e ingreso por dia
+/*select fecha, tipo, SUM(valor) OVER(order by fecha) as valor from (*/
+select
+	to_char(p.DateTrx, 'DD/MM') as fecha,
+	'Total'::text as tipo,
+	SUM (
+		CASE WHEN p.isreceipt = 'Y' 
+		THEN coalesce(p.PayAmt, db.depositamt) 
+		ELSE -coalesce(p.PayAmt, db.depositamt) END
+	) as valor
+from c_payment p
+left join C_DepositBatch db on p.C_DepositBatch_ID=db.C_DepositBatch_ID and db.isactive='Y'
+left join C_BankAccount ba on ba.c_bankaccount_id=p.c_bankaccount_id and ba.isactive='Y'
+left join C_DocType dt on dt.C_DocType_ID= p.C_DocType_ID and dt.isactive='Y'
+where p.docstatus='CO' --and p.isreconciled='N'
+	and date(p.DateTrx) between  date( $P{fecha_desde} ) and date(  $P{fecha_hasta}  )
+	and p.c_bankaccount_id =   $P{C_BankAccount_ID}   --or  1000038  is null)
+group by 1 order by fecha --) AS R2
+
+) union (
+
+--El egreso del dia
+--select fecha, tipo, SUM(valor) OVER(order by fecha) as valor from (
+select 
+	to_char(p.DateTrx, 'DD/MM') as fecha,
+	'Egreso'::text as tipo,
+	SUM (
+		CASE WHEN p.isreceipt = 'N' 
+		THEN coalesce(p.PayAmt, db.depositamt) 
+		ELSE 0 END
+	) as valor
+from c_payment p
+left join C_DepositBatch db on p.C_DepositBatch_ID=db.C_DepositBatch_ID and db.isactive='Y'
+inner join c_bankaccount ba on ba.c_bankaccount_id = p.c_bankaccount_id and ba.isactive = 'Y'
+where p.docstatus='CO' --and p.isreconciled='N'
+	and date(p.DateTrx) between  date( $P{fecha_desde} ) and date(  $P{fecha_hasta}  )
+	and p.c_bankaccount_id =   $P{C_BankAccount_ID}
+group by 1 order by fecha --) AS R1	
+	
+) union (
+
+--el ingreso del dia
+--select fecha, tipo, SUM(valor) OVER(order by fecha) as valor from (
+select
+	to_char(p.DateTrx, 'DD/MM') as fecha,
+	'Ingreso'::text as tipo,
+	SUM (
+		CASE WHEN p.isreceipt = 'Y' 
+		THEN coalesce(p.PayAmt, db.depositamt) 
+		ELSE 0 END
+	) as valor
+from c_payment p
+left join C_DepositBatch db on p.C_DepositBatch_ID=db.C_DepositBatch_ID and db.isactive='Y'
+inner join c_bankaccount ba on ba.c_bankaccount_id = p.c_bankaccount_id and ba.isactive = 'Y'
+where p.docstatus='CO' --and p.isreconciled='N'
+	and date(p.DateTrx) between  date( $P{fecha_desde} ) and date(  $P{fecha_hasta}  )
+	and p.c_bankaccount_id =  $P{C_BankAccount_ID}
+group by 1 order by fecha --) AS R3
+
+) union (
+
+--El saldo inicial que tenia la cuenta hasta el dia (desde)
+select fecha, tipo, SUM(valor) OVER(order by fecha) as valor from (
+select
+	'0 Saldo'::text as fecha,
+	'Total'::text as tipo,
+	SUM (
+		CASE WHEN p.isreceipt = 'Y' 
+		THEN coalesce(p.PayAmt, db.depositamt) 
+		ELSE -coalesce(p.PayAmt, db.depositamt) END
+	) as valor
+from c_payment p
+left join C_DepositBatch db on p.C_DepositBatch_ID=db.C_DepositBatch_ID and db.isactive='Y'
+inner join c_bankaccount ba on ba.c_bankaccount_id = p.c_bankaccount_id and ba.isactive = 'Y'
+where p.docstatus='CO'
+	and date(p.DateTrx) < date(  $P{fecha_desde}  )
+	and p.c_bankaccount_id =  $P{C_BankAccount_ID} 
+group by 1 order by fecha ) AS R4
+	
+)) --reporte
+
+select distinct fecha, tipo, case when tipo = 'Total' then suma else valor end as valor from (
+select 
+	reporte.* , SUM (valor) OVER (partition by tipo order by fecha)	as suma
+from reporte ) foo order by fecha, tipo]]>
+	</queryString>
+	<field name="fecha" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="fecha"/>
+	</field>
+	<field name="tipo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="tipo"/>
+	</field>
+	<field name="valor" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="valor"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<summary>
+		<band height="40">
+			<crosstab>
+				<reportElement x="0" y="0" width="792" height="35" uuid="1acd61ad-6ad9-44e2-92f6-671b69e0636b">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+					<property name="com.jaspersoft.studio.crosstab.style.total" value="Crosstab_CT"/>
+					<property name="com.jaspersoft.studio.crosstab.style.header" value="Crosstab_CH"/>
+					<property name="com.jaspersoft.studio.crosstab.style.group" value="Crosstab_CG"/>
+					<property name="com.jaspersoft.studio.crosstab.style.detail" value="Crosstab_CD"/>
+				</reportElement>
+				<rowGroup name="tipo" width="110" totalPosition="End">
+					<bucket class="java.lang.String">
+						<bucketExpression><![CDATA[$F{tipo}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents mode="Opaque" style="Crosstab_CH">
+							<textField>
+								<reportElement x="0" y="0" width="110" height="10" uuid="04fe7f15-8807-4207-8060-c7c0c7cb4204"/>
+								<textElement>
+									<font size="6" isBold="true"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$V{tipo}]]></textFieldExpression>
+							</textField>
+						</cellContents>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents mode="Opaque" style="Crosstab_CT"/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="fecha" height="20" totalPosition="End">
+					<bucket class="java.lang.String">
+						<bucketExpression><![CDATA[$F{fecha}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents mode="Opaque" style="Crosstab_CH">
+							<textField>
+								<reportElement x="0" y="0" width="30" height="20" uuid="6c219b04-0722-46b5-a48d-bb9b6583928d"/>
+								<textElement textAlignment="Right">
+									<font size="8" isBold="true"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$V{fecha}]]></textFieldExpression>
+							</textField>
+						</cellContents>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents mode="Opaque" style="Crosstab_CT"/>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="tipo_MEASURE" class="java.math.BigDecimal" calculation="Sum">
+					<measureExpression><![CDATA[$F{valor}]]></measureExpression>
+				</measure>
+				<crosstabCell width="30" height="10">
+					<cellContents mode="Opaque" style="Crosstab_CD">
+						<textField pattern="#,##0.00##">
+							<reportElement x="0" y="0" width="30" height="10" uuid="572fe7b7-62b8-47fd-aded-46277b35fd2c"/>
+							<textElement textAlignment="Right">
+								<font size="6"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$V{tipo_MEASURE}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="5" height="10" columnTotalGroup="fecha">
+					<cellContents mode="Opaque" style="Crosstab_CT">
+						<property name="com.jaspersoft.studio.layout"/>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="30" height="5" rowTotalGroup="tipo">
+					<cellContents mode="Opaque" style="Crosstab_CT">
+						<property name="com.jaspersoft.studio.layout"/>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="5" height="5" rowTotalGroup="tipo" columnTotalGroup="fecha">
+					<cellContents mode="Opaque" style="Crosstab_CT"/>
+				</crosstabCell>
+			</crosstab>
+		</band>
+	</summary>
+</jasperReport>

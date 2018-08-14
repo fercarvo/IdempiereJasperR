@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="retencionServihelp" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a80ed23f-586d-4137-9775-4a3bd6032d6d">
+	<property name="ireport.zoom" value="1.610510000000001"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="92"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="GPS Des"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="RECORD_ID" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[select
+	c.name as nombretercero, 
+	c.value as id, 
+	trim(COALESCE(loc.address1,'') ||' '|| COALESCE(loc.address2,'')) as direccion, 
+	i.documentno as numfactura, 
+	r.DocumentNo as numretencion, 
+	r.dateacct as aniofiscal,  
+	r.taxbaseamt as baseimponible,
+	substring(wr.name, 1, 3) codigo,
+	(case tc.issource when 'Y' then 'RENTA' else  'IVA'  end) impuesto, 
+	r.percent retencion, 
+	r.taxamt valorretenido,
+	dt.PrintName tipodocumento
+from c_invoice i
+left join C_DocType dt on dt.C_DocType_ID=i.C_DocTypeTarget_ID and dt.isactive='Y'
+left join LCO_InvoiceWithholding r on r.c_invoice_id=i.c_invoice_id and r.isactive='Y'
+left join LCO_WithholdingRule wr on wr.LCO_WithholdingRule_id=r.LCO_WithholdingRule_id and wr.isactive='Y'
+LEFT JOIN LCO_WithholdingCategory wc on wc.LCO_WithholdingCategory_id=wr.LCO_WithholdingCategory_id and wc.isactive='Y'
+left join C_Tax tax on tax.C_Tax_id=r.C_Tax_id and tax.isactive='Y'
+left join C_TaxCategory tc on tc.C_TaxCategory_ID=tax.C_TaxCategory_ID and tc.isactive='Y'
+left join  c_bpartner c on c.c_bpartner_id=i.c_bpartner_id and c.isactive='Y'
+left join c_bpartner_location l on l.c_bpartner_location_id=i.c_bpartner_location_id and l.isactive='Y'
+left join c_location loc on loc.c_location_id=l.c_location_id and loc.isactive='Y'
+where i.docstatus in ('CO','DR') and i.issotrx='N' and i.C_Invoice_ID=$P{RECORD_ID}]]>
+	</queryString>
+	<field name="nombretercero" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="nombretercero"/>
+	</field>
+	<field name="id" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="id"/>
+	</field>
+	<field name="direccion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="direccion"/>
+	</field>
+	<field name="numfactura" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="numfactura"/>
+	</field>
+	<field name="numretencion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="numretencion"/>
+	</field>
+	<field name="aniofiscal" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="aniofiscal"/>
+	</field>
+	<field name="baseimponible" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="baseimponible"/>
+	</field>
+	<field name="codigo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="codigo"/>
+	</field>
+	<field name="impuesto" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="impuesto"/>
+	</field>
+	<field name="retencion" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="retencion"/>
+	</field>
+	<field name="valorretenido" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="valorretenido"/>
+	</field>
+	<field name="tipodocumento" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="tipodocumento"/>
+	</field>
+	<variable name="total" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{valorretenido}]]></variableExpression>
+	</variable>
+	<title>
+		<band height="213">
+			<textField isBlankWhenNull="true">
+				<reportElement x="52" y="140" width="231" height="15" uuid="37244482-bd2a-458b-9764-8830546a8c93"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="false" isItalic="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{id}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="52" y="157" width="231" height="15" uuid="bce05933-9af0-4fda-9d9d-9d88efa03097"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="false" isItalic="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{direccion}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="438" y="157" width="116" height="15" uuid="218628a8-8739-4275-aeb7-f8563ab4fe1e"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="false" isItalic="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{numfactura}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="438" y="141" width="116" height="15" uuid="65fa3164-42c8-4695-a738-f17a8f1343ea"/>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font fontName="SansSerif" size="8" isBold="false" isItalic="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tipodocumento}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="52" y="123" width="231" height="15" uuid="1326a465-d926-416c-ab13-a66654678218"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="false" isItalic="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nombretercero}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="337" y="121" width="116" height="18" uuid="d5aa613d-3020-41bd-a0da-30b2d6dde661"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{aniofiscal}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<detail>
+		<band height="18" splitType="Stretch">
+			<textField pattern="yyyy" isBlankWhenNull="true">
+				<reportElement x="19" y="0" width="50" height="18" uuid="150c82d9-ac94-468d-b926-7d2f74f0802e"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{aniofiscal}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="105" y="0" width="60" height="18" uuid="2fe78c81-e422-4bb7-a381-e2d0b2eed21c"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{baseimponible}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="182" y="0" width="100" height="18" uuid="a5273385-0eac-4810-b92e-8b37cea20295"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{impuesto}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="288" y="0" width="61" height="18" isPrintWhenDetailOverflows="true" uuid="54b8a91c-f3bd-4d64-8be8-ad4dab31436c"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{codigo}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="460" y="0" width="80" height="18" uuid="8a6fe8a3-7258-4ed5-a8a9-61866b9937ae"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{valorretenido}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="379" y="0" width="67" height="18" uuid="b5e5a107-dd2a-499e-8878-32f2bee2c757"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{retencion}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="242">
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="461" y="20" width="79" height="17" uuid="f70010a6-2bce-482e-b80a-25c90c241120"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{total}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

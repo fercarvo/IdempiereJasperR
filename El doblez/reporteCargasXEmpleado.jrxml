@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteCargasXEmpleado" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a325eafc-9f6d-4b66-8ada-f7c9477b0c49">
+	<property name="ireport.zoom" value="2.853116706110003"/>
+	<property name="ireport.x" value="587"/>
+	<property name="ireport.y" value="50"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<parameter name="AD_Org_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="fecha_desde" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="fecha_hasta" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[/*
+Edgar Carvajal
+Se obtiene los dias que laboro una persona mediante el distinc de las fechas de ordenes asignadas
+*/
+WITH diasLaborados AS (
+select
+	o.salesrep_id,
+	COUNT (DISTINCT o.created::date) as dias
+from c_order as o
+where
+	o.AD_Org_ID = $P{AD_Org_ID}
+	and date(o.created) between date($P{fecha_desde}) and date($P{fecha_hasta})
+	and o.docstatus in ('CO', 'CL')
+	group by o.salesrep_id order by 1,2 )
+
+
+
+select reporte.*, totalordenes/horasLaboradas as order_ from (
+select distinct
+	org.name as org,
+	u.name as usr,
+	COUNT(o.salesrep_id) OVER (PARTITION BY o.salesrep_id) as NumOrdenes,
+	SUM(o.grandtotal) OVER (PARTITION BY o.salesrep_id) as totalOrdenes,
+	diasLaborados.dias::numeric as diasLaborados,
+	diasLaborados.dias*8::numeric as horasLaboradas
+
+from c_order as o
+inner join AD_User as u on u.AD_User_ID = o.salesrep_id and u.isactive = 'Y'
+inner join AD_Org as org on org.AD_Org_ID = o.AD_Org_ID
+inner join diasLaborados on diasLaborados.salesrep_id = o.salesrep_id
+where
+	o.AD_Org_ID = $P{AD_Org_ID}
+	and date(o.created) between date($P{fecha_desde}) and date($P{fecha_hasta})
+	and o.docstatus in ('CO', 'CL')
+) as reporte order by order_ desc]]>
+	</queryString>
+	<field name="org" class="java.lang.String"/>
+	<field name="usr" class="java.lang.String"/>
+	<field name="numordenes" class="java.lang.Long"/>
+	<field name="totalordenes" class="java.math.BigDecimal"/>
+	<field name="diaslaborados" class="java.math.BigDecimal"/>
+	<field name="horaslaboradas" class="java.math.BigDecimal"/>
+	<field name="order_" class="java.math.BigDecimal"/>
+	<variable name="totalordenes" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{totalordenes}]]></variableExpression>
+	</variable>
+	<variable name="totalDias" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{diaslaborados}]]></variableExpression>
+	</variable>
+	<variable name="totalHoras" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{horaslaboradas}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="75" splitType="Stretch">
+			<staticText>
+				<reportElement x="681" y="29" width="120" height="14" uuid="47371d2b-eb77-4917-8202-e88088383ee8"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[ReporteCargasXEmpleado.jrxml]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="650" y="15" width="73" height="14" uuid="7d071472-ae02-4305-b283-fc6448a283e4"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha de impresión:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="100" y="31" width="550" height="13" uuid="8e0c3f50-a65e-4ecd-a351-589f5a51a981"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Desde: " + new SimpleDateFormat("dd/MM/yyyy").format( $P{fecha_desde} ) + "    Hasta: " + new SimpleDateFormat("dd/MM/yyyy").format(  $P{fecha_hasta} )]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="100" y="15" width="550" height="14" uuid="d30322b5-34bf-4fc7-b343-baf40f67f3af"/>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{org}]]></textFieldExpression>
+			</textField>
+			<subreport>
+				<reportElement x="0" y="0" width="100" height="75" uuid="3fdadae7-e0af-49fc-b5c5-4b3fa97051ab"/>
+				<subreportParameter name="AD_Org_ID">
+					<subreportParameterExpression><![CDATA[$P{AD_Org_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["/reports/logorg.jasper"]]></subreportExpression>
+			</subreport>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="723" y="15" width="76" height="14" uuid="c9bc526b-c26c-4f39-9870-abdd02d48fbd"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("dd/MM/yyyy HH:mm").format( new java.util.Date() )]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="650" y="29" width="31" height="14" uuid="d57f8252-9826-417d-9da5-f489baf9a890"/>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Reporte:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="723" y="0" width="53" height="14" uuid="3d7368fc-9fda-41cb-9088-2fdd54df556c"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph rightIndent="1"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}+"  de "]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" evaluationTime="Report">
+				<reportElement x="776" y="0" width="23" height="14" uuid="d6704a62-0c77-4e1a-9cd8-0d88f634f9fe"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph leftIndent="1"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" "+$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="650" y="0" width="73" height="14" uuid="12c71b3d-00ab-460c-9be9-2642e3e5f2d6"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Página:        ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="100" y="1" width="550" height="14" isPrintWhenDetailOverflows="true" uuid="1e199cc6-3bc3-40cf-949b-5989f70a22df"/>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Reporte Cargas de Trabajo por Empleado]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="13" splitType="Stretch">
+			<staticText>
+				<reportElement x="282" y="0" width="82" height="13" uuid="6a4ba91f-7f84-4a26-a755-697f651c5b9c"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total Ordenes]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="205" height="13" uuid="a5465d73-12ec-4f90-a6e0-9ade7226d234"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Responsable]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="434" y="0" width="78" height="13" uuid="fc453478-895d-411a-ba3a-a8d6d2b9afe9"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Horas Laboradas]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="364" y="0" width="70" height="13" uuid="cbf1e400-c1be-4389-9f18-f19e34c92d2a"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Dias Laborados]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="205" y="0" width="77" height="13" uuid="7c08046b-daa2-41f2-b2d6-f102f7e33dde"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Ordenes]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="590" y="0" width="83" height="13" uuid="35fb4031-1616-4296-96ce-5d082be9e272"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<text><![CDATA[$ Total O. / Horas]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="512" y="0" width="78" height="13" uuid="66c47c67-2100-4b90-94f1-9baa25f9102e"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<text><![CDATA[$ Total O. / Dias]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<textField isStretchWithOverflow="true" pattern="###0" isBlankWhenNull="false">
+				<reportElement x="434" y="0" width="78" height="13" uuid="1cf24f55-cdf2-48e1-814c-b3af7341f52e"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{horaslaboradas}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="###0" isBlankWhenNull="false">
+				<reportElement x="205" y="0" width="77" height="13" uuid="bf6333d9-cd68-42e6-b945-ae052a9e88f9"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{numordenes}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="205" height="13" uuid="57a03177-0468-4d67-bfcd-a5e333634dc2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{usr}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00" isBlankWhenNull="false">
+				<reportElement x="282" y="0" width="82" height="13" uuid="8ad1e5ae-4740-49bf-8a82-f89ce99f7b59"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{totalordenes}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="###0" isBlankWhenNull="false">
+				<reportElement x="364" y="0" width="70" height="13" uuid="400645a6-1167-4236-9790-b80b6e058a8f"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{diaslaborados}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00" isBlankWhenNull="false">
+				<reportElement x="512" y="0" width="78" height="13" uuid="d5d719f4-2462-43d4-941e-b056e4867ea5"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{totalordenes}.divide( $F{diaslaborados}, 4)]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00" isBlankWhenNull="false">
+				<reportElement x="590" y="0" width="84" height="13" uuid="1463ee0b-8a98-4050-a90a-f4b1c0df6d6e"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{totalordenes}.divide($F{horaslaboradas}, 4)]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="13">
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00" isBlankWhenNull="false">
+				<reportElement x="282" y="0" width="82" height="13" uuid="edcfe204-c989-47b4-b674-246188924353"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{totalordenes}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00" isBlankWhenNull="false">
+				<reportElement x="512" y="0" width="78" height="13" uuid="5ab590fa-bea4-4279-a1d9-7af6484eacb1"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{totalordenes}.divide( $V{totalDias}, 4 )]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0;-#,##0" isBlankWhenNull="false">
+				<reportElement x="434" y="0" width="78" height="13" uuid="31c0479a-2527-443e-8ede-2fe68162ccae"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{totalHoras}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00" isBlankWhenNull="false">
+				<reportElement x="590" y="0" width="83" height="13" uuid="400a121e-9c88-4fef-8834-7996f200bfdd"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{totalordenes}.divide( $V{totalHoras}, 4 )]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="205" y="0" width="77" height="13" uuid="f67aa0e0-a4df-4c5b-9239-356427301dbb"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total: ]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" pattern="#,##0;-#,##0" isBlankWhenNull="false">
+				<reportElement x="364" y="0" width="70" height="13" uuid="6cf75d35-b8f6-44fd-84f1-199e529657be"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{totalDias}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

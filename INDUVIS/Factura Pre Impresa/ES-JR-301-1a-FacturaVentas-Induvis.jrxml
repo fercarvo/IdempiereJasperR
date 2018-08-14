@@ -1,0 +1,488 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ES-JR-301-1a-FacturaVentas-Induvis" pageWidth="595" pageHeight="707" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="4c2c0df8-a63f-4f38-acd0-861d6b82bf57">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="51"/>
+	<property name="ireport.scriptlethandling" value="0"/>
+	<property name="ireport.encoding" value="UTF-8"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="INDUVIS"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<import value="net.sf.jasperreports.engine.*"/>
+	<import value="java.util.*"/>
+	<import value="net.sf.jasperreports.engine.data.*"/>
+	<parameter name="RECORD_ID" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[select 
+	bp.name,
+	bp.value as ruc,
+	bpl.phone,
+	isnullc(lo.City||' '||lo.address1,'S.D.') as direccion,
+	ci.dateinvoiced,
+   (CASE
+        WHEN cil.pricelist > cil.priceactual AND cil.pricelist <> 0::numeric THEN  round(cil.pricelist*cil.QtyEntered,2)
+        ELSE cil.linenetamt
+    END) as linenetamt,
+    ci.description,
+	(select sum(cil.taxamt) from c_invoice ci,C_InvoiceTax cil
+          where ci.c_invoice_id=$P{RECORD_ID}
+          and cil.C_Invoice_ID=ci.C_Invoice_ID
+      ) as taxamt,
+    ci.grandtotal,
+    cil.qtyentered,
+  	UPPER(es_nl_convertir(Cast(Floor(ABS(ci.grandtotal)) as Integer ),1)) || 
+    (CASE WHEN  ABS((ci.grandtotal-floor(ci.grandtotal))*100) = 0  THEN  ' CON  00'  || '/100 ' ELSE     ' CON ' || Cast(ABS((ci.grandtotal-trunc(ci.grandtotal,0))*100) as integer) || '/100 DOLARES'  
+     END ) as LETRAS,
+	p.name producto,
+	(CASE
+		WHEN cil.pricelist > cil.priceactual AND cil.pricelist <> 0::numeric THEN cil.pricelist
+		ELSE cil.priceactual
+	END) as priceactual,
+	(CASE 
+		WHEN cil.pricelist > cil.priceactual AND cil.pricelist <> 0::numeric 
+		THEN round((cil.pricelist - cil.priceactual)*cil.QtyEntered,2)
+	    ELSE 0
+	END) as descuento,
+	'' as proyecto, 
+	ci.totallines,
+	cil.description as dlinea,
+	cil.C_InvoiceLine_ID, 
+	irf.description proveedor2,
+	irf.taxid,
+	irf.documentno,
+	irf.authorizationno,
+	irf.baseratableamt,
+	irf.basetaxableamt,
+	irf.basenotaxableamt,
+	irf.taxiceamt,
+	irf.taxivaamt,
+	irf.datetrx,
+	ci.c_doctype_id,
+	ci.c_doctype_id,ad.name As representantecomercial ,ci.documentno nrofactura,
+Case
+When pr.Value = 'S' Then 'OTROS CON UTILIZACION DEL SF' -- "Check"              OTROS CON UTILIZACION DEL SISTEMA FINANCIERO
+When pr.Value = 'P' Then 'OTROS CON UTILIZACION DEL SF' -- "On Credit"          OTROS CON UTILIZACION DEL SISTEMA FINANCIERO
+When pr.Value = 'K' Then 'TARJETA DE CRÉDITO' -- "Credit Card"        TARJETA DE CRÉDITO
+When pr.Value = 'T' Then 'OTROS CON UTILIZACION DEL SF' -- "Direct Deposit"     OTROS CON UTILIZACION DEL SISTEMA FINANCIERO
+When pr.Value = 'M' Then 'SIN UTILIZACION DEL SF' -- "Mixed POS Payment"  SIN UTILIZACION DEL SISTEMA FINANCIERO
+When pr.Value = 'D' Then 'OTROS CON UTILIZACION DEL SF' -- "Direct Debit"       OTROS CON UTILIZACION DEL SISTEMA FINANCIERO
+When pr.Value = 'B' Then 'SIN UTILIZACION DEL SF' -- "Cash"               SIN UTILIZACION DEL SISTEMA FINANCIERO
+	Else '20'
+	End As FormaPago,
+	bpt.netdays,
+	es_dateadd('day',cast(bpt.netdays as int),ci.dateinvoiced) as fvencimiento,
+	sr.value salesregionvalue,
+	sr.name salesregionname,
+	ad.phone As fonorepresentantecomercial,
+p.value codigoproducto,ad.phone2,(select Max(documentno) From C_order Where c_order_id=ci.c_order_id) As documentonoov ,
+(Select tp.name As Transportista From C_Order oc Join m_shipper tp On oc.m_shipper_id = tp.m_shipper_id And oc.C_Order_ID = ci.C_Order_ID ) As transportista,
+o.documentno orden
+from c_invoice ci
+Join c_bpartner bp ON ci.c_bpartner_id=bp.c_bpartner_id
+Join C_BPartner_Location bpl ON bpl.c_bpartner_id=bp.c_bpartner_id And ci.C_BPartner_Location_ID = bpl.C_BPartner_Location_ID
+Join C_InvoiceLine cil ON cil.C_Invoice_ID=ci.C_Invoice_ID
+Join M_Product p on cil.M_Product_Id = p.M_Product_Id
+Left Join C_Salesregion sr on bpl.C_Salesregion_ID = sr.C_Salesregion_ID
+Left Join LEC_InvoiceRefund irf on ci.C_Invoice_ID = irf.C_Invoice_ID
+Left Join Ad_User ad on ci.salesrep_id = ad.ad_user_id
+Left Join c_order o on o.C_Order_ID = ci.C_Order_ID
+Left Outer Join C_PaymentTerm bpt ON ci.c_paymentterm_id = bpt.c_paymentterm_id
+Left Outer Join AD_Ref_List pr ON ci.paymentrule = pr.Value And  pr.AD_Reference_ID=195
+Left Outer Join C_Location lo On bpl.C_Location_ID = lo.C_Location_ID
+where ci.c_invoice_id=$P{RECORD_ID}
+order by cil.line]]>
+	</queryString>
+	<field name="name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="name"/>
+	</field>
+	<field name="ruc" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="ruc"/>
+	</field>
+	<field name="phone" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="phone"/>
+	</field>
+	<field name="direccion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="direccion"/>
+	</field>
+	<field name="dateinvoiced" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="dateinvoiced"/>
+	</field>
+	<field name="linenetamt" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="linenetamt"/>
+	</field>
+	<field name="description" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="description"/>
+	</field>
+	<field name="taxamt" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="taxamt"/>
+	</field>
+	<field name="grandtotal" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="grandtotal"/>
+	</field>
+	<field name="qtyentered" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="qtyentered"/>
+	</field>
+	<field name="letras" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="letras"/>
+	</field>
+	<field name="producto" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="producto"/>
+	</field>
+	<field name="priceactual" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="priceactual"/>
+	</field>
+	<field name="descuento" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="descuento"/>
+	</field>
+	<field name="proyecto" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="proyecto"/>
+	</field>
+	<field name="totallines" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="totallines"/>
+	</field>
+	<field name="dlinea" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="dlinea"/>
+	</field>
+	<field name="c_invoiceline_id" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="c_invoiceline_id"/>
+	</field>
+	<field name="proveedor2" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="proveedor2"/>
+	</field>
+	<field name="taxid" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="taxid"/>
+	</field>
+	<field name="documentno" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="documentno"/>
+	</field>
+	<field name="authorizationno" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="authorizationno"/>
+	</field>
+	<field name="baseratableamt" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="baseratableamt"/>
+	</field>
+	<field name="basetaxableamt" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="basetaxableamt"/>
+	</field>
+	<field name="basenotaxableamt" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="basenotaxableamt"/>
+	</field>
+	<field name="taxiceamt" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="taxiceamt"/>
+	</field>
+	<field name="taxivaamt" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="taxivaamt"/>
+	</field>
+	<field name="datetrx" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="datetrx"/>
+	</field>
+	<field name="c_doctype_id" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="c_doctype_id"/>
+	</field>
+	<field name="COLUMN_30" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="c_doctype_id"/>
+	</field>
+	<field name="representantecomercial" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="representantecomercial"/>
+	</field>
+	<field name="nrofactura" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="nrofactura"/>
+	</field>
+	<field name="formapago" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="formapago"/>
+	</field>
+	<field name="netdays" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="netdays"/>
+	</field>
+	<field name="fvencimiento" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="fvencimiento"/>
+	</field>
+	<field name="salesregionvalue" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="salesregionvalue"/>
+	</field>
+	<field name="salesregionname" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="salesregionname"/>
+	</field>
+	<field name="fonorepresentantecomercial" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="fonorepresentantecomercial"/>
+	</field>
+	<field name="codigoproducto" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="codigoproducto"/>
+	</field>
+	<field name="phone2" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="phone2"/>
+	</field>
+	<field name="documentonoov" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="documentonoov"/>
+	</field>
+	<field name="transportista" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="transportista"/>
+	</field>
+	<field name="orden" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="orden"/>
+	</field>
+	<variable name="SUM_linenetamt_1" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{linenetamt}]]></variableExpression>
+	</variable>
+	<variable name="SumTotlReembolso" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[$F{baseratableamt}.add( $F{basetaxableamt}.add( $F{basenotaxableamt}.add( $F{taxiceamt}.add( $F{taxivaamt} ) ) ) )]]></variableExpression>
+	</variable>
+	<variable name="descuento" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{descuento}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="197" splitType="Stretch">
+			<textField isBlankWhenNull="false">
+				<reportElement key="textField" x="70" y="106" width="377" height="15" uuid="1d07dd3d-76d3-4c28-919a-58c4a1b8f0e6"/>
+				<textElement markup="styled">
+					<font fontName="SansSerif" size="10" isBold="false" pdfFontName="Helvetica" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="false">
+				<reportElement key="textField" x="70" y="138" width="377" height="15" uuid="38fa9121-f9c8-474d-8f16-02758ac89a09"/>
+				<textElement markup="styled">
+					<font fontName="SansSerif" size="10" isBold="false" pdfFontName="Helvetica"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ruc}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement key="textField" x="325" y="138" width="124" height="15" uuid="f62b9b1c-8b7e-4ed9-9a49-c030d0a12fb6"/>
+				<textElement>
+					<font fontName="SansSerif" size="10" isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{phone}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd" isBlankWhenNull="false">
+				<reportElement key="textField" x="370" y="63" width="21" height="16" uuid="1df7ccc1-692d-439a-83db-16f697fce74d"/>
+				<textElement markup="styled">
+					<font fontName="SansSerif" size="10" isBold="false" pdfFontName="Helvetica"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{dateinvoiced}]]></textFieldExpression>
+			</textField>
+			<textField pattern="MM" isBlankWhenNull="false">
+				<reportElement key="textField" x="398" y="63" width="21" height="16" uuid="9ffb447d-4d6c-4ed3-bdd7-90ed5ac72525"/>
+				<textElement markup="styled">
+					<font fontName="SansSerif" size="10" isBold="false" pdfFontName="Helvetica"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{dateinvoiced}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy" isBlankWhenNull="false">
+				<reportElement key="textField" x="424" y="63" width="41" height="16" uuid="6886843a-299c-4be1-b9e0-0102b7005291"/>
+				<textElement markup="styled">
+					<font fontName="SansSerif" size="10" isBold="false" pdfFontName="Helvetica"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{dateinvoiced}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement key="staticText-8" x="15" y="106" width="51" height="15" uuid="711cc5a7-1d6f-4afb-9cdb-759baff88c04"/>
+				<textElement>
+					<font fontName="SansSerif" isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<text><![CDATA[CLIENTE:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement key="staticText-9" x="15" y="138" width="51" height="15" uuid="f6d86a4c-45c8-4ea2-abaa-75edc7c67b20"/>
+				<textElement>
+					<font fontName="SansSerif" isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<text><![CDATA[RUC:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement key="staticText-10" x="15" y="122" width="51" height="15" uuid="6f1aca1f-5cf9-4bf7-9101-5ec80d69e64a"/>
+				<textElement>
+					<font fontName="SansSerif" isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<text><![CDATA[DIR:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement key="staticText-11" x="269" y="138" width="51" height="15" uuid="b18f98bb-6ebd-4f1f-a6fc-9626fbf39bc5"/>
+				<textElement>
+					<font fontName="SansSerif" isBold="true" pdfFontName="Helvetica-Bold"/>
+				</textElement>
+				<text><![CDATA[Telf.:]]></text>
+			</staticText>
+			<textField isBlankWhenNull="false">
+				<reportElement key="textField" x="70" y="123" width="377" height="15" uuid="a389e2c1-1f52-443d-a54f-ff1d020173fa"/>
+				<textElement>
+					<font fontName="SansSerif"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{direccion}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="12" splitType="Stretch">
+			<textField isBlankWhenNull="false">
+				<reportElement key="textField" x="118" y="0" width="273" height="12" uuid="73ca87e3-96ba-43f8-8e32-060ab92fbb40"/>
+				<textElement verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{producto}]]></textFieldExpression>
+			</textField>
+			<textField pattern="##0.00" isBlankWhenNull="false">
+				<reportElement key="textField" x="403" y="0" width="77" height="12" uuid="1821e720-b032-420c-a818-72124fa29871"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{priceactual}]]></textFieldExpression>
+			</textField>
+			<textField pattern="##0.00" isBlankWhenNull="false">
+				<reportElement key="textField" x="484" y="0" width="77" height="12" uuid="2ecee1f8-8885-4594-91fd-dad27b2e6c70"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{linenetamt}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="false">
+				<reportElement key="textField" x="12" y="0" width="54" height="12" uuid="d7c50851-cb1e-4a71-8a1a-877db96bd7f5"/>
+				<textElement verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{codigoproducto}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0" isBlankWhenNull="false">
+				<reportElement key="textField" x="72" y="0" width="38" height="12" uuid="98b03d2f-8b80-4f84-9f79-320e73a63ed3"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{qtyentered}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="316" splitType="Prevent">
+			<textField pattern="$ #,##0.00" isBlankWhenNull="false">
+				<reportElement key="textField" x="482" y="111" width="79" height="14" uuid="430b5e9f-3612-4276-a302-f1188bd4f758"/>
+				<textElement textAlignment="Right" markup="styled">
+					<font fontName="SansSerif" size="10" isBold="false" pdfFontName="Helvetica"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{grandtotal}]]></textFieldExpression>
+			</textField>
+			<textField pattern="##0.00" isBlankWhenNull="false">
+				<reportElement key="textField" x="482" y="95" width="79" height="14" uuid="c3a40349-c8ca-475e-8d48-c7f04773b46b"/>
+				<textElement textAlignment="Right" markup="styled">
+					<font fontName="SansSerif" size="10" isBold="false" pdfFontName="Helvetica"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{taxamt}]]></textFieldExpression>
+			</textField>
+			<textField pattern="##0.00" isBlankWhenNull="false">
+				<reportElement key="textField" x="482" y="47" width="79" height="14" uuid="17387837-e0ce-450f-b4a1-5f9549898ff7"/>
+				<textElement textAlignment="Right">
+					<font fontName="SansSerif" isBold="false" pdfFontName="Helvetica"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{totallines}.add( $V{descuento} )]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement key="staticText-5" x="482" y="79" width="79" height="14" uuid="f17e0f8c-0663-44d4-8e7d-805f154b7031"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" isBold="false" pdfFontName="Helvetica"/>
+				</textElement>
+				<text><![CDATA[0.00]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement key="textField" x="22" y="53" width="68" height="15" uuid="9cf2ea5e-d105-4222-8fb5-6d0359d084aa"/>
+				<textElement verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{representantecomercial}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="false">
+				<reportElement key="textField" x="118" y="53" width="212" height="15" uuid="99b39fe6-a3b0-4fad-a17b-5349bca67537"/>
+				<textElement verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{formapago}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0" isBlankWhenNull="false">
+				<reportElement key="textField" x="118" y="68" width="31" height="15" uuid="2ac54ccd-3379-461b-8f2a-fd18ed6ea7ff"/>
+				<textElement verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{netdays}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy/MM/dd" isBlankWhenNull="false">
+				<reportElement key="textField" x="167" y="83" width="100" height="15" uuid="0e23f967-dead-4be0-a0a0-e49fd4bc6501"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fvencimiento}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement key="staticText-7" x="164" y="68" width="166" height="15" uuid="d9ec4a20-c936-4d40-bf6c-d03f1195c763"/>
+				<textElement verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[Días de Crédito]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement key="textField" x="22" y="83" width="90" height="15" uuid="67c8fd53-ca5b-4b45-81bf-f0dd17ac9f4e"/>
+				<textElement verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{phone2}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement key="textField" x="22" y="68" width="90" height="15" uuid="34df432d-2bb2-4c24-8921-f6fda07ae79e"/>
+				<textElement verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{salesregionvalue}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement key="textField" x="85" y="269" width="207" height="15" uuid="bb406686-93a9-44d1-bbe9-eaafe2f7987c"/>
+				<textElement textAlignment="Left">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{transportista}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="false">
+				<reportElement key="textField" x="85" y="220" width="207" height="15" uuid="a0329d68-46c7-4b67-908a-cbba0770dcbc"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nrofactura}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="false">
+				<reportElement key="textField-1" x="85" y="286" width="377" height="15" uuid="c6ed5588-e79a-427c-b67d-49b377cee054"/>
+				<textFieldExpression><![CDATA[$F{direccion}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement key="staticText-12" x="118" y="83" width="42" height="15" uuid="53b59196-db79-48fa-bbd3-70a6dd8351d8"/>
+				<textElement verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[Vence:]]></text>
+			</staticText>
+			<textField pattern="##0.00" isBlankWhenNull="false">
+				<reportElement key="textField" x="482" y="63" width="79" height="14" uuid="bff05ef7-bf2b-4c43-8fb7-52cc836d02c2"/>
+				<textElement textAlignment="Right" markup="styled">
+					<font fontName="SansSerif" size="10" isBold="false" pdfFontName="Helvetica"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{descuento}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement key="textField" x="85" y="235" width="207" height="15" uuid="d51efa06-9bda-47cb-9b03-e97cca744954"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{orden}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

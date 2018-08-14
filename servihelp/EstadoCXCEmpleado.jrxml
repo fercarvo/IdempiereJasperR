@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="EmpleadoCXC" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a80ed23f-586d-4137-9775-4a3bd6032d6d">
+	<property name="ireport.zoom" value="1.464100000000001"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="SERVIHELP"/>
+	<style name="table" mode="Opaque">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_1" mode="Opaque">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<parameter name="AD_Org_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="C_BPartner_ID" class="java.lang.Integer"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["C:\\Users\\Usuario\\Documents\\JasperResports\\stocks\\"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+o.name organizacion,
+p.C_Project_ID,
+p.c_bpartner_id,
+p.name prestamo,
+p.PlannedAmt valorprestamo,
+p.DateContract fechaprestamo,
+(case when char_length(trim(coalesce(BP.lastname1,'') ||' '|| coalesce(BP.lastname2,'') ||' '|| coalesce(BP.firstname1,'') ||' '|| coalesce(BP.firstname2,'')))>0 then trim(coalesce(BP.lastname1,'') ||' '|| coalesce(BP.lastname2,'') ||' '|| coalesce(BP.firstname1,'') ||' '|| coalesce(BP.firstname2,'')) else BP.Name end) empleado,
+coalesce(py.documentno,i.documentno) documento,
+c.name conceptonomina,
+pp.hr_movement_id,
+pp.StartDate fechapago,
+m.amount valorpago,
+pr.name procesonomina,
+(p.PlannedAmt-(select coalesce(sum(f.plannedamt),0) from C_ProjectPhase f where f.C_Project_ID = p.c_project_id and f.isactive = 'Y' and f.hr_movement_id is not null)) saldo
+FROM C_Project p
+JOIN C_ProjectPhase pp on pp.C_Project_ID=p.C_Project_ID and pp.isactive='Y'
+JOIN C_BPartner bp on bp.C_BPartner_ID=p.C_BPartner_ID and bp.isEmployee='Y' and bp.isactive='Y'
+JOIN HR_Concept c on c.HR_Concept_ID=p.HR_Concept_ID and c.AccountSign='C'
+INNER JOIN AD_Org o on o.ad_org_id=p.ad_org_id
+LEFT JOIN HR_Movement m on m.HR_Movement_ID=pp.HR_Movement_ID
+LEFT JOIN HR_Process pr on pr.HR_Process_ID=m.HR_Process_ID
+LEFT JOIN C_Invoice i on i.C_Invoice_ID=p.C_Invoice_ID and i.isactive='Y'
+LEFT JOIN C_Payment py on py.C_Payment_ID=p.C_Payment_ID and py.isactive='Y'
+WHERE p.isactive='Y' --and p.prestamo='Y' and coalesce(p.c_invoice_id,p.c_payment_id) notnull
+and p.ad_org_id=$P{AD_Org_ID}
+and (case when coalesce($P{C_BPartner_ID},0)>0 then p.c_bpartner_id=$P{C_BPartner_ID} else 1=1 end)
+ORDER BY empleado,fechaprestamo,p.c_project_id,fechapago,pp.created]]>
+	</queryString>
+	<field name="organizacion" class="java.lang.String"/>
+	<field name="c_project_id" class="java.math.BigDecimal"/>
+	<field name="c_bpartner_id" class="java.math.BigDecimal"/>
+	<field name="prestamo" class="java.lang.String"/>
+	<field name="valorprestamo" class="java.math.BigDecimal"/>
+	<field name="fechaprestamo" class="java.sql.Timestamp"/>
+	<field name="empleado" class="java.lang.String"/>
+	<field name="documento" class="java.lang.String"/>
+	<field name="conceptonomina" class="java.lang.String"/>
+	<field name="hr_movement_id" class="java.math.BigDecimal"/>
+	<field name="fechapago" class="java.sql.Timestamp"/>
+	<field name="valorpago" class="java.math.BigDecimal"/>
+	<field name="procesonomina" class="java.lang.String"/>
+	<field name="saldo" class="java.math.BigDecimal"/>
+	<variable name="totalprestamo" class="java.math.BigDecimal" resetType="Group" resetGroup="empleado" incrementType="Group" incrementGroup="prestamo" calculation="Sum">
+		<variableExpression><![CDATA[$F{valorprestamo}]]></variableExpression>
+	</variable>
+	<variable name="totalcobrado" class="java.math.BigDecimal" resetType="Group" resetGroup="empleado" calculation="Sum">
+		<variableExpression><![CDATA[$F{valorpago}]]></variableExpression>
+	</variable>
+	<variable name="totalsaldo" class="java.math.BigDecimal" resetType="Group" resetGroup="empleado" incrementType="Group" incrementGroup="prestamo" calculation="Sum">
+		<variableExpression><![CDATA[$F{saldo}]]></variableExpression>
+	</variable>
+	<variable name="SUMA_prestamo" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{valorprestamo}]]></variableExpression>
+	</variable>
+	<variable name="SUMA_cobrado" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{valorpago}]]></variableExpression>
+	</variable>
+	<variable name="SUMA_saldo" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{saldo}]]></variableExpression>
+	</variable>
+	<group name="empleado">
+		<groupExpression><![CDATA[$F{c_bpartner_id}]]></groupExpression>
+		<groupHeader>
+			<band height="15">
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="0" y="0" width="257" height="15" uuid="2a747ff4-77e0-4bdc-8c6b-6480fc1c8e9d"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{empleado}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="15">
+				<staticText>
+					<reportElement x="0" y="0" width="382" height="15" uuid="d7e43a5a-9dfc-4739-a3ff-d0547c08a521"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Total: ]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="382" y="0" width="70" height="15" uuid="342c0bc0-8a17-4ac5-a93d-6a78f69f3a74"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{totalprestamo}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="579" y="0" width="62" height="15" uuid="10abb46f-b5f3-4fc9-acd6-899a853cc635"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{totalsaldo}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="517" y="0" width="62" height="15" uuid="29a993ce-a7a6-4d7c-88df-6f023095bb0f"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{totalcobrado}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="prestamo">
+		<groupExpression><![CDATA[$F{c_project_id}]]></groupExpression>
+		<groupHeader>
+			<band height="15">
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="14" y="0" width="166" height="15" uuid="705ca6ee-7e83-46cd-a30a-5595a261c849"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{prestamo}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="180" y="0" width="134" height="15" uuid="32a3d2ac-733c-44d2-8a6d-781095048042"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{conceptonomina}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+					<reportElement x="314" y="0" width="68" height="15" uuid="2ea58942-94a4-4bb1-ae00-752bcbfbf646"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{fechaprestamo}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="382" y="0" width="70" height="15" uuid="2a5eebb9-37a0-4f38-b4d7-dff832cde5ba"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{valorprestamo}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="641" y="0" width="161" height="15" uuid="512a3b7d-b05d-4cc1-8cb2-378778fe2850"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{documento}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="579" y="0" width="62" height="15" uuid="fc565a50-9668-4f2d-a432-0aaac5e86cb4"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{saldo}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<title>
+		<band height="75" splitType="Stretch">
+			<staticText>
+				<reportElement x="200" y="1" width="430" height="14" uuid="f4582469-735d-416e-9cef-721866c8f59b"/>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ESTADO DE CUENTA POR COBRAR EMPLEADO asdasd]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="282" y="17" width="260" height="14" uuid="fe18d52e-ced6-4a47-90b3-8cedd9121697"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{organizacion}]]></textFieldExpression>
+			</textField>
+			<subreport>
+				<reportElement key="" x="0" y="0" width="100" height="75" uuid="75045631-2e20-4e43-89f5-8c51c8bbd974"/>
+				<subreportParameter name="AD_Org_ID">
+					<subreportParameterExpression><![CDATA[$P{AD_Org_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["/reports/logorg.jasper"]]></subreportExpression>
+			</subreport>
+			<textField isStretchWithOverflow="true" evaluationTime="Report">
+				<reportElement x="784" y="1" width="17" height="14" uuid="fe2bdbd8-f255-4b1b-9543-b1e473ed86ff"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph leftIndent="1"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" "+$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="731" y="1" width="53" height="14" uuid="b88fc889-bbb2-4de5-96f6-bbd73f74aec9"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph rightIndent="1"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}+"  de "]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="658" y="16" width="73" height="14" uuid="9bf386b3-1fb0-4fa6-9eb8-729e2cdc85bc"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[Fecha de impresión:]]></text>
+			</staticText>
+			<textField pattern="">
+				<reportElement x="731" y="16" width="70" height="14" uuid="9086f095-536f-4e5a-a485-33a8a0cfcfdf"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("dd/MM/yyyy HH:mm").format( new java.util.Date() )]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="658" y="1" width="73" height="14" uuid="6c2057ad-3a56-461f-95aa-8fbf6b58525b"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[Página:        ]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="20" splitType="Stretch">
+			<staticText>
+				<reportElement style="table" x="314" y="0" width="68" height="20" uuid="21e785f7-68e8-4703-b754-7439f4fcf577"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha Préstamo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table" x="180" y="0" width="134" height="20" uuid="a8fffd13-4106-4c2e-ab71-f372810eef83"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Concepto Nómina]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table" x="517" y="0" width="62" height="20" uuid="1dc71d36-61d4-4b38-ab8e-0828514ee99f"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Valor Cobrado]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table" x="0" y="0" width="180" height="20" uuid="d5971eea-f56a-4d28-8d6a-88c07d6e1668"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Préstamo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table" x="641" y="0" width="161" height="20" uuid="7a8fd07e-62de-4b8a-92b1-84b7a0729b9e"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Documento / Proceso Nómina]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table" x="579" y="0" width="62" height="20" uuid="fb1e51e2-3666-4253-94f0-bee40de297f9"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Saldo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table" x="382" y="0" width="70" height="20" uuid="1586ba01-95b4-483d-b5d5-f957530aa6fd"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Valor Préstamo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table" x="452" y="0" width="65" height="20" uuid="cf4da6da-c8e0-4c86-9bee-ac053e4dd54e"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha Cobro]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<printWhenExpression><![CDATA[$F{hr_movement_id}!=null]]></printWhenExpression>
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="452" y="0" width="65" height="15" uuid="7bd056fe-ad85-4779-b192-ac7d80bf583b"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fechapago}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="517" y="0" width="62" height="15" uuid="4afef962-f70a-4412-ac28-79e7adf11e46"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{valorpago}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="641" y="0" width="161" height="15" uuid="304a5995-7e06-4f75-bdc8-0ea703120099"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{procesonomina}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="15">
+			<staticText>
+				<reportElement x="230" y="0" width="152" height="15" uuid="5f69b2b1-c114-4bde-91c1-68fab6105db4"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TOTAL REPORTE: ]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="382" y="0" width="70" height="15" uuid="a3419962-887d-45c1-9845-7d57959eac42"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUMA_prestamo}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="517" y="0" width="62" height="15" uuid="3b226326-89dd-4e6a-8a47-05648afebacf"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUMA_cobrado}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="579" y="0" width="62" height="15" uuid="f39f5e23-4379-4e20-9cde-d071ede5d163"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUMA_saldo}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

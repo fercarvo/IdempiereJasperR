@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reportePagosPichincha" pageWidth="1000" pageHeight="595" orientation="Landscape" columnWidth="960" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a80ed23f-586d-4137-9775-4a3bd6032d6d">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="net.sf.jasperreports.export.csv.field.delimiter" value=";"/>
+	<style name="table" mode="Opaque">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_1" mode="Opaque">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<parameter name="AD_Org_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="HR_Department_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="C_BankAccount_ID" class="java.lang.Integer"/>
+	<parameter name="fecha_inicio" class="java.util.Date"/>
+	<parameter name="fecha_fin" class="java.util.Date"/>
+	<parameter name="concuenta" class="java.lang.String"/>
+	<parameter name="TenderType" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select
+'PA' as pago,
+bp.TaxID as identificacion,
+'USD' as moneda,
+to_char(p.PayAmt,'FM9999999990V99')::numeric as sueldo,
+case when p.TenderType='A' then 'CTA' else 'EFE' end as cta,
+case when ba.BankAccountType='S' then 'AHO' when ba.BankAccountType='C' then 'CTE' else '' end tipocta,
+ba.AccountNo numcuenta,
+SUBSTRING(hpro.name, 1, 39) as procesoNomina,
+tit.idats,
+bp.name as nombre,
+b.RoutingNo as idbco
+from c_payment p
+join HR_Process hpro on hpro.HR_Process_id=p.HR_Process_id and hpro.isactive='Y'
+join c_bpartner bp on bp.c_bpartner_id=p.c_bpartner_id and bp.isactive='Y'
+join LCO_TaxIdType tit on tit.LCO_TaxIdType_id=bp.LCO_TaxIdType_id and tit.isactive='Y'
+left join C_BP_BankAccount ba on ba.C_bpartner_ID=p.C_bpartner_ID and ba.isactive='Y' and ba.creditonomina='Y'
+left join C_Bank b on b.C_Bank_ID=ba.C_Bank_ID and b.isactive='Y'
+where p.isactive='Y' and p.docstatus='CO'
+and p.ad_org_id=$P{AD_Org_ID} and p.TenderType not in ('K')
+and p.C_BankAccount_ID=$P{C_BankAccount_ID} and p.TenderType=$P{TenderType}
+and (case when coalesce($P{HR_Department_ID},0)>0 then  EXISTS (SELECT * FROM HR_Employee WHERE C_BPartner_ID=bp.C_BPartner_ID AND HR_Department_ID=$P{HR_Department_ID}) else 1=1 end)
+and p.dateacct between $P{fecha_inicio} and $P{fecha_fin}]]>
+	</queryString>
+	<field name="pago" class="java.lang.String"/>
+	<field name="identificacion" class="java.lang.String"/>
+	<field name="moneda" class="java.lang.String"/>
+	<field name="sueldo" class="java.math.BigDecimal"/>
+	<field name="cta" class="java.lang.String"/>
+	<field name="tipocta" class="java.lang.String"/>
+	<field name="numcuenta" class="java.lang.String"/>
+	<field name="procesonomina" class="java.lang.String"/>
+	<field name="idats" class="java.lang.String"/>
+	<field name="nombre" class="java.lang.String"/>
+	<field name="idbco" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<detail>
+		<band height="14" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="b75cfe83-ed3c-4e8a-a224-cef24207adcf" x="30" y="0" width="86" height="14"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph leftIndent="5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{identificacion}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement uuid="50fad3ee-fc9c-46c7-860e-c8d14e2a3371" x="0" y="0" width="30" height="14"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{pago}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement uuid="e147fe4f-aaed-49fb-8f81-aef9506f089f" x="116" y="0" width="30" height="14"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph leftIndent="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{moneda}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement uuid="13cb903b-0e79-4902-b4bd-6a8c08ce721e" x="199" y="0" width="40" height="14"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cta}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement uuid="d56b0da3-ffa8-4523-b051-9811a41b1f32" x="239" y="0" width="39" height="14"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tipocta}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement uuid="47ace6e1-e866-4a5a-9109-51d3450a9d55" x="278" y="0" width="92" height="14"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{numcuenta}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement uuid="d5f12ab8-39de-4f6c-a42e-df75a4856c71" x="615" y="0" width="23" height="14"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{idats}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement uuid="19a9c188-4c02-4c98-a105-8ef6f2ca8e6a" x="370" y="0" width="245" height="14"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{procesonomina}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement uuid="4a086c18-5924-4c70-adc5-0420e08c1c1c" x="146" y="0" width="53" height="14"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{sueldo}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement uuid="c7f2dfc0-ae51-4692-80de-00e439ac1549" x="638" y="0" width="73" height="14"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{identificacion}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement uuid="368661c1-cc9f-4e23-9762-566cb5987845" x="711" y="0" width="199" height="14"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nombre}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement uuid="3931e056-0756-4688-81c1-f4068f2f1e20" x="910" y="0" width="50" height="14"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{idbco}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

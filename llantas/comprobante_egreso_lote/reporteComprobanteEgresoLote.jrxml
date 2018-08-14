@@ -1,0 +1,623 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteComprobanteEgresoLote" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a80ed23f-586d-4137-9775-4a3bd6032d6d">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Llantas"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="AD_Org_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[/* On Development */
+/* "C:\\Temp\\JasperReports\\" */
+/* On Production */
+/*System.getProperty("java.io.tmpdir") + System.getProperty("file.separator")*/
+""]]></defaultValueExpression>
+	</parameter>
+	<parameter name="C_DepositBatch_ID" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[select db.C_DepositBatch_id,db.documentno lote,db.description descripcion,abc.* from C_DepositBatch db
+left join C_DepositBatchLine dbl on dbl.C_DepositBatch_id=db.C_DepositBatch_id and dbl.isactive='Y'
+left join (select
+ info.taxid idRUC, org.description Organizacion, lo.address1 Direccion1, info.phone, info.email, info.url,cp.c_payment_id,cp.dateacct as fechapago, cp.documentno as numpago,
+cb.name as banco, cba.AccountNo as bancocta, cp.CheckNo, cbp.name as nametercero,
+cp.datetrx as fecha_doc,
+CASE WHEN
+	cp.docstatus =  'VO' THEN
+	cp.Description|| ' ' ||'ANULADO'
+        ELSE  cp.Description
+        END   AS descrip,
+ci.grandtotal   as valor_fact,
+cp.payamt as pago,
+call.amount as monto,
+ci.grandtotal - call.amount   valor_saldo_factura,
+ci.documentno as num_factura,
+bp.name girador,
+cdt.issotrx,
+ot.c_project_id,
+ot.value orden,
+cp.Description,
+(select distinct rl_trl.name from ad_ref_list_trl rl_trl join ad_ref_list rl ON rl.ad_ref_list_id = rl_trl.ad_ref_list_id join ad_reference r on r.ad_reference_id = rl.ad_reference_id and r.name = 'C_Payment Tender Type' and rl.value = cp.TenderType) AS tipopago,
+u.name elaborado
+from C_AllocationLine call
+LEFT JOIN C_PaymentAllocate cpa ON cpa.C_AllocationLine_id =  call.C_AllocationLine_id
+left join C_AllocationHdr cah ON  cah.C_AllocationHdr_id = call.C_AllocationHdr_id
+JOIN C_Payment cp ON cp.C_Payment_id = call.C_Payment_id
+JOIN C_Invoice ci ON ci.c_invoice_id = call.c_invoice_id
+JOIN C_DocType Cdt ON cdt.C_DocType_ID = cp.C_DocType_ID --and cdt.issotrx='N'
+join AD_Org org on org.ad_org_id = cp.ad_org_id and org.isactive='Y'
+join AD_OrgInfo info on info.ad_org_id=org.ad_org_id and info.isactive='Y'
+join C_location lo on lo.c_location_id=info.c_location_id and lo.isactive='Y'
+JOIN C_BankAccount cba ON cba.C_BankAccount_ID = cp.C_BankAccount_ID
+JOIN C_Bank cb ON  cba.C_Bank_ID = cb.C_Bank_ID
+join c_bpartner cbp on cbp.C_BPartner_ID=cp.C_BPartner_ID and cbp.isactive='Y'
+left join c_bpartner bp on bp.C_BPartner_ID=cp.emisor_id and bp.isactive='Y'
+left join c_project ot on ot.c_project_id=cp.c_project_id and ot.isactive='Y'
+left join ad_user u on u.ad_user_id=cp.createdby and cp.isactive='Y'
+where cp.C_Charge_ID isnull
+and cah.isactive  = 'Y'
+union
+select
+ info.taxid idRUC, org.description Organizacion, lo.address1 Direccion1, info.phone, info.email, info.url,cp.c_payment_id,cp.dateacct as fechapago, cp.documentno as numpago,
+cb.name as banco, cba.AccountNo as bancocta, cp.CheckNo, cbp.name as nametercero,
+cp.datetrx as fecha_doc,
+CASE WHEN
+	cp.docstatus =  'VO' THEN
+	cp.Description|| ' ' ||'ANULADO'
+        ELSE  cp.Description
+        END   AS descrip,
+'0' as valor_fact,
+cp.payamt as pago,
+cp.payamt as monto,
+'0' valor_saldo_factura,
+'' as num_factura,
+bp.name girador,
+cdt.issotrx,
+ot.c_project_id,
+ot.value orden,
+cp.Description,
+(select distinct rl_trl.name from ad_ref_list_trl rl_trl join ad_ref_list rl ON rl.ad_ref_list_id = rl_trl.ad_ref_list_id join ad_reference r on r.ad_reference_id = rl.ad_reference_id and r.name = 'C_Payment Tender Type' and rl.value = cp.TenderType) AS tipopago,
+u.name elaborado
+from  C_Payment cp
+JOIN C_DocType Cdt ON cdt.C_DocType_ID = cp.C_DocType_ID --and cdt.issotrx='N'
+join AD_Org org on org.ad_org_id = cp.ad_org_id and org.isactive='Y'
+join AD_OrgInfo info on info.ad_org_id=org.ad_org_id and info.isactive='Y'
+join C_location lo on lo.c_location_id=info.c_location_id and lo.isactive='Y'
+JOIN C_BankAccount cba ON cba.C_BankAccount_ID = cp.C_BankAccount_ID
+JOIN C_Bank cb ON  cba.C_Bank_ID = cb.C_Bank_ID
+join c_bpartner cbp on cbp.C_BPartner_ID=cp.C_BPartner_ID and cbp.isactive='Y'
+left join c_bpartner bp on bp.C_BPartner_ID=cp.emisor_id and bp.isactive='Y'
+left join c_project ot on ot.c_project_id=cp.c_project_id and ot.isactive='Y'
+left join ad_user u on u.ad_user_id=cp.createdby and cp.isactive='Y'
+where cp.C_Charge_ID notnull
+union
+select
+ info.taxid idRUC, org.description Organizacion, lo.address1 Direccion1, info.phone, info.email, info.url,cp.c_payment_id,cp.dateacct as fechapago, cp.documentno as numpago,
+cb.name as banco, cba.AccountNo as bancocta, cp.CheckNo, cbp.name as nametercero,
+cp.datetrx as fecha_doc,
+CASE WHEN
+	cp.docstatus =  'CO' THEN
+	cp.Description|| ' ' ||'ANTICIPO'
+        ELSE  cp.Description
+        END   AS descrip,
+'0' as valor_fact,
+cp.payamt as pago,
+cp.payamt as monto,
+'0' valor_saldo_factura,
+'' as num_factura,
+bp.name girador,
+cdt.issotrx,
+ot.c_project_id,
+ot.value orden,
+cp.Description,
+(select distinct rl_trl.name from ad_ref_list_trl rl_trl join ad_ref_list rl ON rl.ad_ref_list_id = rl_trl.ad_ref_list_id join ad_reference r on r.ad_reference_id = rl.ad_reference_id and r.name = 'C_Payment Tender Type' and rl.value = cp.TenderType) AS tipopago,
+u.name elaborado
+from  C_Payment cp
+left JOIN C_Invoice ci ON ci.c_invoice_id = cp.c_invoice_id
+JOIN C_DocType Cdt ON cdt.C_DocType_ID = cp.C_DocType_ID --and cdt.issotrx='N'
+join AD_Org org on org.ad_org_id = cp.ad_org_id and org.isactive='Y'
+join AD_OrgInfo info on info.ad_org_id=org.ad_org_id and info.isactive='Y'
+join C_location lo on lo.c_location_id=info.c_location_id and lo.isactive='Y'
+JOIN C_BankAccount cba ON cba.C_BankAccount_ID = cp.C_BankAccount_ID
+JOIN C_Bank cb ON  cba.C_Bank_ID = cb.C_Bank_ID
+join c_bpartner cbp on cbp.C_BPartner_ID=cp.C_BPartner_ID and cbp.isactive='Y'
+left join c_bpartner bp on bp.C_BPartner_ID=cp.emisor_id and bp.isactive='Y'
+left join c_project ot on ot.c_project_id=cp.c_project_id and ot.isactive='Y'
+left join ad_user u on u.ad_user_id=cp.createdby and cp.isactive='Y'
+where  cp.C_Charge_ID isnull
+and cp.c_invoice_id isnull
+and (select cal.C_Payment_ID  from C_AllocationLine cal where cal.C_Payment_ID = cp.C_Payment_ID group by cal.C_Payment_ID) is null) abc on abc.c_payment_id=dbl.c_payment_id
+where db.isactive='Y' and db.C_DepositBatch_id=$P{C_DepositBatch_ID}
+order by dbl.line]]>
+	</queryString>
+	<field name="c_depositbatch_id" class="java.math.BigDecimal"/>
+	<field name="lote" class="java.lang.String"/>
+	<field name="descripcion" class="java.lang.String"/>
+	<field name="idruc" class="java.lang.String"/>
+	<field name="organizacion" class="java.lang.String"/>
+	<field name="direccion1" class="java.lang.String"/>
+	<field name="phone" class="java.lang.String"/>
+	<field name="email" class="java.lang.String"/>
+	<field name="url" class="java.lang.String"/>
+	<field name="c_payment_id" class="java.math.BigDecimal"/>
+	<field name="fechapago" class="java.sql.Timestamp"/>
+	<field name="numpago" class="java.lang.String"/>
+	<field name="banco" class="java.lang.String"/>
+	<field name="bancocta" class="java.lang.String"/>
+	<field name="checkno" class="java.lang.String"/>
+	<field name="nametercero" class="java.lang.String"/>
+	<field name="fecha_doc" class="java.sql.Timestamp"/>
+	<field name="descrip" class="java.lang.String"/>
+	<field name="valor_fact" class="java.math.BigDecimal"/>
+	<field name="pago" class="java.math.BigDecimal"/>
+	<field name="monto" class="java.math.BigDecimal"/>
+	<field name="valor_saldo_factura" class="java.math.BigDecimal"/>
+	<field name="num_factura" class="java.lang.String"/>
+	<field name="girador" class="java.lang.String"/>
+	<field name="issotrx" class="java.lang.String"/>
+	<field name="c_project_id" class="java.math.BigDecimal"/>
+	<field name="orden" class="java.lang.String"/>
+	<field name="description" class="java.lang.String"/>
+	<field name="tipopago" class="java.lang.String"/>
+	<field name="elaborado" class="java.lang.String"/>
+	<variable name="monto_1" class="java.math.BigDecimal" resetType="Group" resetGroup="pago" calculation="Sum">
+		<variableExpression><![CDATA[$F{monto}]]></variableExpression>
+	</variable>
+	<variable name="monto_2" class="java.math.BigDecimal" resetType="Group" resetGroup="lote" calculation="Sum">
+		<variableExpression><![CDATA[$F{monto}]]></variableExpression>
+	</variable>
+	<group name="lote">
+		<groupExpression><![CDATA[$F{c_depositbatch_id}]]></groupExpression>
+		<groupFooter>
+			<band height="17">
+				<line>
+					<reportElement x="498" y="2" width="59" height="1" uuid="14ebd1aa-8ec3-4534-8358-7e0fa2c8d614"/>
+				</line>
+				<textField pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="495" y="4" width="60" height="13" uuid="3351968f-00f9-402c-9c89-cab12fe3fe16"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{monto_2}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="402" y="2" width="64" height="13" uuid="910660fa-e934-42e1-bae9-ee6917f1a85c"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[TOTAL:]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="pago">
+		<groupExpression><![CDATA[$F{c_payment_id}]]></groupExpression>
+		<groupHeader>
+			<band height="15">
+				<textField pattern="" isBlankWhenNull="true">
+					<reportElement x="1" y="2" width="60" height="13" uuid="d80fbad7-cb73-47a2-a251-a51676b99df8"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{numpago}]]></textFieldExpression>
+				</textField>
+				<textField pattern="" isBlankWhenNull="true">
+					<reportElement x="61" y="2" width="131" height="13" uuid="bf84bc07-41a2-4223-8353-bd737105541e">
+						<printWhenExpression><![CDATA[$F{c_project_id}!=null]]></printWhenExpression>
+					</reportElement>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Orden: "+$F{orden}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="14">
+				<staticText>
+					<reportElement x="402" y="0" width="64" height="13" uuid="a546054a-1aa9-4dc1-a512-ebd3352b31fa"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[TOTAL PAGO:]]></text>
+				</staticText>
+				<textField pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="495" y="0" width="60" height="13" uuid="5d03aec2-05ef-4344-ba6e-87bba7bb67f6"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{monto_1}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<title>
+		<band height="169" splitType="Stretch">
+			<textField>
+				<reportElement x="1" y="76" width="242" height="12" uuid="0f1b2e2a-5b1c-4b73-8d37-a40a982c643d"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{organizacion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1" y="124" width="242" height="12" uuid="066bb035-6716-45dc-aa89-0dc7ef700d88"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{email}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="1" y="100" width="263" height="12" uuid="b8766130-28ab-4437-b93c-581f5baa3e7f"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{direccion1}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="1" y="88" width="242" height="12" uuid="658d03e0-4606-46e4-82ab-32d0d348d5eb"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true" isItalic="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{idruc}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1" y="112" width="242" height="12" uuid="b58521f9-1bd0-4612-979c-87095fca56f7"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{phone}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="215" y="38" width="49" height="12" uuid="2f6a9817-1a38-430c-86af-2b2d8247bb65"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="264" y="76" width="94" height="12" uuid="be7021d4-e028-43f2-b0ea-c80a65640035"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Banco:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="264" y="88" width="94" height="12" uuid="0c7a2b52-7985-4269-acc1-cc91aa77c32c"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cuenta:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="264" y="112" width="94" height="12" uuid="529b4bfe-9d4c-499b-8dbc-3a6e47e638a4"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cheque:]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="264" y="38" width="84" height="12" uuid="303b1d18-a61b-43e7-96eb-125c96d799f5"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fechapago}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="358" y="76" width="128" height="12" uuid="c7e05f8b-78c8-466f-8fb5-257531c625ec"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{banco}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="358" y="112" width="128" height="12" uuid="ac4c24b5-bdf4-43b1-95ff-8d27e9bc0470"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{checkno}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="358" y="88" width="128" height="12" uuid="5cb1e218-cded-47d1-840f-cb59c2e36c55"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{bancocta}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="264" y="124" width="94" height="12" uuid="cb25d9ed-8a8a-4160-8166-accb1df3fbca"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Girador:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="358" y="124" width="195" height="12" uuid="f4313a1e-6c09-41be-a879-56fd609df997"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{girador}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="192" y="3" width="171" height="14" uuid="1eeaa8cc-77ff-49c7-9f04-886592ee8870"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["COMPROBANTE "+($F{issotrx}.equals("N")?"EGRESO":"INGRESO")]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="264" y="100" width="94" height="12" uuid="5ec189dd-942d-475a-9665-c543120597e4"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tipo de Pago:]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="360" y="100" width="126" height="12" uuid="88bca56a-52ff-45cd-b6ab-494a2fc4d7c0"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tipopago}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="217" y="19" width="47" height="12" uuid="74ea4fa5-39ba-4f81-8024-1cf31dfccda9"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Lote:]]></text>
+			</staticText>
+			<textField pattern="" isBlankWhenNull="true">
+				<reportElement x="264" y="19" width="84" height="12" uuid="a83459be-fd04-4af6-81fe-8efc6c38a3e4"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{lote}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="49" y="138" width="74" height="12" uuid="ec9c2169-f0e3-49d5-8392-24b6c5043335"/>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{issotrx}.equals("N")?"PAGADO":"COBRADO")+" A:"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="125" y="138" width="427" height="12" uuid="97b7081d-607a-44e1-af2b-cc4f9f43b7b1"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nametercero}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="49" y="150" width="74" height="12" uuid="87af6e48-d32e-4982-9b38-2700d77bad9b"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CONCEPTO:]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="125" y="150" width="427" height="12" uuid="ab0f1f5e-e220-4c88-befb-ddfec4cd41cf"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descripcion}]]></textFieldExpression>
+			</textField>
+			<subreport>
+				<reportElement key="" x="0" y="0" width="100" height="75" uuid="6097bb9d-0263-4e93-9b97-13739239a4da"/>
+				<subreportParameter name="AD_Org_ID">
+					<subreportParameterExpression><![CDATA[$P{AD_Org_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["/reports/logorg.jasper"]]></subreportExpression>
+			</subreport>
+			<textField isStretchWithOverflow="true" evaluationTime="Report">
+				<reportElement x="537" y="1" width="17" height="14" uuid="5321ddd8-7355-437f-ac78-67486c2bca8d"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph leftIndent="1"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" "+$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="484" y="1" width="53" height="14" uuid="9875adac-4800-45c7-b737-0a15419f6150"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph rightIndent="1"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}+"  de "]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="411" y="16" width="73" height="14" uuid="d2cc7be0-50aa-4623-8016-a860b0fd86ef"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[Fecha de impresión:]]></text>
+			</staticText>
+			<textField pattern="">
+				<reportElement x="484" y="16" width="70" height="14" uuid="332501be-3c6e-4c58-876e-f0fcb39e41dc"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("dd/MM/yyyy HH:mm").format( new java.util.Date() )]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="411" y="30" width="35" height="14" uuid="6ebaeb7e-f454-4754-9f62-d76349738c90"/>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font size="7" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Reporte:                   stock_max_min.jrxml]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="446" y="30" width="108" height="14" uuid="94303bcc-a3ec-4870-a78e-72f32f823b80"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font size="7" isBold="false"/>
+				</textElement>
+				<text><![CDATA[reporteComprobanteEgresoLote.jrxml]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="411" y="1" width="73" height="14" uuid="ee780205-aef1-4e61-9469-7181434d6eb7"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[Página:        ]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="20" splitType="Stretch">
+			<staticText>
+				<reportElement mode="Transparent" x="40" y="0" width="60" height="20" uuid="145c81a6-cd28-47fe-84ce-ae1d488dc268"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="100" y="0" width="92" height="20" uuid="fc3dad8f-9c33-4a94-911b-03ca7a97c627"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Número Documento]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="192" y="0" width="183" height="20" uuid="d85e2a8a-301e-4aa1-b816-b863417de4cd"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Descripción]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="375" y="0" width="60" height="20" uuid="765bc7ac-19b6-4e6e-9870-640f2c924e29"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Valor]]></text>
+			</staticText>
+			<textField>
+				<reportElement mode="Transparent" x="495" y="0" width="60" height="20" uuid="0f5980e7-2c73-42fd-9703-1398982bcbb4"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{issotrx}.equals("N")?"Pagado":"Cobrado")]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Transparent" x="435" y="0" width="60" height="20" uuid="bace8407-94e6-46fe-a2aa-ab75fb43f4b7"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Saldo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="0" y="0" width="40" height="20" uuid="e35064ae-bcd5-4811-a5be-d65024bf39e6"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Pago]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement x="100" y="0" width="92" height="13" uuid="ca055d2c-f358-43bf-8bb3-0c0c240e512a"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{num_factura}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="192" y="0" width="183" height="13" uuid="5f319b30-f8e8-4a89-9286-caf453cf618a"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descrip}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="375" y="0" width="60" height="13" uuid="1d8ba2f7-25ba-4be2-b29c-013f4b525423"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{valor_fact}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="495" y="0" width="60" height="13" uuid="0f576a38-c503-4fb3-9ecc-9c150c02c601"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{monto}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="40" y="0" width="60" height="13" uuid="116781eb-1f33-4b71-abe5-206e1d4c69d3"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fecha_doc}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="435" y="0" width="60" height="13" uuid="f64fcef6-fd9a-442d-9684-05110741a0b9"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{valor_saldo_factura}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="36" splitType="Stretch">
+			<subreport>
+				<reportElement x="0" y="19" width="545" height="17" uuid="cb6483ed-6a7c-4435-968f-f53d770b6ccb"/>
+				<subreportParameter name="C_DepositBatch_ID">
+					<subreportParameterExpression><![CDATA[$P{C_DepositBatch_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="elaborado">
+					<subreportParameterExpression><![CDATA[$F{elaborado}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "ContabilizacionLote.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</summary>
+</jasperReport>

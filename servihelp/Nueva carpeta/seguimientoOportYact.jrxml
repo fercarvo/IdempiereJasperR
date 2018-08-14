@@ -1,0 +1,584 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="seguimientoOportYact" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a80ed23f-586d-4137-9775-4a3bd6032d6d">
+	<property name="ireport.zoom" value="1.2396694214876032"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="SERVIHELP"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<style name="table" mode="Opaque">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_1" mode="Opaque">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<parameter name="AD_Org_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["C:\\Users\\Usuario\\Documents\\JasperResports\\stocks\\"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="fecha_inicio" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="fecha_fin" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="OpportunityAmt" class="java.math.BigDecimal">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="fechaesperada" class="java.lang.String"/>
+	<parameter name="Probability" class="java.math.BigDecimal"/>
+	<parameter name="Linea_Producto" class="java.lang.String"/>
+	<parameter name="SalesRep_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="C_BPartner_ID" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[select
+org.name as org,
+op.documentno as no_opor,
+op.foportunidad as f_opor,
+op.C_BPartner_ID as cliente_id,
+op.SalesRep_ID as repre_id,
+repre.Name as representante,
+cb.Name as cliente,
+ss.Name as etapa_venta,
+op.OpportunityAmt as valor,
+trunc((op.OpportunityAmt*op.Probability/100),2) as valor_ponderado,
+op.ExpectedCloseDate as f_cierre,
+op.Comments as comentario,
+c.Name as campana,
+coalesce(trl.Name,rl.Name) as tipoactiv,
+ca.StartDate as fechaInicio,
+ca.Description as descripcion,
+coalesce(trla.Name,rla.Name) as tipoactivsgte,
+ca.EndDate as fechasgte
+from c_opportunity op
+join C_BPartner cb on cb.C_BPartner_ID=op.C_BPartner_ID and cb.isactive='Y'
+left join C_SalesStage ss on ss.C_SalesStage_ID=op.C_SalesStage_ID and ss.isactive='Y'
+left join C_ContactActivity ca on ca.C_Opportunity_ID=op.C_Opportunity_ID and ca.isactive='Y'
+left join AD_Reference ract on ract.name='C_ContactActivity Type' and ract.isactive = 'Y'
+left join AD_Ref_List rl on rl.AD_Reference_ID=ract.AD_Reference_ID AND rl.value=ca.ContactActivityType AND rl.isactive = 'Y'
+left join AD_Ref_List_Trl trl on trl.AD_Ref_List_ID=rl.AD_Ref_List_ID and trl.AD_Language='es_EC'
+left join AD_Reference rnact on rnact.name='C_ContactActivity Type' and rnact.isactive = 'Y'
+left join AD_Ref_List rla on rla.AD_Reference_ID=rnact.AD_Reference_ID AND rla.value=ca.next_activity AND rla.isactive = 'Y'
+left join AD_Ref_List_Trl trla on trla.AD_Ref_List_ID=rla.AD_Ref_List_ID and trla.AD_Language='es_EC'
+left join C_Campaign c on c.C_Campaign_ID=op.C_Campaign_ID and c.isactive='Y'
+left join AD_User repre on repre.AD_User_ID=op.SalesRep_ID and repre.isactive='Y'
+left join AD_Org org on org.ad_org_id = op.ad_org_id and org.isactive='Y'
+where op.ad_org_id=$P{AD_Org_ID}
+and op.isactive = 'Y'
+and ss.Name != 'Orden'
+and case when $P{fechaesperada}='Y' then (op.ExpectedCloseDate between coalesce($P{fecha_inicio},'1900-01-01'::date) and coalesce($P{fecha_fin},'3001-01-01'::date)) else (op.foportunidad between coalesce($P{fecha_inicio},'1900-01-01'::date) and coalesce($P{fecha_fin},'3001-01-01'::date)) end
+and (case when coalesce($P{SalesRep_ID},0)>0 then op.salesrep_id=$P{SalesRep_ID} else 1=1 end)
+and (case when coalesce(length($P{Linea_Producto}),0)>0 then op.Linea_Producto=$P{Linea_Producto} else 1=1 end)
+and (case when coalesce($P{OpportunityAmt},0)>0 then op.OpportunityAmt>=$P{OpportunityAmt} else 1=1 end)
+and (case when coalesce($P{Probability},0)>0 then op.Probability>=$P{Probability} else 1=1 end)
+and coalesce( $P{C_BPartner_ID}, -1) in (op.C_BPartner_ID, -1) 
+order by op.SalesRep_ID,op.documentno,f_opor, fechaInicio]]>
+	</queryString>
+	<field name="org" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="org"/>
+	</field>
+	<field name="no_opor" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="no_opor"/>
+	</field>
+	<field name="f_opor" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="f_opor"/>
+	</field>
+	<field name="cliente_id" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="cliente_id"/>
+	</field>
+	<field name="repre_id" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="repre_id"/>
+	</field>
+	<field name="representante" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="representante"/>
+	</field>
+	<field name="cliente" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="cliente"/>
+	</field>
+	<field name="etapa_venta" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="etapa_venta"/>
+	</field>
+	<field name="valor" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="valor"/>
+	</field>
+	<field name="valor_ponderado" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="valor_ponderado"/>
+	</field>
+	<field name="f_cierre" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="f_cierre"/>
+	</field>
+	<field name="comentario" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="comentario"/>
+	</field>
+	<field name="campana" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="campana"/>
+	</field>
+	<field name="tipoactiv" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="tipoactiv"/>
+	</field>
+	<field name="fechainicio" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="fechainicio"/>
+	</field>
+	<field name="descripcion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="descripcion"/>
+	</field>
+	<field name="tipoactivsgte" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="tipoactivsgte"/>
+	</field>
+	<field name="fechasgte" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.label" value="fechasgte"/>
+	</field>
+	<variable name="valor_1" class="java.math.BigDecimal" resetType="Group" resetGroup="representante" calculation="Sum">
+		<variableExpression><![CDATA[$F{valor}]]></variableExpression>
+	</variable>
+	<variable name="valor_ponderado_1" class="java.math.BigDecimal" resetType="Group" resetGroup="representante" calculation="Sum">
+		<variableExpression><![CDATA[$F{valor_ponderado}]]></variableExpression>
+	</variable>
+	<variable name="logo" class="java.io.InputStream"/>
+	<group name="representante">
+		<groupExpression><![CDATA[$F{repre_id}]]></groupExpression>
+		<groupHeader>
+			<band height="15">
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="4" y="0" width="296" height="15" uuid="8edbb704-e41e-48d7-9f67-ed3e4d67d01a"/>
+					<textElement verticalAlignment="Middle">
+						<font size="10" isBold="true" isItalic="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{representante}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="15">
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="349" y="0" width="55" height="15" uuid="3aa7aa03-173b-4e0c-817f-ee04a271d409"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{valor_1}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="404" y="0" width="84" height="15" uuid="7fc3d8ef-2a91-45c9-9a5e-ad3838f09f65"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{valor_ponderado_1}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="oportunidad">
+		<groupExpression><![CDATA[$F{no_opor}]]></groupExpression>
+		<groupHeader>
+			<band height="35">
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="274" y="0" width="75" height="15" uuid="859bb26d-f067-44d7-ad08-37a3002ea3b1"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{etapa_venta}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="349" y="0" width="55" height="15" uuid="9f3ff803-ed66-4662-bbaa-1314f30b9229"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{valor}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="68" y="0" width="50" height="15" uuid="e3705669-4f26-41cc-bc2c-873e43d556eb"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{f_opor}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="404" y="0" width="84" height="15" uuid="693bebc7-3444-47e5-a654-53d8040f1076"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{valor_ponderado}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="568" y="0" width="229" height="15" uuid="ac4d2597-c7bd-48f5-a4dc-2de60e8c18bb"/>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{campana}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="76" y="20" width="704" height="15" uuid="301720a7-4e6a-4541-9edd-fae0a76e45a5"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{comentario}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="488" y="0" width="80" height="15" uuid="8e9da9b8-ec48-4256-b84a-58bdbf872487"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{f_cierre}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="3" y="0" width="65" height="15" uuid="475ec7a8-fd49-4d9e-9042-0b6310d20f76"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{no_opor}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="118" y="0" width="156" height="15" uuid="868bdc65-b092-4692-8ef0-e4bebcdf5a46"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cliente}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="0" y="20" width="76" height="15" uuid="0967b602-cbd2-4e3e-a49e-39c6413cdb74"/>
+					<box>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Comentario:  ]]></text>
+				</staticText>
+			</band>
+			<band height="13">
+				<staticText>
+					<reportElement style="table" x="154" y="0" width="96" height="13" uuid="da1002c3-2a6d-43de-a9eb-87b6d8c6d4ea"/>
+					<box leftPadding="2">
+						<pen lineWidth="0.0"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Tipo Actividad]]></text>
+				</staticText>
+				<staticText>
+					<reportElement style="table" x="250" y="0" width="65" height="13" uuid="ff467e33-b8b2-4d65-8b9a-8f9f75263caf"/>
+					<box>
+						<pen lineWidth="0.0"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Fecha Inicio]]></text>
+				</staticText>
+				<staticText>
+					<reportElement style="table" x="315" y="0" width="315" height="13" uuid="973d3d88-6d09-4175-b415-a79e5d32b5b1"/>
+					<box>
+						<pen lineWidth="0.0"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Descripción]]></text>
+				</staticText>
+				<staticText>
+					<reportElement style="table" x="630" y="0" width="102" height="13" uuid="52e35e9a-b054-476d-af09-7729d2f11c84"/>
+					<box leftPadding="2">
+						<pen lineWidth="0.0"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Sgte. Actividad]]></text>
+				</staticText>
+				<staticText>
+					<reportElement style="table" x="732" y="0" width="65" height="13" uuid="35b5aa24-2315-474b-94fd-3193d072c87d"/>
+					<box>
+						<pen lineWidth="0.0"/>
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Sgte. Fecha]]></text>
+				</staticText>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="10">
+				<line>
+					<reportElement x="6" y="9" width="791" height="1" uuid="cb6c19b9-06a6-48b2-ae8c-f0c47b6fd1f0"/>
+					<graphicElement>
+						<pen lineWidth="0.9"/>
+					</graphicElement>
+				</line>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="75" splitType="Stretch">
+			<staticText>
+				<reportElement x="218" y="1" width="351" height="14" uuid="f4582469-735d-416e-9cef-721866c8f59b"/>
+				<textElement textAlignment="Center">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[SEGUIMIENTO DE OPORTUNIDADES CON ACTIVIDADES]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="219" y="17" width="349" height="12" uuid="fe18d52e-ced6-4a47-90b3-8cedd9121697"/>
+				<textElement textAlignment="Center">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{org}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="644" y="1" width="126" height="14" uuid="b197ef94-cc70-48eb-b9ae-c12985597b5c"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Página:                           "+$V{PAGE_NUMBER}+"      de "]]></textFieldExpression>
+			</textField>
+			<textField pattern="">
+				<reportElement x="644" y="15" width="158" height="14" uuid="21a0f375-00d9-4022-97d4-54f44a64f876"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Fecha de impresión:   "+new SimpleDateFormat("dd/MMM/yyyy HH:mm").format( new java.util.Date() )]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" evaluationTime="Report">
+				<reportElement x="770" y="1" width="17" height="14" uuid="8ff3ae43-31fd-4810-939a-374255c32537"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="644" y="29" width="158" height="14" uuid="81e34e73-8895-4101-b62c-5a94558c1ece"/>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font size="7" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Reporte:     seguimientoOportYact.jrxml]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="239" y="43" width="66" height="15" uuid="30ac5cbb-1c33-40f6-8061-4cf83dd26403"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha Inicio: ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="413" y="43" width="74" height="15" uuid="99a00af4-3e05-48a2-846e-bf3da281c9b8"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha Fin: ]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="305" y="43" width="90" height="15" uuid="b02f299e-4d50-41a5-8044-84724fad7d1d"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{fecha_inicio}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="487" y="43" width="87" height="15" uuid="909e3561-b292-4aa8-954b-14aaa3c8f8fd"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{fecha_fin}]]></textFieldExpression>
+			</textField>
+			<subreport isUsingCache="false" runToBottom="false" overflowType="Stretch">
+				<reportElement key="" positionType="Float" stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="0" y="0" width="90" height="58" uuid="e6eb6ee3-2cf5-46b1-8214-dca23a6e0fea"/>
+				<subreportParameter name="AD_Org_ID">
+					<subreportParameterExpression><![CDATA[$P{AD_Org_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<returnValue subreportVariable="logo" toVariable="logo"/>
+				<subreportExpression><![CDATA["logorg.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="20" splitType="Stretch">
+			<staticText>
+				<reportElement x="68" y="0" width="50" height="20" uuid="2562b481-0d40-4375-a3e1-8d7dccf299ff"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="3" y="0" width="65" height="20" uuid="80ab14c9-afbc-48c5-97a2-8d01ac55bca8"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[No. Oport.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="274" y="0" width="75" height="20" uuid="638dfe14-2dc1-46f8-bcb2-9988bb668d49"/>
+				<box topPadding="0" leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Etapa Venta]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="349" y="0" width="55" height="20" uuid="310cab44-4495-4a44-bbc7-a94d1dfb335a"/>
+				<box topPadding="0" leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Valor]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="404" y="0" width="84" height="20" uuid="f3194890-9876-4094-ba1c-c245d33a27c8"/>
+				<box topPadding="0" leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Valor Ponderado]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="488" y="0" width="80" height="20" uuid="d0e787fb-dfbb-4455-be32-1bfab98db311"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha Cierre]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="118" y="0" width="156" height="20" uuid="d791d0da-75b7-4a6a-ae23-ef34fa7c6115"/>
+				<box topPadding="0" leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cliente]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="568" y="0" width="229" height="20" uuid="6721f623-1197-4f0f-b2d4-0cf4d24958ee"/>
+				<box topPadding="0" leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Campaña]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="154" y="0" width="96" height="15" uuid="8a811bf5-2c47-4e3e-90d5-b0ac10b84da4"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tipoactiv}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="250" y="0" width="65" height="15" uuid="03b3cd19-0308-4c55-bc1b-f0626dccbefd"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fechainicio}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="630" y="0" width="102" height="15" uuid="49a61ae8-b418-4729-8344-fabc03e91db9"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tipoactivsgte}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="315" y="0" width="315" height="15" uuid="4735a93f-64f1-49da-9a38-cabee8955cda"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descripcion}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement stretchType="RelativeToBandHeight" x="732" y="0" width="65" height="15" uuid="16c0a04c-8aae-4066-872a-5bd4f50c6043"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fechasgte}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

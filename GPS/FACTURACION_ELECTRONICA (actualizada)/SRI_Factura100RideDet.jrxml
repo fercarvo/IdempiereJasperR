@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="SRI_Factura100RideDet" pageWidth="555" pageHeight="802" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" isIgnorePagination="true" uuid="22a1fbe9-fa66-4cac-973e-a3fb4021f03e">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="GPS Des"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="C_Invoice_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[0]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+	il.C_InvoiceLine_ID,
+ 	p.value AS codigoPrincipal,
+	il.QtyEntered AS cantidad,
+ 	(CASE
+		WHEN il.pricelist > il.priceactual AND il.pricelist <> 0::numeric THEN il.pricelist
+		ELSE il.priceactual
+	END) as precioUnitario,
+ 	(CASE 
+		WHEN il.pricelist > il.priceactual AND il.pricelist <> 0::numeric 
+		THEN (il.pricelist - il.priceactual) * il.QtyEntered
+    	ELSE 0
+	END) as descuento,
+  	(CASE
+        WHEN il.pricelist > il.priceactual AND il.pricelist <> 0::numeric THEN  il.pricelist*il.QtyEntered
+        ELSE il.linenetamt
+    END) as precioTotalSinImpuesto,
+	COALESCE(il.description, p.description, p.name, c.name) as productdescription,
+	det.name as detalle_adicional_nombre,
+	det.description as detalle_adicional_descripcion
+FROM C_InvoiceLine as il
+LEFT JOIN C_InvoiceLineAddDetail as det ON det.C_InvoiceLine_ID = il.C_InvoiceLine_ID
+LEFT JOIN M_Product as p ON p.M_Product_ID = il.M_Product_ID
+LEFT JOIN c_charge as c ON il.c_charge_id = c.c_charge_id
+WHERE il.C_Invoice_ID = $P{C_Invoice_ID}
+ORDER BY productdescription]]>
+	</queryString>
+	<field name="c_invoiceline_id" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="c_invoiceline_id"/>
+	</field>
+	<field name="codigoprincipal" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="codigoprincipal"/>
+	</field>
+	<field name="cantidad" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="cantidad"/>
+	</field>
+	<field name="preciounitario" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="preciounitario"/>
+	</field>
+	<field name="descuento" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="descuento"/>
+	</field>
+	<field name="preciototalsinimpuesto" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="preciototalsinimpuesto"/>
+	</field>
+	<field name="productdescription" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="productdescription"/>
+	</field>
+	<field name="detalle_adicional_nombre" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="detalle_adicional_nombre"/>
+	</field>
+	<field name="detalle_adicional_descripcion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="detalle_adicional_descripcion"/>
+	</field>
+	<variable name="suma_descuento" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{descuento}]]></variableExpression>
+	</variable>
+	<group name="Linea Factura">
+		<groupExpression><![CDATA[$F{c_invoiceline_id}]]></groupExpression>
+		<groupHeader>
+			<band height="13">
+				<textField isStretchWithOverflow="true" pattern="#,##0.###" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="64" y="0" width="46" height="13" isPrintWhenDetailOverflows="true" uuid="d65ef855-7d4b-467a-93f8-dc72eb904921"/>
+					<box leftPadding="2" rightPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Top">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cantidad}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00#" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="402" y="0" width="68" height="13" isPrintWhenDetailOverflows="true" uuid="48e7aed6-061e-4533-b809-bfd81b0f3bc1"/>
+					<box leftPadding="2" rightPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Top">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{preciounitario}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="#,##0.00#" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="470" y="0" width="80" height="13" isPrintWhenDetailOverflows="true" uuid="e340f469-031d-4ef8-bb01-db1893a85a56"/>
+					<box leftPadding="2" rightPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Top">
+						<font size="8"/>
+						<paragraph rightIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{preciototalsinimpuesto}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="64" height="13" isPrintWhenDetailOverflows="true" uuid="b9e89c6d-dfe9-4676-9e3c-804036697c86"/>
+					<box leftPadding="2" rightPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Top">
+						<font size="8"/>
+						<paragraph leftIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{codigoprincipal}]]></textFieldExpression>
+				</textField>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="110" y="0" width="292" height="13" isPrintWhenDetailOverflows="true" uuid="07839300-eb47-46f5-bddf-3ea5aabe6ba3"/>
+					<box leftPadding="2" rightPadding="2">
+						<topPen lineWidth="0.5"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Top">
+						<font size="8"/>
+						<paragraph lineSpacing="1_1_2" leftIndent="2"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{productdescription}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="1">
+				<staticText>
+					<reportElement x="0" y="0" width="64" height="1" uuid="97caf321-9df1-4800-a1df-36a3efb0484d"/>
+					<box>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<text><![CDATA[]]></text>
+				</staticText>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="110" y="0" width="292" height="1" isPrintWhenDetailOverflows="true" uuid="1b76f9fb-7dd8-47b4-b5f5-d0fc7a893d13"/>
+					<box leftPadding="2" rightPadding="2">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Top">
+						<font size="8"/>
+						<paragraph lineSpacing="1_1_2" leftIndent="2"/>
+					</textElement>
+				</textField>
+				<textField isStretchWithOverflow="true" pattern="###0;-###0" isBlankWhenNull="true">
+					<reportElement stretchType="RelativeToBandHeight" x="64" y="0" width="46" height="1" isPrintWhenDetailOverflows="true" uuid="449eab95-c3e0-46ad-b1f7-64bd84a02641"/>
+					<box leftPadding="2" rightPadding="2">
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Top">
+						<font size="8"/>
+					</textElement>
+				</textField>
+				<staticText>
+					<reportElement x="402" y="0" width="68" height="1" uuid="e860ec59-aea2-4c7e-8174-dd91e11b7cf6"/>
+					<box>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<text><![CDATA[]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="470" y="0" width="80" height="1" uuid="7446cc7a-b5d1-49c5-b203-1932c50ae815"/>
+					<box>
+						<leftPen lineWidth="0.5"/>
+						<bottomPen lineWidth="0.5"/>
+						<rightPen lineWidth="0.5"/>
+					</box>
+					<text><![CDATA[]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<columnHeader>
+		<band height="13">
+			<staticText>
+				<reportElement x="64" y="0" width="46" height="13" uuid="66de6189-c6cc-41ac-bb70-1235c65e42ed"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cantidad]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="110" y="0" width="292" height="13" uuid="231b5b52-27db-450e-a0c5-33ee79ea0dc4"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Descripción]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="402" y="0" width="68" height="13" uuid="2e483f3a-e94d-49d0-a825-efbb3403099e"/>
+				<box rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Precio Unitario]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="470" y="0" width="80" height="13" uuid="31a3d8f2-ff12-44f5-8950-eb886281cb91"/>
+				<box rightPadding="2">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+				<text><![CDATA[Precio Total]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="64" height="13" uuid="7e2f6279-ac6d-46a6-8f52-2b7f470a55ea"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font size="8" isBold="true"/>
+					<paragraph leftIndent="2"/>
+				</textElement>
+				<text><![CDATA[Código]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<printWhenExpression><![CDATA[$F{detalle_adicional_nombre} != null]]></printWhenExpression>
+			<staticText>
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="64" height="13" uuid="e8967664-489f-4d6f-bd0e-13466b8c4aa6"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" pattern="###0;-###0" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="64" y="0" width="46" height="13" isPrintWhenDetailOverflows="true" uuid="86c723f5-3951-4ab3-9b54-a9c7e2e780bf"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="110" y="0" width="90" height="13" isPrintWhenDetailOverflows="true" uuid="40e90e77-4347-470c-9ab0-6b5ddf16f038"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8"/>
+					<paragraph lineSpacing="1_1_2" leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{detalle_adicional_nombre}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.0000;-#,##0.0000" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="402" y="0" width="68" height="13" isPrintWhenDetailOverflows="true" uuid="9f65e196-d329-411c-a7a8-ca0527d20b24"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8"/>
+				</textElement>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="470" y="0" width="80" height="13" isPrintWhenDetailOverflows="true" uuid="34b6a7a8-7df4-4bb1-9587-b047d844a5de"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Top">
+					<font size="8"/>
+					<paragraph rightIndent="2"/>
+				</textElement>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToBandHeight" x="200" y="0" width="202" height="13" isPrintWhenDetailOverflows="true" uuid="6d8ebec1-d1e6-4795-903d-5323904fd000"/>
+				<box leftPadding="2" rightPadding="2">
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="8"/>
+					<paragraph lineSpacing="1_1_2" leftIndent="2"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{detalle_adicional_descripcion}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

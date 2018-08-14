@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.5.1.final using JasperReports Library version 6.5.1  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteMovimientosCobros" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a80ed23f-586d-4137-9775-4a3bd6032d6d">
+	<property name="ireport.zoom" value="1.3310000000000008"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="produccion"/>
+	<style name="table" mode="Opaque">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_1" mode="Opaque">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<parameter name="AD_Org_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="HR_Period_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select o.name organizacion,
+pr.hr_process_id,
+pr.name procesonomina,
+bp.name empleado,
+c.name concepto,
+ph.PlannedAmt cobro
+ from hr_period pe
+ join c_projectphase ph on ph.startdate::date between pe.startdate::date and pe.enddate::date and ph.hr_movement_id is null and ph.isactive='Y'
+ join c_project p on p.c_project_id=ph.c_project_id and p.isactive='Y' and (p.prestamo='N' or ((p.c_payment_id is not null or p.c_invoice_id is not null) and prestamo='Y'))  and p.hr_concept_id is not null
+ join hr_process pr on pr.hr_period_id=pe.hr_period_id and pr.isactive='Y' and pr.ad_org_id=p.ad_org_id and pr.docstatus not in ('CO')
+ join hr_payroll py on py.hr_payroll_id=pr.hr_payroll_id and py.mensual='Y' and py.isactive='Y'
+ join hr_employee e on e.c_bpartner_id=p.c_bpartner_id and e.hr_payroll_id=pr.hr_payroll_id and e.ad_org_id=pr.ad_org_id and e.isactive='Y' and e.startdate<=pe.enddate AND (e.EndDate isnull or e.EndDate>=pe.startdate)
+ join c_bpartner bp on bp.c_bpartner_id=e.c_bpartner_id
+ join hr_concept c on c.hr_concept_id=p.hr_concept_id
+ join ad_org o on o.ad_org_id=p.ad_org_id
+ where pe.isactive='Y' and pe.hr_period_id=$P{HR_Period_ID} and p.ad_org_id=$P{AD_Org_ID}
+order by procesonomina,empleado,concepto]]>
+	</queryString>
+	<field name="organizacion" class="java.lang.String"/>
+	<field name="hr_process_id" class="java.math.BigDecimal"/>
+	<field name="procesonomina" class="java.lang.String"/>
+	<field name="empleado" class="java.lang.String"/>
+	<field name="concepto" class="java.lang.String"/>
+	<field name="cobro" class="java.math.BigDecimal"/>
+	<group name="proceso">
+		<groupExpression><![CDATA[$F{hr_process_id}]]></groupExpression>
+		<groupHeader>
+			<band height="15">
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement x="0" y="0" width="319" height="15" uuid="e4c10c69-b3ad-4764-a5fb-473c42e1ff56"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{procesonomina}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="75" splitType="Stretch">
+			<staticText>
+				<reportElement x="120" y="2" width="273" height="14" uuid="f4582469-735d-416e-9cef-721866c8f59b"/>
+				<textElement textAlignment="Center">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Movimientos de Cobros a Empleados por Crear]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="105" y="17" width="298" height="14" uuid="fe18d52e-ced6-4a47-90b3-8cedd9121697"/>
+				<textElement textAlignment="Center">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{organizacion}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="481" y="2" width="53" height="14" uuid="b197ef94-cc70-48eb-b9ae-c12985597b5c"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph rightIndent="1"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}+"  de "]]></textFieldExpression>
+			</textField>
+			<textField pattern="">
+				<reportElement x="481" y="17" width="70" height="14" uuid="21a0f375-00d9-4022-97d4-54f44a64f876"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("dd/MM/yyyy HH:mm").format( new java.util.Date() )]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" evaluationTime="Report">
+				<reportElement x="534" y="2" width="17" height="14" uuid="8ff3ae43-31fd-4810-939a-374255c32537"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+					<paragraph leftIndent="1"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" "+$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="408" y="31" width="35" height="14" uuid="81e34e73-8895-4101-b62c-5a94558c1ece"/>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font size="7" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Reporte:                   stock_max_min.jrxml]]></text>
+			</staticText>
+			<subreport overflowType="Stretch">
+				<reportElement x="0" y="0" width="100" height="75" uuid="de2680a1-9280-49a6-ba9b-c0a3adb72d8c"/>
+				<subreportParameter name="AD_Org_ID">
+					<subreportParameterExpression><![CDATA[$P{AD_Org_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["/reports/logorg.jasper"]]></subreportExpression>
+			</subreport>
+			<staticText>
+				<reportElement x="408" y="2" width="73" height="14" uuid="636b2bb9-6751-4291-920a-ac50f60e1163"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[Página:        ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="408" y="16" width="73" height="14" uuid="51aece4f-7843-47a2-b600-7d4c310ea8dc"/>
+				<textElement verticalAlignment="Middle">
+					<font size="7"/>
+				</textElement>
+				<text><![CDATA[Fecha de impresión:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="443" y="31" width="108" height="14" uuid="456d723c-b104-43ae-b00f-7ec1abb72394"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font size="7" isBold="false"/>
+				</textElement>
+				<text><![CDATA[reporteMovimientosCobros.jrxml]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="25" splitType="Stretch">
+			<staticText>
+				<reportElement style="table" x="0" y="0" width="100" height="25" uuid="a8fffd13-4106-4c2e-ab71-f372810eef83"/>
+				<box leftPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+					<paragraph leftIndent="1"/>
+				</textElement>
+				<text><![CDATA[PROCESO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table" x="319" y="0" width="170" height="25" uuid="5d726299-c4ce-4b67-95c3-680d2f5bb5e8"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[CONCEPTO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table" x="100" y="0" width="219" height="25" uuid="f80cd776-d518-45ef-8b8c-bc53f9a186a0"/>
+				<box leftPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[EMPLEADO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="table" x="489" y="0" width="66" height="25" uuid="04eacd53-0a04-468a-81c5-e91ff7da3954"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[COBRO]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="100" y="0" width="219" height="15" uuid="b75cfe83-ed3c-4e8a-a224-cef24207adcf"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{empleado}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="319" y="0" width="170" height="15" uuid="e5960c34-ac05-498a-95ee-553f80283a17"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{concepto}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="489" y="0" width="66" height="15" uuid="e39c1b87-5f67-4855-8be9-773e6141efaa"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cobro}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>
